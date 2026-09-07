@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../server/db/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Todo {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  priority    String    @default("medium")
+  dueDate     DateTime?
+  subtasks    Json?
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
