@@ -1,0 +1,11 @@
+.next
+out
+build
+node_modules
+server/db/generated
+prisma/dev.db
+*.tsbuildinfo
+next-env.d.ts
+pnpm-lock.yaml
+.pnpm-store
+.czrc
