@@ -1,6 +1,6 @@
 ---
 description: Gera scaffold de uma página/feature completa no Next.js.
-agent: fullstack
+agent: frontend-engineer
 ---
 
 Gere a estrutura completa de uma feature ou página no projeto.
