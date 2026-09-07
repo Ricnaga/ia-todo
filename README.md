@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ia-task-manager
 
-## Getting Started
+Gerenciador de tarefas com assistência de IA. A IA não é um chat — é uma feature que estrutura, organiza e interpreta dados de tarefa.
 
-First, run the development server:
+## O que o app faz
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Gestão completa de tarefas (CRUD): criar, editar, deletar e concluir; campos de título, descrição, prioridade (low/medium/high/urgent), data de vencimento e subtarefas; listagem em tabela com ações rápidas.
+
+IA aplicada ao ciclo de vida da tarefa — 3 features:
+
+1. **suggestTodo** — um rascunho solto ("falar c/ RH terça") vira tarefa estruturada (título, descrição, prioridade, subtarefas) via botão "Sugerir com IA".
+2. **summarizeDay** — tarefas pendentes viram um resumo do dia + sugestão de foco gerados por IA.
+3. **nlSearch** — busca em linguagem natural ("minhas tarefas urgentes de hoje") interpretada em critérios tipados e aplicada na lista.
+
+## Páginas
+
+| Rota       | Página                             |
+| ---------- | ---------------------------------- |
+| `/`        | Landing/README do app + navegação  |
+| `/tarefas` | CRUD de tarefas + botão sugerir IA |
+| `/resumo`  | summarizeDay (IA)                  |
+| `/busca`   | nlSearch (IA)                      |
+
+## Arquitetura — núcleo único, porta GraphQL
+
+```
+lib/
+├── shared/      → contratos comuns frontend/server (Tipos + constantes de UI: prioridades)
+├── schemas/     → zod compartilhado entre as fronteiras
+└── graphql/     → cliente GraphQL da UI (graphql-request) + operações tipadas
+
+server/          → núcleo de negócio (zero dependência de Next)
+├── modules/
+│   ├── todos/   → clean architecture: controllers (orquestram use-cases) + use-cases/ (por operação)
+│   │            → repositories/ (port) + infra/ (Prisma) + errors.ts
+│   └── ai/      → controllers/ + capabilities/ (suggestTodo, summarizeDay, nlSearch) + client.ts
+├── shared/container.ts → composition root (DI manual, sem inversify)
+├── config/env.ts → variáveis de ambiente com parse zod (UPPERCASE)
+├── db/          → prisma.ts (singleton better-sqlite3) + generated/ (Prisma Client gerado)
+└── utils/       → helpers genéricos
+
+bff/             → camada de apresentação de API
+├── context.ts   → GraphQLContext (controllers entregues aos resolvers via container) + createContext()
+├── graphql.ts   → createGraphQLHandler() — monta e retorna o Yoga (schema + context)
+└── graphql/     → arquitetura GraphQL (Yoga + Pothos) p/ consumidores externos; reusa server/modules
+    ├── builder.ts   → SchemaBuilder (Context, scalars/enums) + Query/Mutation raiz
+    ├── types.ts     → representações do BFF (refs/inputs por domínio)
+    ├── resolvers/   → resolvers por feature (todos.ts, ai.ts) — acessam controllers via ctx
+    └── schema.ts    → monta e exporta o schema
+
+app/api/**       → transporte fino
+└── graphql/route.ts                                 → GET/POST delega a createGraphQLHandler()
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- A UI consome **GraphQL** via React Query, com operações tipadas no wrapper `lib/graphql/client.ts`.
+- Consumidores externos usam o mesmo endpoint GraphQL — uma porta, zero duplicação.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Next.js 16 (App Router) · React 19 · TypeScript strict · Prisma 7 (SQLite via better-sqlite3) · GraphQL Yoga + Pothos · Google Gemini · Mantine · React Query · react-hook-form + zod · TanStack Table
 
-## Learn More
+## Começando
 
-To learn more about Next.js, take a look at the following resources:
+Pré-requisitos: Node.js 20+ e pnpm.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cp .env.example .env   # preencha GEMINI_API_KEY
+pnpm install
+pnpm prisma migrate dev
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Abra [http://localhost:3000](http://localhost:3000).
 
-## Deploy on Vercel
+## Variáveis de ambiente
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Variável         | Obrigatória | Descrição                                   |
+| ---------------- | ----------- | ------------------------------------------- |
+| `DATABASE_URL`   | sim         | URL do SQLite (ex.: `file:./prisma/dev.db`) |
+| `GEMINI_API_KEY` | não (IA)    | Chave do Google AI Studio                   |
+| `GEMINI_MODEL`   | não         | Modelo padrão `gemini-2.5-flash`            |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`GEMINI_API_KEY` é opcional: o app roda com CRUD; os recursos de IA precisam da chave.
+
+## Scripts
+
+| Comando             | Descrição                            |
+| ------------------- | ------------------------------------ |
+| `pnpm dev`          | servidor de desenvolvimento          |
+| `pnpm build`        | build de produção                    |
+| `pnpm start`        | roda o build                         |
+| `pnpm lint`         | ESLint                               |
+| `pnpm typecheck`    | TypeScript (tsc --noEmit)            |
+| `pnpm format:check` | verificação Prettier                 |
+| `pnpm db:studio`    | Prisma Studio (browser do banco)     |
+| `pnpm commit`       | commit com commitizen (convencional) |
+
+## Roadmap
+
+- [ ] Polimento (README, smoke tests)
