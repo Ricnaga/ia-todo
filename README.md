@@ -33,9 +33,9 @@ server/          → núcleo de negócio (zero dependência de Next)
 ├── modules/
 │   ├── todos/   → clean architecture: controllers (orquestram use-cases) + use-cases/ (por operação)
 │   │            → repositories/ (port) + infra/ (Prisma) + errors.ts
-│   └── ai/      → controllers/ + capabilities/ (suggestTodo, summarizeDay, nlSearch) + client.ts
+│   └── ai/      → controllers/ + capabilities/ (suggest-todo, summarize-day, nl-search) + client.ts
 ├── shared/container.ts → composition root (DI manual, sem inversify)
-├── config/env.ts → variáveis de ambiente com parse zod (UPPERCASE)
+├── config/environment.ts → variáveis de ambiente com parse zod (UPPERCASE)
 ├── db/          → prisma.ts (singleton better-sqlite3) + generated/ (Prisma Client gerado)
 └── utils/       → helpers genéricos
 
@@ -45,6 +45,7 @@ bff/             → camada de apresentação de API
 └── graphql/     → arquitetura GraphQL (Yoga + Pothos) p/ consumidores externos; reusa server/modules
     ├── builder.ts   → SchemaBuilder (Context, scalars/enums) + Query/Mutation raiz
     ├── types.ts     → representações do BFF (refs/inputs por domínio)
+    ├── errors.ts    → raiseResolvable: mapeia DomainError/ZodError → GraphQLError
     ├── resolvers/   → resolvers por feature (todos.ts, ai.ts) — acessam controllers via ctx
     └── schema.ts    → monta e exporta o schema
 
@@ -90,11 +91,13 @@ Abra [http://localhost:3000](http://localhost:3000).
 | `pnpm build`        | build de produção                    |
 | `pnpm start`        | roda o build                         |
 | `pnpm lint`         | ESLint                               |
+| `pnpm lint:fix`     | ESLint com correção automática       |
 | `pnpm typecheck`    | TypeScript (tsc --noEmit)            |
+| `pnpm format`       | formata com Prettier                 |
 | `pnpm format:check` | verificação Prettier                 |
 | `pnpm db:studio`    | Prisma Studio (browser do banco)     |
 | `pnpm commit`       | commit com commitizen (convencional) |
 
 ## Roadmap
 
-- [ ] Polimento (README, smoke tests)
+- [ ] Smoke tests automatizados (vitest/playwright)
