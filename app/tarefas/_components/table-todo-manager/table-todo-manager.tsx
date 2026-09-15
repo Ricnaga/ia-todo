@@ -13,7 +13,6 @@ import {
   Text,
   Title,
 } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
 import {
   IconClipboardList,
   IconPencil,
@@ -23,36 +22,21 @@ import {
 } from '@tabler/icons-react'
 import type { Todo } from '@/lib/shared/todos/todo.types'
 import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
+import { formatDate } from '@/lib/utils/date'
+import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { useCreateTodo, useDeleteTodo, useUpdateTodo } from '@/services/todo/todo.mutation'
 import { useTodos } from '@/services/todo/todo.query'
-import { ModalTodoForm, type TodoFormInput } from './modal-todo-form'
-import { ModalAiSuggest } from './modal-ai-suggest'
+import { ModalTodoForm, type TodoFormInput } from '../modal-todo-form/modal-todo-form'
+import { ModalAiSuggest } from '../modal-ai-suggest/modal-ai-suggest'
 
-function formatDate(date: Date | null): string {
-  if (!date) return '-'
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date)
+type FormModalState = {
+  mode: 'create' | 'edit'
+  todo?: Todo
 }
 
-const notifySuccess = (title: string, message: string) =>
-  notifications.show({ title, message, color: 'green' })
-
-const notifyError = (title: string) => (error: unknown) =>
-  notifications.show({
-    title,
-    message: error instanceof Error ? error.message : String(error),
-    color: 'red',
-  })
-
 export function TableTodoManager() {
-  const [formModal, setFormModal] = useState<{
-    mode: 'create' | 'edit'
-    todo?: Todo
-  } | null>(null)
-  const [aiOpened, setAiOpened] = useState(false)
+  const [formModal, setFormModal] = useState<FormModalState | null>(null)
+  const [aiOpened, setAiOpened] = useState<boolean>(false)
 
   const { data: todos = [], isLoading } = useTodos()
 
@@ -60,35 +44,34 @@ export function TableTodoManager() {
   const updateMutation = useUpdateTodo()
   const deleteMutation = useDeleteTodo()
 
-  const handleSubmit = (mode: 'create' | 'edit', todo?: Todo) => async (values: TodoFormInput) => {
-    try {
-      if (mode === 'edit' && todo) {
-        await updateMutation.mutateAsync(
-          { id: todo.id, input: values },
-          {
-            onSuccess: () => notifySuccess('Tarefa atualizada', 'As alterações foram salvas.'),
-            onError: notifyError('Erro ao atualizar'),
-          },
-        )
-      } else {
-        await createMutation.mutateAsync(values, {
-          onSuccess: () => notifySuccess('Tarefa criada', 'A tarefa foi criada com sucesso.'),
-          onError: notifyError('Erro ao criar'),
-        })
-      }
-      setFormModal(null)
-    } catch {
-      // erro já exibido via onError da chamada
+  const handleSubmit = (mode: 'create' | 'edit', todo?: Todo) => (values: TodoFormInput) => {
+    if (mode !== 'edit' || !todo) {
+      createMutation.mutate(values, {
+        onSuccess: () => {
+          notifySuccess('Tarefa criada', 'A tarefa foi criada com sucesso.')
+          setFormModal(null)
+        },
+        onError: notifyError('Erro ao criar'),
+      })
+      return
     }
+    updateMutation.mutate(
+      { id: todo.id, input: values },
+      {
+        onSuccess: () => {
+          notifySuccess('Tarefa atualizada', 'As alterações foram salvas.')
+          setFormModal(null)
+        },
+        onError: notifyError('Erro ao atualizar'),
+      },
+    )
   }
 
   const handleToggleComplete = (todo: Todo, completed: boolean) => {
-    updateMutation
-      .mutateAsync(
-        { id: todo.id, input: { completed } },
-        { onError: notifyError('Erro ao atualizar') },
-      )
-      .catch(() => null)
+    updateMutation.mutate(
+      { id: todo.id, input: { completed } },
+      { onError: notifyError('Erro ao atualizar') },
+    )
   }
 
   return (
@@ -212,12 +195,14 @@ export function TableTodoManager() {
         opened={aiOpened}
         onClose={() => setAiOpened(false)}
         adding={createMutation.isPending}
-        onAdd={async (suggestion) => {
-          await createMutation.mutateAsync(suggestion, {
-            onSuccess: () => notifySuccess('Tarefa criada', 'A tarefa foi criada com sucesso.'),
+        onAdd={(suggestion) => {
+          createMutation.mutate(suggestion, {
+            onSuccess: () => {
+              notifySuccess('Tarefa criada', 'A tarefa foi criada com sucesso.')
+              setAiOpened(false)
+            },
             onError: notifyError('Erro ao criar'),
           })
-          setAiOpened(false)
         }}
       />
     </div>

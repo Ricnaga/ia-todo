@@ -2,27 +2,20 @@
 
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Button, Group, Modal, Select, Stack, TextInput, Textarea } from '@mantine/core'
 import { IconX } from '@tabler/icons-react'
 import type { Todo } from '@/lib/shared/todos/todo.types'
 import { priorityOptions } from '@/lib/shared/todos/todo.ui'
-import { createTodoSchema } from '@/lib/schemas/todo'
+import { toDateInputValue } from '@/lib/utils/date'
+import { createTodoSchema, type CreateTodoFormInput } from '@/lib/schemas/todo'
 
-export type TodoFormInput = z.input<typeof createTodoSchema>
+export type TodoFormInput = CreateTodoFormInput
 
 type ModalTodoFormProps = {
   mode: 'create' | 'edit'
   todo?: Todo
   onSubmit: (values: TodoFormInput) => void
   onClose: () => void
-}
-
-function toDateInputValue(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
 }
 
 export function ModalTodoForm({ mode, todo, onSubmit, onClose }: ModalTodoFormProps) {

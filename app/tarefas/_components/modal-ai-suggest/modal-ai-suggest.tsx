@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { Badge, Button, Card, Group, Modal, Stack, Text, Textarea, TextInput } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
 import { IconPlus, IconSparkles } from '@tabler/icons-react'
 import type { TodoSuggestion, DraftInput } from '@/lib/schemas/ai'
 import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
+import { notifyError } from '@/lib/utils/notifications'
 import { useSuggestTodo } from '@/services/ai/ai.mutation'
 
 type ModalAiSuggestProps = {
@@ -14,13 +14,6 @@ type ModalAiSuggestProps = {
   adding: boolean
   onAdd: (suggestion: TodoSuggestion) => void
 }
-
-const notifyError = (error: unknown) =>
-  notifications.show({
-    title: 'Não consegui sugerir',
-    message: error instanceof Error ? error.message : String(error),
-    color: 'red',
-  })
 
 export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSuggestProps) {
   const [draft, setDraft] = useState<DraftInput>({})
@@ -71,7 +64,10 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
               leftSection={<IconSparkles size={16} />}
               loading={suggestMutation.isPending}
               onClick={() =>
-                suggestMutation.mutate(draft, { onSuccess: setSuggestion, onError: notifyError })
+                suggestMutation.mutate(draft, {
+                  onSuccess: setSuggestion,
+                  onError: notifyError('Não consegui sugerir'),
+                })
               }
             >
               Sugerir
