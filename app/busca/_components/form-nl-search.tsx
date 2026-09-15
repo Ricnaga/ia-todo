@@ -1,61 +1,22 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { Badge, Button, Card, Group, Kbd, Stack, Text, TextInput, Title } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
+import { useState, type KeyboardEvent } from 'react'
+import { Button, Group, Kbd, Text, TextInput, Title } from '@mantine/core'
 import { IconSearch } from '@tabler/icons-react'
-import type { Todo } from '@/lib/shared/todos/todo.types'
-import type { SearchResult } from '@/lib/shared/ai/search'
-import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
 import { useNlSearch } from '@/services/ai/ai.mutation'
-
-const notifyError = (error: unknown) =>
-  notifications.show({
-    title: 'Não consegui buscar',
-    message: error instanceof Error ? error.message : String(error),
-    color: 'red',
-  })
-
-const statusLabels: Record<string, string> = {
-  any: 'qualquer',
-  pending: 'pendente',
-  completed: 'concluída',
-}
-
-const dueLabels: Record<string, string> = {
-  any: 'qualquer',
-  today: 'hoje',
-  'this-week': 'esta semana',
-  overdue: 'atrasada',
-  none: 'sem data',
-}
-
-function formatCriteria(result: SearchResult['criteria']): string {
-  const parts: string[] = []
-  if (result.keywords.length > 0) {
-    parts.push(result.keywords.map((k) => `“${k}”`).join(', '))
-  }
-  parts.push(statusLabels[result.status])
-  if (result.priority !== 'any') {
-    parts.push(`prioridade ${priorityLabels[result.priority]}`)
-  }
-  parts.push(`vencimento ${dueLabels[result.due]}`)
-  return parts.join(' · ')
-}
+import { notifyError } from '@/lib/utils/notifications'
+import { EmptyState } from './empty-state/empty-state'
+import { CardSearchResultList } from './card-search-result-list/card-search-result-list'
 
 export function FormNlSearch() {
-  const [query, setQuery] = useState('')
+  const { data: result, isPending, mutate } = useNlSearch()
+  const [query, setQuery] = useState<string>('')
 
-  const mutation = useNlSearch()
+  const handleSearch = () => mutate(query, { onError: notifyError('Não consegui buscar') })
 
-  const result = mutation.data
-
-  const renderEmpty = (text: string) => (
-    <Text size="sm" c="dimmed">
-      {text}
-    </Text>
-  )
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && query.trim()) handleSearch()
+  }
 
   return (
     <div className="flex max-w-4xl flex-col gap-4">
@@ -72,69 +33,22 @@ export function FormNlSearch() {
           placeholder="Ex.: consultas de amanhã de alta prioridade"
           value={query}
           onChange={(event) => setQuery(event.currentTarget.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && query.trim()) {
-              mutation.mutate(query, { onError: notifyError })
-            }
-          }}
-          style={{ flex: 1 }}
+          onKeyDown={handleKeyDown}
+          className="flex-1"
           rightSection={<Kbd>↵</Kbd>}
         />
         <Button
           leftSection={<IconSearch size={18} />}
-          loading={mutation.isPending}
+          loading={isPending}
           disabled={!query.trim()}
-          onClick={() => mutation.mutate(query, { onError: notifyError })}
+          onClick={handleSearch}
         >
           Buscar
         </Button>
       </Group>
 
-      {!result && !mutation.isPending && renderEmpty('Descreva uma busca para começar.')}
-      {result && result.results.length === 0 && renderEmpty('Nenhuma tarefa corresponde à busca.')}
-      {result && result.results.length > 0 && (
-        <Card withBorder>
-          <Stack gap="md">
-            <Group gap={6}>
-              <Text size="xs" c="dimmed" fw={600}>
-                Filtros entendidos:
-              </Text>
-              <Badge variant="light" size="sm">
-                {formatCriteria(result.criteria)}
-              </Badge>
-            </Group>
-
-            <Stack gap="xs">
-              {result.results.map((todo: Todo) => (
-                <Card key={todo.id} withBorder p="sm">
-                  <Group justify="space-between" wrap="nowrap">
-                    <Stack gap={2}>
-                      <Text fw={600} td={todo.completed ? 'line-through' : undefined}>
-                        {todo.title}
-                      </Text>
-                      {todo.description && (
-                        <Text size="sm" c="dimmed" lineClamp={1}>
-                          {todo.description}
-                        </Text>
-                      )}
-                    </Stack>
-                    <Badge color={priorityColors[todo.priority]} variant="light" size="sm">
-                      {priorityLabels[todo.priority]}
-                    </Badge>
-                  </Group>
-                </Card>
-              ))}
-            </Stack>
-
-            <Text size="xs" c="dimmed">
-              <Link href="/tarefas" className="underline">
-                Ver todas as tarefas
-              </Link>{' '}
-              · {result.results.length} resultado(s)
-            </Text>
-          </Stack>
-        </Card>
-      )}
+      {result && <CardSearchResultList result={result} />}
+      {!result && !isPending && <EmptyState message="Descreva uma busca para começar." />}
     </div>
   )
 }
