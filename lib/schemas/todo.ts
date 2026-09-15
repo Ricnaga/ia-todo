@@ -21,3 +21,5 @@ export const updateTodoSchema = createTodoSchema.partial().extend({
 
 export type CreateTodoInput = z.infer<typeof createTodoSchema>
 export type UpdateTodoInput = z.infer<typeof updateTodoSchema>
+
+export type CreateTodoFormInput = z.input<typeof createTodoSchema>
