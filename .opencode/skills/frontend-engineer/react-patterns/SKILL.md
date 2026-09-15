@@ -91,19 +91,20 @@ function useDebounce<T>(value: T, delay: number): T {
 
 ### 4.4 Estado
 
-- **Inferência de tipos:** deixe o TypeScript inferir (`useState("")` → `string`). Anote explicitamente apenas quando a inferência for insuficiente: `useState([])` → `never[]` (use `useState<Item[]>([])`), `useState<User | null>(null)`.
+- **Tipagem explícita e legível:** nunca objeto anônimo inline no `useState`. Estado de objeto extrai um `type`/`interface` nomeado fora do componente; booleano de UI com anotação explícita.
 
 ```tsx
-// ❌ Negativo: anotação desnecessária
-const [name, setName] = useState<string>('')
+// ❌ Negativo: objeto anônimo inline + booleano sem anotação
+const [formModal, setFormModal] = useState<{ mode: 'create' | 'edit'; todo?: Todo } | null>(null)
+const [opened, setOpened] = useState(false)
 
-// ✅ Positivo: inferência suficiente
-const [name, setName] = useState('')
-
-// ✅ Positivo: anotação necessária (inferência insuficiente)
-const [items, setItems] = useState<Item[]>([])
-const [user, setUser] = useState<User | null>(null)
+// ✅ Positivo: type nomeado + boolean anotado
+type FormModalState = { mode: 'create' | 'edit'; todo?: Todo }
+const [formModal, setFormModal] = useState<FormModalState | null>(null)
+const [opened, setOpened] = useState<boolean>(false)
 ```
+
+- **Inferência da lib:** no restante, deixe o TypeScript inferir (`useState("")` → `string`). Anotar quando a inferência for insuficiente: `useState([])` → `never[]` (use `useState<Item[]>([])`), `useState<User | null>(null)`.
 
 - **Muitos `useState`:** se um componente acumula muitos estados relacionados, avalie agrupar em uma interface tipada **apenas quando** isso reduzir re-renders parciais e clobber. Estado-objeto tem custo (stale reads, mais re-renders) — avalie por contexto, não por contagem fixa.
 
@@ -288,6 +289,54 @@ const ExpensiveComponent = React.memo(function ExpensiveComponent({ data }: Prop
 - ✅ Aplicar `useCallback`/`useMemo` quando há problema mensurável ou dependência de efeito que dispara em excesso.
 - ❌ Não embrulhar todo valor/callback em `useMemo`/`useCallback` "por garantia".
 
+### 4.8 Mutações (React Query)
+
+Preferir `mutate` + callbacks (`onSuccess`/`onError`) a `mutateAsync`. O `mutateAsync` retorna uma Promise que **rejeita** quando a mutation falha — sem `catch`/`try/catch` vira _unhandled promise rejection_; com o `onError` já exibindo o toast, o `catch` só existiria para engolir a rejeição.
+
+```tsx
+// ✅ Positivo: mutate + callbacks, guard clause, fecha o modal só no sucesso
+const onSubmit = (values: Values) => {
+  if (!editing) {
+    createMutation.mutate(values, {
+      onSuccess: () => {
+        notifySuccess('Criado', 'Tarefa criada.')
+        setModalOpen(null)
+      },
+      onError: notifyError('Erro ao criar'),
+    })
+    return
+  }
+  updateMutation.mutate(
+    { id: editing.id, input: values },
+    {
+      onSuccess: () => {
+        notifySuccess('Atualizado', 'Alterações salvas.')
+        setModalOpen(null)
+      },
+      onError: notifyError('Erro ao atualizar'),
+    },
+  )
+}
+
+// ❌ Negativo: mutateAsync + try/catch vazio + else
+try {
+  if (editing) {
+    await updateMutation.mutateAsync(
+      { id: editing.id, input: values },
+      { onError: notifyError('Erro') },
+    )
+  } else {
+    await createMutation.mutateAsync(values, { onError: notifyError('Erro') })
+  }
+  setModalOpen(null)
+} catch {}
+```
+
+- ✅ Fechar modal / limpar estado **somente no `onSuccess`** (erro preserva o form e mostra o toast via `onError`).
+- ✅ Usar guard clause (early return) em vez de `if/else` quando um branch encerra o fluxo.
+- ❌ `mutateAsync` sem `catch`: unhandled rejection.
+- ❌ `try { await mutateAsync(...) } catch {}` ou `.catch(() => null)` só para suprimir rejeição — trocar por `mutate`.
+
 ## 5. Sinais de Alerta na Revisão (code smells)
 
 ### 5.1 Complexidade de componente
@@ -348,20 +397,25 @@ Extrair componente/hook/generic sem pelo menos 2 usos reais é YAGNI. → Não e
 
 Tabela condição → ação. Referência, não regra absoluta:
 
-| Condição observada                                       | Ação sugerida                                        |
-| -------------------------------------------------------- | ---------------------------------------------------- |
-| Componente muito extenso ou com muitas responsabilidades | Extrair subcomponentes / hooks / composição          |
-| Muitas props (esp. booleanas)                            | Objeto tipado, Compound Component ou `children`      |
-| Ternário aninhado (3+ níveis)                            | Early return, mapping object, subcomponente          |
-| Ternário no meio do JSX                                  | Componentizar + return early                         |
-| Lógica/variáveis no meio do JSX                          | Extrair lógica antes do return                       |
-| Várias variantes de renderização por estado              | `Record<Estado, Componente>` (mapping object)        |
-| Decisão por enum/estado com vários branches              | `switch` (legibilidade > ternário encadeado)         |
-| Lógica de negócio dentro do JSX/componente               | Mover para hook/service (componente apresentacional) |
-| Extração sem 2+ usos reais                               | **Não extrair** (YAGNI / abstração prematura)        |
-| `useMemo`/`useCallback` sem problema mensurável          | **Não otimizar preventivamente**                     |
-| Key por index quando a ordem pode mudar                  | Corrigir para ID estável                             |
-| Prop drilling excessivo                                  | Context / composição / colocation de estado          |
+| Condição observada                                        | Ação sugerida                                        |
+| --------------------------------------------------------- | ---------------------------------------------------- |
+| Componente muito extenso ou com muitas responsabilidades  | Extrair subcomponentes / hooks / composição          |
+| Muitas props (esp. booleanas)                             | Objeto tipado, Compound Component ou `children`      |
+| Ternário aninhado (3+ níveis)                             | Early return, mapping object, subcomponente          |
+| Ternário no meio do JSX                                   | Componentizar + return early                         |
+| Lógica/variáveis no meio do JSX                           | Extrair lógica antes do return                       |
+| Várias variantes de renderização por estado               | `Record<Estado, Componente>` (mapping object)        |
+| Decisão por enum/estado com vários branches               | `switch` (legibilidade > ternário encadeado)         |
+| Lógica de negócio dentro do JSX/componente                | Mover para hook/service (componente apresentacional) |
+| Extração sem 2+ usos reais                                | **Não extrair** (YAGNI / abstração prematura)        |
+| `useMemo`/`useCallback` sem problema mensurável           | **Não otimizar preventivamente**                     |
+| Key por index quando a ordem pode mudar                   | Corrigir para ID estável                             |
+| Prop drilling excessivo                                   | Context / composição / colocation de estado          |
+| Estado de objeto anônimo inline no `useState`             | Extrair `type`/`interface` nomeado no arquivo        |
+| Booleano de UI sem anotação                               | `useState<boolean>(false)`                           |
+| `mutateAsync` usado só para disparar a mutation           | Trocar por `mutate` + `onSuccess`/`onError`          |
+| `try/catch` vazio ou `.catch(() => null)` suprimindo erro | Trocar por `mutate` + `onError` (toast)              |
+| `if/else` com um branch que encerra o fluxo               | Guard clause (early return)                          |
 
 ## 7. Exemplos Positivos
 
@@ -371,6 +425,8 @@ Consolidado (também interleaved nas seções 4 e 5):
 - Mapping object para múltiplos estados de renderização (`5.4`).
 - `switch` tipado em reducer para transições de estado (`5.5`).
 - Early return antes de JSX condicional complexo (`4.6`).
+- `type` nomeado para estado de objeto + booleano anotado (`4.4`).
+- `mutate` + callbacks, modal fechado só no sucesso, guard clause (`4.8`).
 - Componentizar ternário do JSX + return early (`4.6.2`).
 - Lógica extraída antes do return, JSX limpo (`4.6.3`).
 - Hook extraído somente após 2+ usos reais (`4.3`).
@@ -383,7 +439,9 @@ Consolidado (também interleaved nas seções 4 e 5):
 - Ternário no meio do JSX sem componentizar (`4.6.2`).
 - Lógica/variáveis no meio do JSX (`4.6.3`).
 - Prop drilling de responsabilidades que atravessam níveis sem uso (`4.1`).
-- Anotação de tipo redundante no `useState` (`4.4`).
+- Estado de objeto anônimo inline no `useState` e booleano sem `boolean` (`4.4`).
+- `mutateAsync` sem `catch` / `try { await mutateAsync } catch {}` (`4.8`).
+- `if/else` que seria guard clause e modal fechado fora do `onSuccess` (`4.8`).
 - `useMemo`/`useCallback` preventivos (`4.7`).
 - Key por index do array (`4.5`).
 - Regra de negócio embutida no JSX (`5.6`).

@@ -49,6 +49,16 @@ Se existir um componente no UI Kit ou Design System do projeto, **priorizá-lo**
 - ✅ Seguir o padrão visual existente nas telas vizinhas.
 - ❌ Não introduzir cor, fonte ou espaçamento fora do token/scale do projeto.
 
+### 4.2.1 Nomenclatura de componentes (`tipo UI + nome`)
+
+Prefixo indica o **tipo de UI**, sufixo o **propósito**. Facilita localizar e revisar componentes.
+
+- `CardSearchResultList`, `CardDaySummary`, `CardDaySummaryContent` → `Card`
+- `TableTodoManager` → `Table`
+- `ModalTodoForm`, `ModalAiSuggest` → `Modal`
+- `FormNlSearch` → `Form`
+- `EmptyState`, `NavShell` → tipo próprio (estado vazio, navegação)
+
 ### 4.3 HTML semântico
 
 Usar elementos semânticos conforme o propósito — e nunca substituí-los por `div` sem necessidade.

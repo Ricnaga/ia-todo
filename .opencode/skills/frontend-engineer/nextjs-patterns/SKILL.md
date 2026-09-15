@@ -25,6 +25,34 @@ app/
     └── page.tsx         # Catch-all routes
 ```
 
+## Estrutura de componentes (convenção do projeto)
+
+Componentes de uma rota vivem em `app/<rota>/_components/`, cada um na **própria pasta homônima**:
+
+```
+app/tarefas/
+├── page.tsx                                # Server Component (shell estático)
+└── _components/
+    ├── table-todo-manager/
+    │   └── table-todo-manager.tsx          # Client island principal da rota
+    ├── modal-todo-form/
+    │   └── modal-todo-form.tsx
+    └── modal-ai-suggest/
+        └── modal-ai-suggest.tsx
+```
+
+- Página (`page.tsx`) fica **Server Component** (síncrona quando não há `await` de dados) e renderiza header/metadados estáticos; a interatividade vira **client island** no `_components/`.
+- Cada componente na sua pasta `<nome>/<nome>.tsx` (ex: `_components/card-search-result-list/card-search-result-list.tsx`).
+- `components/` (raiz) é **apenas** para componentes multi-página (ex: `components/nav-shell/`). Componente específico de página (ex: `EmptyState`) é duplicado por página no `_components/` — **não** vai para a raiz.
+
+## Camada `lib/` (contratos vs helpers de front)
+
+- `lib/shared/` — contrato de domínio usado por front, server e bff (types, schemas, labels **sem** dependência de UI).
+- `lib/schemas/*`, `lib/graphql/*` — contrato (importadas por server/bff).
+- `lib/utils/*`, `lib/constants/*` — **frontend-only**: `lib/utils/notifications.ts` (toasts `notifyError`/`notifySuccess`/`toErrorMessage`, dependem de `@mantine/notifications`); `lib/utils/date.ts` (`formatDate`, `toDateInputValue`, `defaultDateOptions`).
+- ❌ Nunca importar módulo com dependência de UI (`lib/utils/*`, `lib/constants/*`) de dentro de `lib/shared/` — vazaria Mantine para o server.
+- Utils de data/toast são **centralizadas** em `lib/utils/*`, nunca duplicadas no componente (`formatDate` expõe `Intl.DateTimeFormatOptions` como 2º argumento).
+
 ## Server Components (padrão)
 
 ```tsx
