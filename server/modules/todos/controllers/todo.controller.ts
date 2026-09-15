@@ -3,7 +3,9 @@ import type { FindTodoByIdUseCase } from '@/server/modules/todos/use-cases/find-
 import type { CreateTodoUseCase } from '@/server/modules/todos/use-cases/create-todo.use-case'
 import type { UpdateTodoUseCase } from '@/server/modules/todos/use-cases/update-todo.use-case'
 import type { DeleteTodoUseCase } from '@/server/modules/todos/use-cases/delete-todo.use-case'
+import type { SuggestTodoUseCase } from '@/server/modules/todos/use-cases/suggest-todo.use-case'
 import type { Todo } from '@/lib/shared/todos/todo.types'
+import type { TodoSuggestion } from '@/lib/schemas/ai'
 
 type TodoUseCases = {
   list: ListTodosUseCase
@@ -11,6 +13,7 @@ type TodoUseCases = {
   create: CreateTodoUseCase
   update: UpdateTodoUseCase
   delete: DeleteTodoUseCase
+  suggestTodo: SuggestTodoUseCase
 }
 
 export class TodoController {
@@ -34,5 +37,9 @@ export class TodoController {
 
   delete(id: string): Promise<void> {
     return this.useCases.delete.execute(id)
+  }
+
+  suggestTodo(raw: unknown): Promise<TodoSuggestion> {
+    return this.useCases.suggestTodo.execute(raw)
   }
 }

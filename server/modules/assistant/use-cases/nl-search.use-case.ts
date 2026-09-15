@@ -1,8 +1,7 @@
-import { SchemaType, type Schema } from '@google/generative-ai'
-import { getGeminiModel } from '@/server/modules/ai/client'
 import { searchCriteriaSchema, type SearchCriteria } from '@/lib/schemas/ai'
 import type { Todo } from '@/lib/shared/todos/todo.types'
 import type { SearchResult } from '@/lib/shared/ai/search'
+import type { AiService } from '@/server/shared/ai/ai.service.interface'
 
 const SYSTEM_INSTRUCTION = `Você interpreta buscas em linguagem natural dentro de um app de tarefas (todo).
 Seu trabalho é transformar a consulta do usuário em critérios de filtro estruturados.
@@ -12,31 +11,7 @@ Regras:
 - keywords: 1 a 5 termos-chave que devam aparecer no título ou descrição da tarefa.
 - status: "pending" se quer tarefas a fazer, "completed" se concluídas, "any" se tanto faz.
 - priority: prioridade explícita se citada ("urgente", "prioritário"), senão "any".
-- due: "today" para hoje/vence hoje, "this-week" para esta semana, "overdue" para atrasadas/venceu, "none" para sem data, senão "any".`
-
-const responseSchema: Schema = {
-  type: SchemaType.OBJECT,
-  properties: {
-    query: { type: SchemaType.STRING },
-    keywords: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-    status: {
-      type: SchemaType.STRING,
-      format: 'enum',
-      enum: ['any', 'pending', 'completed'],
-    },
-    priority: {
-      type: SchemaType.STRING,
-      format: 'enum',
-      enum: ['any', 'low', 'medium', 'high', 'urgent'],
-    },
-    due: {
-      type: SchemaType.STRING,
-      format: 'enum',
-      enum: ['any', 'today', 'this-week', 'overdue', 'none'],
-    },
-  },
-  required: ['query', 'keywords', 'status', 'priority', 'due'],
-}
+- due: "today" para hoje/vence hoje, "thisWeek" para esta semana, "overdue" para atrasadas/venceu, "none" para sem data, senão "any".`
 
 function startOfDay(date: Date): Date {
   const d = new Date(date)
@@ -81,25 +56,19 @@ function matchesCriteria(todo: Todo, criteria: SearchCriteria): boolean {
   return matchesDue(todo, criteria.due)
 }
 
-export async function nlSearch(query: string, todos: Todo[]): Promise<SearchResult> {
-  const result = await getGeminiModel().generateContent({
-    systemInstruction: SYSTEM_INSTRUCTION,
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: `Consulta: "${query}"` }],
-      },
-    ],
-    generationConfig: {
-      responseMimeType: 'application/json',
-      responseSchema,
+export class NlSearchUseCase {
+  constructor(private readonly aiService: AiService) {}
+
+  async execute(query: string, todos: Todo[]): Promise<SearchResult> {
+    const criteria = await this.aiService.generateStructured({
+      systemInstruction: SYSTEM_INSTRUCTION,
+      prompt: `Consulta: "${query}"`,
+      schema: searchCriteriaSchema,
       temperature: 0.2,
-    },
-  })
+    })
 
-  const text = result.response.text()
-  const criteria = searchCriteriaSchema.parse(JSON.parse(text))
-  const results = todos.filter((todo) => matchesCriteria(todo, criteria))
+    const results = todos.filter((todo) => matchesCriteria(todo, criteria))
 
-  return { criteria, results }
+    return { criteria, results }
+  }
 }
