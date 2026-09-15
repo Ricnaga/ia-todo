@@ -113,7 +113,7 @@ SearchCriteriaRef.implement({
     priority: t.expose('priority', { type: SearchPriorityEnum }),
     due: t.field({
       type: SearchDueEnum,
-      resolve: (criteria) => (criteria.due === 'this-week' ? 'this_week' : criteria.due),
+      resolve: (criteria) => (criteria.due === 'thisWeek' ? 'this_week' : criteria.due),
     }),
   }),
 })

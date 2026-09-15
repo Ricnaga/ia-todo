@@ -28,7 +28,7 @@ export const searchCriteriaSchema = z.object({
   keywords: z.array(z.string().trim().min(1).max(100)).max(20),
   status: z.enum(['any', 'pending', 'completed']),
   priority: z.enum(['any', 'low', 'medium', 'high', 'urgent']),
-  due: z.enum(['any', 'today', 'this-week', 'overdue', 'none']),
+  due: z.enum(['any', 'today', 'thisWeek', 'overdue', 'none']),
 })
 
 export type DraftInput = z.infer<typeof draftInputSchema>

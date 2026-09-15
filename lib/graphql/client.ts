@@ -39,7 +39,7 @@ function toSearchResult(result: SearchResultWire): SearchResult {
   return {
     criteria: {
       ...result.criteria,
-      due: result.criteria.due === 'this_week' ? 'this-week' : result.criteria.due,
+      due: result.criteria.due === 'this_week' ? 'thisWeek' : result.criteria.due,
     },
     results: result.results.map(toTodo),
   }
