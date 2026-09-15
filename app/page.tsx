@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { Badge, Button, Card, SimpleGrid, Text, ThemeIcon, Title } from '@mantine/core'
 import { IconClipboardList, IconSearch, IconSparkles, IconStack2 } from '@tabler/icons-react'
+import { paths } from '@/lib/constants/router-paths'
 
 const features = [
   {
-    href: '/tarefas',
+    href: paths.TAREFAS,
     icon: IconClipboardList,
     title: 'Tarefas',
     description:
@@ -12,7 +13,7 @@ const features = [
     cta: 'Abrir tarefas',
   },
   {
-    href: '/resumo',
+    href: paths.RESUMO,
     icon: IconSparkles,
     title: 'Resumo do dia',
     description:
@@ -20,11 +21,11 @@ const features = [
     cta: 'Gerar resumo',
   },
   {
-    href: '/busca',
+    href: paths.BUSCA,
     icon: IconSearch,
     title: 'Busca em linguagem natural',
     description:
-      'Digite “consultas de amanhã de alta prioridade” e a IA transforma em filtros sobre seus dados.',
+      'Digite "consultas de amanhã de alta prioridade" e a IA transforma em filtros sobre seus dados.',
     cta: 'Fazer uma busca',
   },
 ]
@@ -48,12 +49,12 @@ export default function Home() {
           uma única porta GraphQL (Yoga + Pothos) — usada pela UI e por consumidores externos.
         </Text>
         <div className="flex gap-3">
-          <Link href="/tarefas">
+          <Link href={paths.TAREFAS}>
             <Button leftSection={<IconClipboardList size={18} />} size="md">
               Começar pelas tarefas
             </Button>
           </Link>
-          <Link href="/resumo">
+          <Link href={paths.RESUMO}>
             <Button variant="light" size="md" leftSection={<IconSparkles size={18} />}>
               Ver resumo do dia
             </Button>

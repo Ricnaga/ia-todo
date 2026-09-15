@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { AppShell, NavLink, Title } from '@mantine/core'
 import { IconClipboardList, IconHome, IconSearch, IconSparkles } from '@tabler/icons-react'
+import { paths } from '@/lib/constants/router-paths'
 
 const navItems = [
-  { href: '/', label: 'Início', icon: IconHome },
-  { href: '/tarefas', label: 'Tarefas', icon: IconClipboardList },
-  { href: '/resumo', label: 'Resumo do dia', icon: IconSparkles },
-  { href: '/busca', label: 'Busca por IA', icon: IconSearch },
+  { href: paths.HOME, label: 'Início', icon: IconHome },
+  { href: paths.TAREFAS, label: 'Tarefas', icon: IconClipboardList },
+  { href: paths.RESUMO, label: 'Resumo do dia', icon: IconSparkles },
+  { href: paths.BUSCA, label: 'Busca por IA', icon: IconSearch },
 ]
 
 export function NavShell({ children }: { children: React.ReactNode }) {
