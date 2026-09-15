@@ -21,32 +21,40 @@ IA aplicada ao ciclo de vida da tarefa — 3 features:
 | `/resumo`  | summarizeDay (IA)                  |
 | `/busca`   | nlSearch (IA)                      |
 
-## Arquitetura — núcleo único, porta GraphQL
+## Arquitetura — núcleo único, porta GraphQL, DDD por bounded contexts
 
 ```
 lib/
 ├── shared/      → contratos comuns frontend/server (Tipos + constantes de UI: prioridades)
-├── schemas/     → zod compartilhado entre as fronteiras
+├── schemas/     → zod compartilhado entre as fronteiras (published language)
 └── graphql/     → cliente GraphQL da UI (graphql-request) + operações tipadas
 
-server/          → núcleo de negócio (zero dependência de Next)
+server/          → núcleo de negócio (zero dependência de Next), DDD por bounded contexts
 ├── modules/
-│   ├── todos/   → clean architecture: controllers (orquestram use-cases) + use-cases/ (por operação)
-│   │            → repositories/ (port) + infra/ (Prisma) + errors.ts
-│   └── ai/      → controllers/ + capabilities/ (suggest-todo, summarize-day, nl-search) + client.ts
-├── shared/container.ts → composition root (DI manual, sem inversify)
+│   ├── todos/     → context CORE: Todo aggregate + CRUD + suggestTodo (shaping de todo com IA)
+│   │               → clean architecture: controllers + use-cases/ + repositories/ (port) + infra/ (Prisma)
+│   ├── assistant/ → context SUPPORTING: nlSearch (caixa-preta, recebe Todo[] via parâmetro)
+│   └── insights/  → context SUPPORTING: summarizeDay (caixa-preta; filtra pendentes no use-case)
+├── shared/
+│   ├── ai/        → INFRA genérica IA: ai.service.interface.ts (port) + gemini-ai.service.ts + zod→Gemini mapper
+│   └── container.ts → composition root (DI manual, sem inversify)
 ├── config/environment.ts → variáveis de ambiente com parse zod (UPPERCASE)
 ├── db/          → prisma.ts (singleton better-sqlite3) + generated/ (Prisma Client gerado)
 └── utils/       → helpers genéricos
 
-bff/             → camada de apresentação de API
-├── context.ts   → GraphQLContext (controllers entregues aos resolvers via container) + createContext()
+bff/             → camada de apresentação de API (núcleo hexagonal, espelha os bounded contexts)
+├── adapters/    → ports (contrato do BFF, sem import de server) + adapters por context
+│   ├── todo/      → todo.port.ts (CRUD + suggestTodo) + todo.adapter.ts
+│   ├── assistant/ → assistant.port.ts (nlSearch) + assistant.adapter.ts
+│   └── insights/  → insights.port.ts (summarizeDay) + insights.adapter.ts
+├── context.ts   → GraphQLContext { adapters: { todo, assistant, insights } } — único ponto que importa de server/ (composition root do BFF)
 ├── graphql.ts   → createGraphQLHandler() — monta e retorna o Yoga (schema + context)
-└── graphql/     → arquitetura GraphQL (Yoga + Pothos) p/ consumidores externos; reusa server/modules
+└── graphql/     → arquitetura GraphQL (Yoga + Pothos) p/ consumidores externos; consome as ports
     ├── builder.ts   → SchemaBuilder (Context, scalars/enums) + Query/Mutation raiz
     ├── types.ts     → representações do BFF (refs/inputs por domínio)
     ├── errors.ts    → raiseResolvable: mapeia DomainError/ZodError → GraphQLError
-    ├── resolvers/   → resolvers por feature (todos.ts, ai.ts) — acessam controllers via ctx
+    ├── resolvers/   → resolvers por context (todos.ts, assistant.ts, insights.ts) — acessam ports via ctx.adapters
+    │                 → orquestração todo→assistant/insights é mecânica (busca bruta + delegação, sem regra de negócio)
     └── schema.ts    → monta e exporta o schema
 
 app/api/**       → transporte fino
@@ -55,6 +63,8 @@ app/api/**       → transporte fino
 
 - A UI consome **GraphQL** via React Query, com operações tipadas no wrapper `lib/graphql/client.ts`.
 - Consumidores externos usam o mesmo endpoint GraphQL — uma porta, zero duplicação.
+- Hexagonal no BFF + clean architecture/DDD no back: o BFF define as ports (`adapters/`, uma por bounded context); o server entra como adapter no único composition root (`bff/context.ts`), sem connectors/domain/factories intermediários — retomados só se surgir divergência real de shape (relay, multi-consumidores, subscriptions, 3º domínio).
+- A IA é infra genérica em `server/shared/ai`: os use-cases injetam o port `AiService`; trocar de provider (Gemini → outro) = novo adapter, sem tocar nos contexts.
 
 ## Stack
 
