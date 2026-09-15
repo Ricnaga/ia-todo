@@ -1,79 +1,36 @@
 'use client'
 
-import { Button, Card, Group, List, Stack, Text, ThemeIcon, Title } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
-import { IconCircleCheck, IconSparkles } from '@tabler/icons-react'
+import { Button, Group, Text } from '@mantine/core'
+import { IconSparkles } from '@tabler/icons-react'
+import { notifyError } from '@/lib/utils/notifications'
 import { useSummarizeDay } from '@/services/ai/ai.mutation'
-
-const notifyError = (error: unknown) =>
-  notifications.show({
-    title: 'Não consegui gerar o resumo',
-    message: error instanceof Error ? error.message : String(error),
-    color: 'red',
-  })
+import { EmptyState } from './empty-state/empty-state'
+import { CardDaySummaryContent } from './card-day-summary-content/card-day-summary-content'
 
 export function CardDaySummary() {
-  const mutation = useSummarizeDay()
-
-  const summary = mutation.data
+  const { data: summary, isPending, isError, mutate } = useSummarizeDay()
 
   return (
-    <div className="flex max-w-3xl flex-col gap-4">
-      <Group justify="space-between">
-        <div>
-          <Title order={3}>Resumo do dia</Title>
-          <Text size="sm" c="dimmed">
-            A IA lê suas tarefas pendentes e monta um plano de execução.
-          </Text>
-        </div>
+    <div className="flex flex-col gap-4">
+      <Group justify="flex-end">
         <Button
           leftSection={<IconSparkles size={18} />}
-          loading={mutation.isPending}
-          onClick={() => mutation.mutate(undefined, { onError: notifyError })}
+          loading={isPending}
+          onClick={() => mutate(undefined, { onError: notifyError('Não consegui gerar o resumo') })}
         >
           Gerar resumo
         </Button>
       </Group>
 
-      {mutation.isError && (
+      {isError && (
         <Text size="sm" c="red">
           Não foi possível gerar o resumo agora. Verifique a configuração da IA e tente novamente.
         </Text>
       )}
 
-      {summary && (
-        <Card withBorder>
-          <Stack gap="md">
-            <Text>{summary.summary}</Text>
-
-            <div>
-              <Group gap="xs" mb={6}>
-                <ThemeIcon variant="light" size="sm" radius="xl">
-                  <IconCircleCheck size={16} />
-                </ThemeIcon>
-                <Text fw={600} size="sm">
-                  Foco principal
-                </Text>
-              </Group>
-              <Text size="sm" c="dimmed">
-                {summary.focus}
-              </Text>
-            </div>
-
-            {summary.suggestedOrder.length > 0 && (
-              <div>
-                <Text fw={600} size="sm" mb={6}>
-                  Ordem sugerida
-                </Text>
-                <List spacing="xs" withPadding>
-                  {summary.suggestedOrder.map((item) => (
-                    <List.Item key={item}>{item}</List.Item>
-                  ))}
-                </List>
-              </div>
-            )}
-          </Stack>
-        </Card>
+      {summary && <CardDaySummaryContent summary={summary} />}
+      {!summary && !isPending && (
+        <EmptyState message="Gere um resumo para ver o plano de execução do dia." />
       )}
     </div>
   )
