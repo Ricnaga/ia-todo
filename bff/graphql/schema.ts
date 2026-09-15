@@ -1,5 +1,6 @@
 import './resolvers/todos'
-import './resolvers/ai'
+import './resolvers/assistant'
+import './resolvers/insights'
 
 import { builder } from '@/bff/graphql/builder'
 
