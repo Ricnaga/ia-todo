@@ -1,6 +1,6 @@
 import type { NlSearchUseCase } from '@/server/modules/assistant/use-cases/nl-search.use-case'
-import type { Todo } from '@/lib/shared/todos/todo.types'
-import type { SearchResult } from '@/lib/shared/ai/search'
+import type { Todo } from '@/lib/schemas/todo'
+import type { SearchResult } from '@/lib/shared/assistant/search'
 
 export class AssistantController {
   constructor(private readonly useCases: { nlSearch: NlSearchUseCase }) {}

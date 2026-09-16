@@ -1,9 +1,9 @@
-import type { Todo, TodoCreate, TodoUpdate } from '@/lib/shared/todos/todo.types'
+import type { CreateTodoInput, Todo, UpdateTodoInput } from '@/lib/schemas/todo'
 
 export interface TodoRepository {
   list(): Promise<Todo[]>
   getById(id: string): Promise<Todo | null>
-  create(input: TodoCreate): Promise<Todo>
-  update(id: string, input: TodoUpdate): Promise<Todo>
+  create(input: CreateTodoInput): Promise<Todo>
+  update(id: string, input: UpdateTodoInput): Promise<Todo>
   delete(id: string): Promise<void>
 }

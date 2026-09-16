@@ -1,6 +1,6 @@
-import { searchCriteriaSchema, type SearchCriteria } from '@/lib/schemas/ai'
-import type { Todo } from '@/lib/shared/todos/todo.types'
-import type { SearchResult } from '@/lib/shared/ai/search'
+import { searchCriteriaSchema, type SearchCriteria } from '@/lib/schemas/assistant'
+import type { Todo } from '@/lib/schemas/todo'
+import type { SearchResult } from '@/lib/shared/assistant/search'
 import type { AiService } from '@/server/shared/ai/ai.service.interface'
 
 const SYSTEM_INSTRUCTION = `Você interpreta buscas em linguagem natural dentro de um app de tarefas (todo).

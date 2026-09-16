@@ -4,8 +4,8 @@ import type { CreateTodoUseCase } from '@/server/modules/todos/use-cases/create-
 import type { UpdateTodoUseCase } from '@/server/modules/todos/use-cases/update-todo.use-case'
 import type { DeleteTodoUseCase } from '@/server/modules/todos/use-cases/delete-todo.use-case'
 import type { SuggestTodoUseCase } from '@/server/modules/todos/use-cases/suggest-todo.use-case'
-import type { Todo } from '@/lib/shared/todos/todo.types'
-import type { TodoSuggestion } from '@/lib/schemas/ai'
+import type { Todo } from '@/lib/schemas/todo'
+import type { TodoSuggestion } from '@/lib/schemas/todo'
 
 type TodoUseCases = {
   list: ListTodosUseCase

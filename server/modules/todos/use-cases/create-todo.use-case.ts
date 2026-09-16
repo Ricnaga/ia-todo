@@ -1,6 +1,6 @@
 import { createTodoSchema } from '@/lib/schemas/todo'
 import type { TodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
-import type { Todo } from '@/lib/shared/todos/todo.types'
+import type { Todo } from '@/lib/schemas/todo'
 
 export class CreateTodoUseCase {
   constructor(private readonly repository: TodoRepository) {}

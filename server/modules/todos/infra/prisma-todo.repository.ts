@@ -2,7 +2,7 @@ import { Prisma } from '@/server/db/generated/prisma/client'
 import { prisma } from '@/server/db/prisma'
 import { TodoNotFoundError } from '@/server/modules/todos/errors'
 import type { TodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
-import type { Todo, TodoCreate, TodoSubtask, TodoUpdate } from '@/lib/shared/todos/todo.types'
+import type { CreateTodoInput, Todo, TodoSubtask, UpdateTodoInput } from '@/lib/schemas/todo'
 
 type TodoRow = Prisma.TodoGetPayload<object>
 
@@ -33,7 +33,7 @@ export class PrismaTodoRepository implements TodoRepository {
     return row ? toDomain(row) : null
   }
 
-  async create(input: TodoCreate): Promise<Todo> {
+  async create(input: CreateTodoInput): Promise<Todo> {
     const row = await prisma.todo.create({
       data: {
         title: input.title,
@@ -45,7 +45,7 @@ export class PrismaTodoRepository implements TodoRepository {
     return toDomain(row)
   }
 
-  async update(id: string, input: TodoUpdate): Promise<Todo> {
+  async update(id: string, input: UpdateTodoInput): Promise<Todo> {
     const row = await prisma.todo
       .update({
         where: { id },

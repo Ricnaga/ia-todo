@@ -1,4 +1,4 @@
-import { draftInputSchema, todoSuggestionSchema, type TodoSuggestion } from '@/lib/schemas/ai'
+import { draftInputSchema, todoSuggestionSchema, type TodoSuggestion } from '@/lib/schemas/todo'
 import type { AiService } from '@/server/shared/ai/ai.service.interface'
 
 const SYSTEM_INSTRUCTION = `Você é um assistente de produtividade embutido em um app de tarefas (todo).

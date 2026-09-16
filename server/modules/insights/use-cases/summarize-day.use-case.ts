@@ -1,5 +1,5 @@
-import { daySummarySchema, type DaySummary } from '@/lib/schemas/ai'
-import type { Todo } from '@/lib/shared/todos/todo.types'
+import { daySummarySchema, type DaySummary } from '@/lib/schemas/insights'
+import type { Todo } from '@/lib/schemas/todo'
 import type { AiService } from '@/server/shared/ai/ai.service.interface'
 
 const SYSTEM_INSTRUCTION = `Você é um assistente de produtividade embutido em um app de tarefas (todo).
