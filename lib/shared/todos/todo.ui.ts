@@ -1,4 +1,4 @@
-import type { TodoPriority } from './todo.types'
+import type { TodoPriority } from '@/lib/schemas/todo'
 
 export const priorityLabels: Record<TodoPriority, string> = {
   low: 'Baixa',
