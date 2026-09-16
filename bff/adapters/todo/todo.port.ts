@@ -1,5 +1,5 @@
-import type { Todo, TodoPriority } from '@/lib/shared/todos/todo.types'
-import type { TodoSuggestion } from '@/lib/schemas/ai'
+import type { Todo, TodoPriority } from '@/lib/schemas/todo'
+import type { TodoSuggestion } from '@/lib/schemas/todo'
 
 export type TodoCreateInput = {
   title: string
