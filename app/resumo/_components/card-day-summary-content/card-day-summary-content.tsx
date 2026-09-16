@@ -1,6 +1,6 @@
 import { Card, Group, List, Stack, Text, ThemeIcon } from '@mantine/core'
 import { IconCircleCheck } from '@tabler/icons-react'
-import type { DaySummary } from '@/lib/schemas/ai'
+import type { DaySummary } from '@/lib/schemas/insights'
 
 export function CardDaySummaryContent({ summary }: { summary: DaySummary }) {
   return (
