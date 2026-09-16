@@ -1,6 +1,8 @@
-import type { Todo, TodoSubtask } from '@/lib/shared/todos/todo.types'
-import type { DaySummary, SearchCriteria, TodoSuggestion } from '@/lib/schemas/ai'
-import type { SearchResult } from '@/lib/shared/ai/search'
+import type { Todo, TodoSubtask } from '@/lib/schemas/todo'
+import type { DaySummary } from '@/lib/schemas/insights'
+import type { SearchCriteria } from '@/lib/schemas/assistant'
+import type { TodoSuggestion } from '@/lib/schemas/todo'
+import type { SearchResult } from '@/lib/shared/assistant/search'
 import { builder, DateTimeScalar, PriorityEnum } from '@/bff/graphql/builder'
 
 export const TodoRef = builder.objectRef<Todo>('Todo')
@@ -44,7 +46,7 @@ const SearchPriorityEnum = builder.enumType('SearchPriority', {
 })
 
 const SearchDueEnum = builder.enumType('SearchDue', {
-  values: ['any', 'today', 'this_week', 'overdue', 'none'],
+  values: ['any', 'today', 'thisWeek', 'overdue', 'none'],
 })
 
 export const TodoSuggestionRef = builder.objectRef<TodoSuggestion>('TodoSuggestion')
@@ -111,10 +113,7 @@ SearchCriteriaRef.implement({
     keywords: t.exposeStringList('keywords'),
     status: t.expose('status', { type: SearchStatusEnum }),
     priority: t.expose('priority', { type: SearchPriorityEnum }),
-    due: t.field({
-      type: SearchDueEnum,
-      resolve: (criteria) => (criteria.due === 'thisWeek' ? 'this_week' : criteria.due),
-    }),
+    due: t.expose('due', { type: SearchDueEnum }),
   }),
 })
 

@@ -1,46 +1,24 @@
 import { ClientError, GraphQLClient } from 'graphql-request'
-import type { Todo, TodoPriority, TodoSubtask } from '@/lib/shared/todos/todo.types'
-import type { DaySummary, DraftInput, SearchCriteria, TodoSuggestion } from '@/lib/schemas/ai'
-import type { SearchResult } from '@/lib/shared/ai/search'
+import { todoSchema, type Todo, type TodoPriority } from '@/lib/schemas/todo'
+import type { DaySummary } from '@/lib/schemas/insights'
+import type { DraftInput, TodoSuggestion } from '@/lib/schemas/todo'
+import type { SearchCriteria } from '@/lib/schemas/assistant'
+import type { SearchResult } from '@/lib/shared/assistant/search'
 
 const client = new GraphQLClient('/api/graphql')
 
-type TodoWire = {
-  id: string
-  title: string
-  description: string | null
-  priority: TodoPriority
-  dueDate: string | null
-  subtasks: TodoSubtask[] | null
-  completed: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-type SearchCriteriaWire = Omit<SearchCriteria, 'due'> & {
-  due: 'any' | 'today' | 'this_week' | 'overdue' | 'none'
-}
-
 type SearchResultWire = {
-  criteria: SearchCriteriaWire
-  results: TodoWire[]
+  criteria: SearchCriteria
+  results: unknown[]
 }
 
-function toTodo(todo: TodoWire): Todo {
-  return {
-    ...todo,
-    dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
-    createdAt: new Date(todo.createdAt),
-    updatedAt: new Date(todo.updatedAt),
-  }
+function toTodo(raw: unknown): Todo {
+  return todoSchema.parse(raw)
 }
 
 function toSearchResult(result: SearchResultWire): SearchResult {
   return {
-    criteria: {
-      ...result.criteria,
-      due: result.criteria.due === 'this_week' ? 'thisWeek' : result.criteria.due,
-    },
+    criteria: result.criteria,
     results: result.results.map(toTodo),
   }
 }
@@ -78,7 +56,7 @@ export type TodoCreateRequest = {
 export type TodoUpdateRequest = Partial<TodoCreateRequest> & { completed?: boolean }
 
 export async function listTodos(): Promise<Todo[]> {
-  const data = await request<{ todos: TodoWire[] }>(`
+  const data = await request<{ todos: unknown[] }>(`
     query ListTodos {
       todos {
         ${TODO_FIELDS}
@@ -89,7 +67,7 @@ export async function listTodos(): Promise<Todo[]> {
 }
 
 export async function getTodo(id: string): Promise<Todo> {
-  const data = await request<{ todo: TodoWire }>(
+  const data = await request<{ todo: unknown }>(
     `
       query GetTodo($id: String!) {
         todo(id: $id) {
@@ -103,7 +81,7 @@ export async function getTodo(id: string): Promise<Todo> {
 }
 
 export async function createTodo(input: TodoCreateRequest): Promise<Todo> {
-  const data = await request<{ createTodo: TodoWire }>(
+  const data = await request<{ createTodo: unknown }>(
     `
       mutation CreateTodo($input: CreateTodoInput!) {
         createTodo(input: $input) {
@@ -117,7 +95,7 @@ export async function createTodo(input: TodoCreateRequest): Promise<Todo> {
 }
 
 export async function updateTodo(id: string, input: TodoUpdateRequest): Promise<Todo> {
-  const data = await request<{ updateTodo: TodoWire }>(
+  const data = await request<{ updateTodo: unknown }>(
     `
       mutation UpdateTodo($id: String!, $input: UpdateTodoInput!) {
         updateTodo(id: $id, input: $input) {
