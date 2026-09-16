@@ -20,7 +20,7 @@ import {
   IconSparkles,
   IconTrash,
 } from '@tabler/icons-react'
-import type { Todo } from '@/lib/shared/todos/todo.types'
+import type { Todo } from '@/lib/schemas/todo'
 import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
 import { formatDate } from '@/lib/utils/date'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'

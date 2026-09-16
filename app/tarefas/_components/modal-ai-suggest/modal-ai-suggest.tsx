@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { Badge, Button, Card, Group, Modal, Stack, Text, Textarea, TextInput } from '@mantine/core'
 import { IconPlus, IconSparkles } from '@tabler/icons-react'
-import type { TodoSuggestion, DraftInput } from '@/lib/schemas/ai'
+import type { TodoSuggestion, DraftInput } from '@/lib/schemas/todo'
 import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
 import { notifyError } from '@/lib/utils/notifications'
-import { useSuggestTodo } from '@/services/ai/ai.mutation'
+import { useSuggestTodo } from '@/services/todo/todo.mutation'
 
 type ModalAiSuggestProps = {
   opened: boolean
