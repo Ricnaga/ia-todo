@@ -28,9 +28,10 @@ alwaysApply: true
 ```
 lib/
 ├── shared/          → contratos usados por frontend e server (Tipos e constantes de UI)
-│   ├── todos/       → Todo, TodoCreate/Update, priorityLabels/Colors/Options
-│   └── ai/          → SearchResult
-├── schemas/         → zod compartilhado entre fronteiras (todo.ts, ai.ts) — published language
+│   ├── todos/       → todo.ui.ts (constantes de UI: priorityLabels/Colors/Options)
+│   └── assistant/   → SearchResult
+├── schemas/         → zod compartilhado entre fronteiras (todo.ts, assistant.ts, insights.ts) — published language
+│   todos/todo.ts    → todoSchema é a BASE canônica (type Todo); create/update/draft/suggestion derivam dela via pick/extend
 └── graphql/         → cliente GraphQL da UI (graphql-request) + operações tipadas
                       → NÃO confundir com o diretório gerado lib/generated ⛔ (removido — Prisma sai em server/db/generated)
 
@@ -73,7 +74,7 @@ app/api/graphql/route.ts → único endpoint: sobe o handler via createGraphQLHa
 
 Regras da divisão:
 
-- **Frontend (Client Components) importa só de `lib/shared`, `lib/schemas` e `lib/graphql`** — nunca de `server/` nem `bff/`. `lib/shared` guarda tipos (`Todo`, `SearchResult`) e constantes de UI (`priorityLabels/Colors/Options`); `lib/graphql/client.ts` é a única ponte de dados da UI para o server.
+- **Frontend (Client Components) importa só de `lib/shared`, `lib/schemas` e `lib/graphql`** — nunca de `server/` nem `bff/`. `lib/shared` guarda `SearchResult` e constantes de UI (`priorityLabels/Colors/Options`); `Todo` e os inputs (`CreateTodoInput`/`UpdateTodoInput`) vêm de `lib/schemas/todo.ts`; `lib/graphql/client.ts` é a única ponte de dados da UI para o server.
 - `server/` não depende de Next (`next/server`), nem de `app/api`; só de `lib/shared`, `lib/schemas` e de si mesmo. Testável sem mockar Next.
 - `bff/graphql` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container.ts`), nunca por import direto nos resolvers/adpaters — limpo de server exceto nos adapters (que tipam os controllers).
 - `app/api/graphql/route.ts` é o único endpoint (não há mais REST).

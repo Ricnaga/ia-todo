@@ -47,8 +47,10 @@ lib/graphql/           → cliente GraphQL da UI (graphql-request) + operações
 - Um arquivo por responsabilidade, por contexto:
   - `services/todo/todo.keys.ts` → **query key factory** em UPPERCASE com underline (ex.: `todoQueryKeys.all = ['TODO_LIST']`, `todoQueryKeys.detail(id) = ['TODO_DETAIL', id]`); `as const` para manter o literal
   - `services/todo/todo.query.ts` → `useTodos()` (queryKey + queryFn)
-  - `services/todo/todo.mutation.ts` → `useCreateTodo`/`useUpdateTodo`/`useDeleteTodo` (casts `unknown → TodoCreateRequest/TodoUpdateRequest` e `invalidateQueries(todoQueryKeys.all)` ficam aqui)
-  - `services/ai/ai.mutation.ts` → `useSuggestTodo`/`useSummarizeDay`/`useNlSearch` (só mutations; sem key enquanto não houver query de IA)
+  - `services/todo/todo.mutation.ts` → `useCreateTodo`/`useUpdateTodo`/`useDeleteTodo`/`useSuggestTodo` (casts `unknown → TodoCreateRequest/TodoUpdateRequest` e `invalidateQueries(todoQueryKeys.all)` ficam aqui; suggestTodo pertence ao context todos, igual no server)
+  - `services/assistant/assistant.mutation.ts` → `useNlSearch`
+  - `services/insights/insights.mutation.ts` → `useSummarizeDay`
+- Hooks de IA ficam no contexto de negócio (assistant/insights/todos), **não** em uma pasta `ai` — `server/shared/ai` (infra do provider) fica imune
 - Componentes **nunca** chamam `lib/graphql/client` direto: usam os hooks de `services/*`
 - Toasts/notificações vêm dos componentes como **callbacks por chamada** (`mutateAsync(vars, { onSuccess, onError })`) — o `onSuccess` do service é exclusivo da invalidação
 
