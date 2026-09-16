@@ -2,11 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   createTodo as createTodoRequest,
   deleteTodo as deleteTodoRequest,
+  suggestTodo as suggestTodoRequest,
   updateTodo as updateTodoRequest,
 } from '@/lib/graphql/client'
 import type { TodoCreateRequest, TodoUpdateRequest } from '@/lib/graphql/client'
-import type { Todo } from '@/lib/shared/todos/todo.types'
-import type { TodoSuggestion } from '@/lib/schemas/ai'
+import type { Todo } from '@/lib/schemas/todo'
+import type { TodoSuggestion } from '@/lib/schemas/todo'
 import type { CreateTodoFormInput } from '@/lib/schemas/todo'
 import { todoQueryKeys } from './todo.keys'
 
@@ -46,6 +47,10 @@ export function useUpdateTodo() {
       updateTodoRequest(id, toTodoUpdateRequest(input)),
     onSuccess: invalidateTodos,
   })
+}
+
+export function useSuggestTodo() {
+  return useMutation({ mutationFn: suggestTodoRequest })
 }
 
 export function useDeleteTodo() {
