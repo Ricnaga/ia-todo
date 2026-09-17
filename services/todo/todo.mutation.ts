@@ -32,7 +32,7 @@ const toTodoUpdateRequest = (draft: TodoUpdateDraft): TodoUpdateRequest => {
   return toTodoCreateRequest(draft)
 }
 
-export function useCreateTodo() {
+export function useCreateTodoMutation() {
   const invalidateTodos = useInvalidateTodos()
   return useMutation({
     mutationFn: (draft: TodoDraft): Promise<Todo> => createTodoRequest(toTodoCreateRequest(draft)),
@@ -40,7 +40,7 @@ export function useCreateTodo() {
   })
 }
 
-export function useUpdateTodo() {
+export function useUpdateTodoMutation() {
   const invalidateTodos = useInvalidateTodos()
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: TodoUpdateDraft }): Promise<Todo> =>
@@ -49,11 +49,11 @@ export function useUpdateTodo() {
   })
 }
 
-export function useSuggestTodo() {
+export function useSuggestTodoMutation() {
   return useMutation({ mutationFn: suggestTodoRequest })
 }
 
-export function useDeleteTodo() {
+export function useDeleteTodoMutation() {
   const invalidateTodos = useInvalidateTodos()
   return useMutation({
     mutationFn: (id: string): Promise<void> => deleteTodoRequest(id),
