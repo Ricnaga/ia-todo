@@ -60,23 +60,29 @@ bff/                 → camada de apresentação de API (GraphQL) — NÚCLEO H
 │   fluxo: resolver → ctx.adapters.todo (Port) → adapter → controller (server)
 ├── context.ts       → GraphQLContext { adapters: { todo, assistant, insights } } — ÚNICO ponto que importa de server/ (composition root do BFF)
 ├── graphql.ts       → createGraphQLHandler() — Yoga montado com schema + context
-└── graphql/         → GraphQL (builder, types, resolvers/, errors, schema); reusa server/modules
-    ├── builder.ts   → SchemaBuilder (Context + Scalars/enums) + Query/Mutation raiz
-    ├── types.ts     → representações do BFF (objectRefs/inputs por domínio)
+└── pothos/          → camada GraphQL/Pothos (builder, errors, schema) + 1 pasta por bounded context
+    ├── builder.ts   → SchemaBuilder (tipagem Context + Scalars) + Query/Mutation raiz (SÓ ISSO — enums vivem nos contexts; scalars em scalars/)
     ├── errors.ts    → raiseResolvable + execute: mapeia DomainError/ZodError → GraphQLError (yoga mascara o resto)
-    ├── resolvers/   → resolvers por context: todos.ts (CRUD + suggestTodo), assistant.ts (nlSearch), insights.ts (summarizeDay)
+    ├── scalars/     → scalars globais ({name}.ts + barrel index.ts): datetime.ts (DateTimeScalar, builder.scalarType)
+    ├── todo/        → CORE: enums/ref/inputs/queries/mutations (o context espelha server/modules/todos)
     │                → NÃO importam server; pegam via ctx.adapters (3º argumento do resolver) + executam via errors.execute
     │                → orquestração todo→assistant/insights fica no resolver (busca bruta + delegação MECÂNICA, sem regra)
-    └── schema.ts    → importa resolvers (side-effect) e exporta builder.toSchema()
+    ├── assistant/   → SUPPORTING: enums/ref/mutations (nlSearch)
+    ├── insights/    → SUPPORTING: ref/mutations (summarizeDay)
+    └── schema.ts    → importa scalars + os 3 barrels por context (side-effect) e exporta builder.toSchema()
+```
+
+(convenção por context: `{context}.enums.ts`, `{context}.ref.ts`, `{context}.inputs.ts`, `{context}.queries.ts`, `{context}.mutations.ts` + barrel `index.ts`; scalars globais em `scalars/{name}.ts` + barrel, registrados por side-effect no schema.ts; `SubtaskRef` é privado em todo.ref.ts; barrel exporta só o que clientes cross-context consomem, ex.: assistant.ref usa `TodoRef` do barrel de todo)
 
 app/api/graphql/route.ts → único endpoint: sobe o handler via createGraphQLHandler() (transporte fino)
+
 ```
 
 Regras da divisão:
 
 - **Frontend (Client Components) importa só de `lib/shared`, `lib/schemas` e `lib/graphql`** — nunca de `server/` nem `bff/`. `lib/shared` guarda `SearchResult` e constantes de UI (`priorityLabels/Colors/Options`); `Todo` e os inputs (`CreateTodoInput`/`UpdateTodoInput`) vêm de `lib/schemas/todo.ts`; `lib/graphql/client.ts` é a única ponte de dados da UI para o server.
 - `server/` não depende de Next (`next/server`), nem de `app/api`; só de `lib/shared`, `lib/schemas` e de si mesmo. Testável sem mockar Next.
-- `bff/graphql` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container.ts`), nunca por import direto nos resolvers/adpaters — limpo de server exceto nos adapters (que tipam os controllers).
+- `bff/pothos` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container.ts`), nunca por import direto nos resolvers/adpaters — limpo de server exceto nos adapters (que tipam os controllers).
 - `app/api/graphql/route.ts` é o único endpoint (não há mais REST).
 - Passo do Prisma: gerar client para `server/db/generated/prisma` (schema.prisma → output).
 
@@ -88,5 +94,6 @@ Regras da divisão:
 - Camada de negócio (`server/modules`) isolada de HTTP/GraphQL (ports & adapters); `server/` nunca importa de `app/api` nem de `next/server`
 - Frontend importa só `lib/shared`, `lib/schemas` e `lib/graphql` (contratos e cliente); nunca `server/`/`bff/`
 - Validação de input com zod em todas as fronteiras
-- Erros tratados de forma consistente: a UI Normaliza `errors[0].message` no wrapper (`lib/graphql/client.ts`); o bff mapeia `DomainError`/`ZodError` → `GraphQLError` (`bff/graphql/errors.ts`); nunca expor stack trace em produção
+- Erros tratados de forma consistente: a UI Normaliza `errors[0].message` no wrapper (`lib/graphql/client.ts`); o bff mapeia `DomainError`/`ZodError` → `GraphQLError` (`bff/pothos/errors.ts`); nunca expor stack trace em produção
 - Estilo de código segue prettier (single quote, sem semicolon)
+```

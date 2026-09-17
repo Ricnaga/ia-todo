@@ -85,4 +85,4 @@ export async function actionName(formData: FormData) {
 - **Validação**: `zod` + `react-hook-form` (`@hookform/resolvers`)
 - **Banco**: Prisma (`prisma/schema.prisma`, SQLite via better-sqlite3), cliente em `server/db/prisma.ts`, casos de uso em `server/modules/*/use-cases/`, DI pelo composition root em `server/shared/container.ts`
 - **Estilo de código**: single quotes, sem semicolon, trailing comma all (prettier)
-- Verificar como arquivos similares existentes resolvem (ex: `components/`, `lib/schemas/`, `bff/graphql/`, `server/modules/`) antes de criar novo padrão
+- Verificar como arquivos similares existentes resolvem (ex: `components/`, `lib/schemas/`, `bff/pothos/`, `server/modules/`) antes de criar novo padrão
