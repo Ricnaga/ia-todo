@@ -13,7 +13,11 @@ const navItems = [
   { href: paths.BUSCA, label: 'Busca por IA', icon: IconSearch },
 ]
 
-export function NavShell({ children }: { children: React.ReactNode }) {
+type NavShellProps = {
+  children: React.ReactNode
+}
+
+export function NavShell({ children }: NavShellProps) {
   const pathname = usePathname()
 
   return (

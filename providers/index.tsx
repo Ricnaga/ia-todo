@@ -10,7 +10,11 @@ const theme = createTheme({
   defaultRadius: 'md',
 })
 
-export function Providers({ children }: { children: ReactNode }) {
+type ProvidersProps = {
+  children: ReactNode
+}
+
+export function Providers({ children }: ProvidersProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
