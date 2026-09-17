@@ -49,13 +49,17 @@ bff/             → camada de apresentação de API (núcleo hexagonal, espelha
 │   └── insights/  → insights.port.ts (summarizeDay) + insights.adapter.ts
 ├── context.ts   → GraphQLContext { adapters: { todo, assistant, insights } } — único ponto que importa de server/ (composition root do BFF)
 ├── graphql.ts   → createGraphQLHandler() — monta e retorna o Yoga (schema + context)
-└── graphql/     → arquitetura GraphQL (Yoga + Pothos) p/ consumidores externos; consome as ports
-    ├── builder.ts   → SchemaBuilder (Context, scalars/enums) + Query/Mutation raiz
-    ├── types.ts     → representações do BFF (refs/inputs por domínio)
-    ├── errors.ts    → raiseResolvable: mapeia DomainError/ZodError → GraphQLError
-    ├── resolvers/   → resolvers por context (todos.ts, assistant.ts, insights.ts) — acessam ports via ctx.adapters
+└── pothos/      → camada GraphQL/Pothos por bounded context (consome as ports via ctx.adapters)
+    ├── builder.ts   → SchemaBuilder (tipagem Context + Scalars) + Query/Mutation raiz (SÓ ISSO)
+    ├── errors.ts    → raiseResolvable + execute: mapeia DomainError/ZodError → GraphQLError
+    ├── scalars/     → scalars globais ({name}.ts + barrel): datetime.ts (DateTimeScalar)
+    ├── modules/     → 1 pasta por bounded context, espelhando server/modules
+    │   ├── todo/      → CORE: {context}.enums/ref/inputs/queries/mutations + barrel (CRUD + suggestTodo)
+    │   ├── assistant/ → SUPPORTING: enums/ref/mutations (nlSearch)
+    │   └── insights/  → SUPPORTING: ref/mutations (summarizeDay)
+    │                 → acessam as ports via ctx.adapters (3º argumento do resolver) + executam via errors.execute
     │                 → orquestração todo→assistant/insights é mecânica (busca bruta + delegação, sem regra de negócio)
-    └── schema.ts    → monta e exporta o schema
+    └── schema.ts    → importa scalars + modules (side-effect) e exporta o schema
 
 app/api/**       → transporte fino
 └── graphql/route.ts                                 → GET/POST delega a createGraphQLHandler()

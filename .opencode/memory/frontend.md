@@ -62,6 +62,7 @@ lib/graphql/           → cliente GraphQL da UI (graphql-request) + operações
 - `components/` na raiz é exclusivo para componentes usados em múltiplas pages
 - Nome de componente começa pelo tipo UI (Card, Form, Table, Modal, Button…) + nome (ex.: `FormNlSearch`, `CardDaySummary`, `TableTodoManager`, `ModalTodoForm`)
 - Validação de input reutiliza schemas zod compartilhados com o server
+- Padrão de Card do Mantine: `shadow="sm" padding="lg" withBorder` (aplicado em todos os `<Card>` do app)
 - A UI fala com o server **só via GraphQL** (`lib/graphql/client.ts`), sempre através dos hooks de `services/*`; não existe mais REST
 - Erros de operação chegam normalizados pela `lib/graphql/client.ts` (usa `errors[0].message` do envelope do Yoga)
 - Estilo de código segue prettier (single quote, sem semicolon)
