@@ -1,8 +1,24 @@
 import { Card, Group, List, Stack, Text, ThemeIcon } from '@mantine/core'
 import { IconCircleCheck } from '@tabler/icons-react'
 import type { DaySummary } from '@/lib/schemas/insights'
+import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 
-export function CardDaySummaryContent({ summary }: { summary: DaySummary }) {
+type CardDaySummaryContentProps = {
+  summary: DaySummary | undefined
+  isPending: boolean
+}
+
+export function CardDaySummaryContent({ summary, isPending }: CardDaySummaryContentProps) {
+  if (isPending) {
+    return (
+      <Card withBorder>
+        <SkeletonStack rowHeight={14} />
+      </Card>
+    )
+  }
+
+  if (!summary) return null
+
   return (
     <Card withBorder>
       <Stack gap="md">

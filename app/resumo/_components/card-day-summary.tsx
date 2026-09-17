@@ -3,12 +3,12 @@
 import { Button, Group, Text } from '@mantine/core'
 import { IconSparkles } from '@tabler/icons-react'
 import { notifyError } from '@/lib/utils/notifications'
-import { useSummarizeDay } from '@/services/insights/insights.mutation'
+import { useSummarizeDayMutation } from '@/services/insights/insights.mutation'
 import { EmptyState } from './empty-state/empty-state'
 import { CardDaySummaryContent } from './card-day-summary-content/card-day-summary-content'
 
 export function CardDaySummary() {
-  const { data: summary, isPending, isError, mutate } = useSummarizeDay()
+  const { data: summary, isPending, isError, mutate } = useSummarizeDayMutation()
 
   return (
     <div className="flex flex-col gap-4">
@@ -28,7 +28,7 @@ export function CardDaySummary() {
         </Text>
       )}
 
-      {summary && <CardDaySummaryContent summary={summary} />}
+      <CardDaySummaryContent summary={summary} isPending={isPending} />
       {!summary && !isPending && (
         <EmptyState message="Gere um resumo para ver o plano de execução do dia." />
       )}
