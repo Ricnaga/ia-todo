@@ -46,10 +46,10 @@ lib/graphql/           → cliente GraphQL da UI (graphql-request) + operações
 
 - Um arquivo por responsabilidade, por contexto:
   - `services/todo/todo.keys.ts` → **query key factory** em UPPERCASE com underline (ex.: `todoQueryKeys.all = ['TODO_LIST']`, `todoQueryKeys.detail(id) = ['TODO_DETAIL', id]`); `as const` para manter o literal
-  - `services/todo/todo.query.ts` → `useTodos()` (queryKey + queryFn)
-  - `services/todo/todo.mutation.ts` → `useCreateTodo`/`useUpdateTodo`/`useDeleteTodo`/`useSuggestTodo` (casts `unknown → TodoCreateRequest/TodoUpdateRequest` e `invalidateQueries(todoQueryKeys.all)` ficam aqui; suggestTodo pertence ao context todos, igual no server)
-  - `services/assistant/assistant.mutation.ts` → `useNlSearch`
-  - `services/insights/insights.mutation.ts` → `useSummarizeDay`
+  - `services/todo/todo.query.ts` → `useTodosQuery()` (queryKey + queryFn)
+  - `services/todo/todo.mutation.ts` → `useCreateTodoMutation`/`useUpdateTodoMutation`/`useDeleteTodoMutation`/`useSuggestTodoMutation` (casts `unknown → TodoCreateRequest/TodoUpdateRequest` e `invalidateQueries(todoQueryKeys.all)` ficam aqui; suggestTodo pertence ao context todos, igual no server)
+  - `services/assistant/assistant.mutation.ts` → `useNlSearchMutation`
+  - `services/insights/insights.mutation.ts` → `useSummarizeDayMutation`
 - Hooks de IA ficam no contexto de negócio (assistant/insights/todos), **não** em uma pasta `ai` — `server/shared/ai` (infra do provider) fica imune
 - Componentes **nunca** chamam `lib/graphql/client` direto: usam os hooks de `services/*`
 - Toasts/notificações vêm dos componentes como **callbacks por chamada** (`mutateAsync(vars, { onSuccess, onError })`) — o `onSuccess` do service é exclusivo da invalidação
@@ -57,6 +57,7 @@ lib/graphql/           → cliente GraphQL da UI (graphql-request) + operações
 ## Convenções frontend
 
 - Tipar sempre com TypeScript explícito; sem `any` sem justificativa
+- Hooks de service terminam com o sufixo do tipo: `Query` (leitura) ou `Mutation` (escrita), ex.: `useTodosQuery`, `useNlSearchMutation`
 - Component usado em só uma page → `app/<rota>/_components/`; subcomponents seguem a mesma lógica
 - `components/` na raiz é exclusivo para componentes usados em múltiplas pages
 - Nome de componente começa pelo tipo UI (Card, Form, Table, Modal, Button…) + nome (ex.: `FormNlSearch`, `CardDaySummary`, `TableTodoManager`, `ModalTodoForm`)
