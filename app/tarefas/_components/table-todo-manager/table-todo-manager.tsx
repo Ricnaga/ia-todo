@@ -76,7 +76,7 @@ export function TableTodoManager() {
         </Group>
       </Group>
 
-      <Card withBorder pos="relative">
+      <Card withBorder shadow="sm" padding="lg" pos="relative">
         <TableTodoList
           todos={todos}
           isLoading={isLoading}

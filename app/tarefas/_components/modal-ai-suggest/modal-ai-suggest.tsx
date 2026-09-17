@@ -80,7 +80,7 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
             Sugestão da IA — revise e adicione:
           </Text>
           {suggestion.subtasks.length > 0 && (
-            <Card withBorder bg="var(--mantine-color-gray-0)">
+            <Card withBorder shadow="sm" padding="lg" bg="var(--mantine-color-gray-0)">
               <Stack gap={4}>
                 {suggestion.subtasks.map((subtask) => (
                   <Group key={subtask} gap="xs">
@@ -91,7 +91,13 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
               </Stack>
             </Card>
           )}
-          <Card withBorder p="md" onClick={resetSuggestion} style={{ cursor: 'pointer' }}>
+          <Card
+            withBorder
+            shadow="sm"
+            padding="lg"
+            onClick={resetSuggestion}
+            style={{ cursor: 'pointer' }}
+          >
             <Group justify="space-between">
               <Text fw={600}>{suggestion.title}</Text>
               <Badge color={priorityColors[suggestion.priority]} variant="light">

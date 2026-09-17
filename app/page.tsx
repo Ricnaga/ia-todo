@@ -71,7 +71,7 @@ export default function Home() {
               href={feature.href}
               className="transition-shadow hover:shadow-md"
             >
-              <Card withBorder h="100%" p="lg">
+              <Card withBorder shadow="sm" padding="lg" h="100%">
                 <ThemeIcon variant="light" size="xl" radius="md" mb="sm">
                   <Icon size={22} />
                 </ThemeIcon>
@@ -91,7 +91,7 @@ export default function Home() {
       </SimpleGrid>
 
       <SimpleGrid cols={2}>
-        <Card withBorder p="lg">
+        <Card withBorder shadow="sm" padding="lg">
           <Title order={5} mb="xs">
             Arquitetura
           </Title>
@@ -104,7 +104,7 @@ Consumidor externo ──▶ GraphQL ─┤
               SQLite (Prisma 7 + driver adapter)`}
           </Text>
         </Card>
-        <Card withBorder p="lg">
+        <Card withBorder shadow="sm" padding="lg">
           <Title order={5} mb="xs">
             IA de ponta a ponta
           </Title>

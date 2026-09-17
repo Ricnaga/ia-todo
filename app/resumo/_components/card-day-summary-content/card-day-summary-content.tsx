@@ -11,7 +11,7 @@ type CardDaySummaryContentProps = {
 export function CardDaySummaryContent({ summary, isPending }: CardDaySummaryContentProps) {
   if (isPending) {
     return (
-      <Card withBorder>
+      <Card withBorder shadow="sm" padding="lg">
         <SkeletonStack rowHeight={14} />
       </Card>
     )
@@ -20,7 +20,7 @@ export function CardDaySummaryContent({ summary, isPending }: CardDaySummaryCont
   if (!summary) return null
 
   return (
-    <Card withBorder>
+    <Card withBorder shadow="sm" padding="lg">
       <Stack gap="md">
         <Text>{summary.summary}</Text>
 

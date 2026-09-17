@@ -43,7 +43,7 @@ type CardSearchResultListProps = {
 export function CardSearchResultList({ result, isPending }: CardSearchResultListProps) {
   if (isPending) {
     return (
-      <Card withBorder>
+      <Card withBorder shadow="sm" padding="lg">
         <SkeletonStack rowHeight={18} />
       </Card>
     )
@@ -58,7 +58,7 @@ export function CardSearchResultList({ result, isPending }: CardSearchResultList
   }
 
   return (
-    <Card withBorder>
+    <Card withBorder shadow="sm" padding="lg">
       <Stack gap="md">
         <Group gap={6}>
           <Text size="xs" c="dimmed" fw={600}>
@@ -71,7 +71,7 @@ export function CardSearchResultList({ result, isPending }: CardSearchResultList
 
         <Stack gap="xs">
           {result.results.map((todo: Todo) => (
-            <Card key={todo.id} withBorder p="sm">
+            <Card key={todo.id} withBorder shadow="sm" padding="lg">
               <Group justify="space-between" wrap="nowrap">
                 <Stack gap={2}>
                   <Text fw={600} td={todo.completed ? 'line-through' : undefined}>
