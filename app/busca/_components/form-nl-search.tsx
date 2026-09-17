@@ -3,13 +3,12 @@
 import { useState, type KeyboardEvent } from 'react'
 import { Button, Group, Kbd, Text, TextInput, Title } from '@mantine/core'
 import { IconSearch } from '@tabler/icons-react'
-import { useNlSearch } from '@/services/assistant/assistant.mutation'
+import { useNlSearchMutation } from '@/services/assistant/assistant.mutation'
 import { notifyError } from '@/lib/utils/notifications'
-import { EmptyState } from './empty-state/empty-state'
 import { CardSearchResultList } from './card-search-result-list/card-search-result-list'
 
 export function FormNlSearch() {
-  const { data: result, isPending, mutate } = useNlSearch()
+  const { data: result, isPending, mutate } = useNlSearchMutation()
   const [query, setQuery] = useState<string>('')
 
   const handleSearch = () => mutate(query, { onError: notifyError('Não consegui buscar') })
@@ -47,8 +46,7 @@ export function FormNlSearch() {
         </Button>
       </Group>
 
-      {result && <CardSearchResultList result={result} />}
-      {!result && !isPending && <EmptyState message="Descreva uma busca para começar." />}
+      <CardSearchResultList result={result} isPending={isPending} />
     </div>
   )
 }

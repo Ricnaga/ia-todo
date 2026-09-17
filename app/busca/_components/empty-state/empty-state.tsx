@@ -1,6 +1,10 @@
 import { Text } from '@mantine/core'
 
-export function EmptyState({ message }: { message: string }) {
+type EmptyStateProps = {
+  message: string
+}
+
+export function EmptyState({ message }: EmptyStateProps) {
   return (
     <Text size="sm" c="dimmed">
       {message}

@@ -5,6 +5,7 @@ import type { SearchResult } from '@/lib/shared/assistant/search'
 import type { SearchCriteria } from '@/lib/schemas/assistant'
 import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
 import { paths } from '@/lib/constants/router-paths'
+import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 import { EmptyState } from '../empty-state/empty-state'
 
 const statusLabels: Record<SearchCriteria['status'], string> = {
@@ -34,7 +35,24 @@ function formatCriteria(criteria: SearchCriteria): string {
   return parts.join(' · ')
 }
 
-export function CardSearchResultList({ result }: { result: SearchResult }) {
+type CardSearchResultListProps = {
+  result: SearchResult | undefined
+  isPending: boolean
+}
+
+export function CardSearchResultList({ result, isPending }: CardSearchResultListProps) {
+  if (isPending) {
+    return (
+      <Card withBorder>
+        <SkeletonStack rowHeight={18} />
+      </Card>
+    )
+  }
+
+  if (!result) {
+    return <EmptyState message="Descreva uma busca para começar." />
+  }
+
   if (result.results.length === 0) {
     return <EmptyState message="Nenhuma tarefa corresponde à busca." />
   }
