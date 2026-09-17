@@ -6,7 +6,7 @@ import { IconPlus, IconSparkles } from '@tabler/icons-react'
 import type { TodoSuggestion, DraftInput } from '@/lib/schemas/todo'
 import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
 import { notifyError } from '@/lib/utils/notifications'
-import { useSuggestTodo } from '@/services/todo/todo.mutation'
+import { useSuggestTodoMutation } from '@/services/todo/todo.mutation'
 
 type ModalAiSuggestProps = {
   opened: boolean
@@ -19,7 +19,7 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
   const [draft, setDraft] = useState<DraftInput>({})
   const [suggestion, setSuggestion] = useState<TodoSuggestion | null>(null)
 
-  const suggestMutation = useSuggestTodo()
+  const suggestMutation = useSuggestTodoMutation()
 
   const handleClose = () => {
     if (suggestMutation.isPending) return
