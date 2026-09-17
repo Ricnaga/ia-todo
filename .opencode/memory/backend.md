@@ -64,12 +64,13 @@ bff/                 → camada de apresentação de API (GraphQL) — NÚCLEO H
     ├── builder.ts   → SchemaBuilder (tipagem Context + Scalars) + Query/Mutation raiz (SÓ ISSO — enums vivem nos contexts; scalars em scalars/)
     ├── errors.ts    → raiseResolvable + execute: mapeia DomainError/ZodError → GraphQLError (yoga mascara o resto)
     ├── scalars/     → scalars globais ({name}.ts + barrel index.ts): datetime.ts (DateTimeScalar, builder.scalarType)
-    ├── todo/        → CORE: enums/ref/inputs/queries/mutations (o context espelha server/modules/todos)
-    │                → NÃO importam server; pegam via ctx.adapters (3º argumento do resolver) + executam via errors.execute
-    │                → orquestração todo→assistant/insights fica no resolver (busca bruta + delegação MECÂNICA, sem regra)
-    ├── assistant/   → SUPPORTING: enums/ref/mutations (nlSearch)
-    ├── insights/    → SUPPORTING: ref/mutations (summarizeDay)
-    └── schema.ts    → importa scalars + os 3 barrels por context (side-effect) e exporta builder.toSchema()
+    ├── modules/     → bounded contexts do Pothos, espelhando server/modules (CORE + SUPPORTING)
+    │   ├── todo/        → CORE: enums/ref/inputs/queries/mutations (o context espelha server/modules/todos)
+    │   │                → NÃO importam server; pegam via ctx.adapters (3º argumento do resolver) + executam via errors.execute
+    │   │                → orquestração todo→assistant/insights fica no resolver (busca bruta + delegação MECÂNICA, sem regra)
+    │   ├── assistant/   → SUPPORTING: enums/ref/mutations (nlSearch)
+    │   └── insights/    → SUPPORTING: ref/mutations (summarizeDay)
+    └── schema.ts    → importa scalars + modules (side-effect, barrels) e exporta builder.toSchema()
 ```
 
 (convenção por context: `{context}.enums.ts`, `{context}.ref.ts`, `{context}.inputs.ts`, `{context}.queries.ts`, `{context}.mutations.ts` + barrel `index.ts`; scalars globais em `scalars/{name}.ts` + barrel, registrados por side-effect no schema.ts; `SubtaskRef` é privado em todo.ref.ts; barrel exporta só o que clientes cross-context consomem, ex.: assistant.ref usa `TodoRef` do barrel de todo)
