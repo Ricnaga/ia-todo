@@ -1,6 +1,6 @@
-import { builder } from '@/bff/graphql/builder'
-import { SearchResultRef } from '@/bff/graphql/types'
-import { execute } from '@/bff/graphql/errors'
+import { builder } from '@/bff/pothos/builder'
+import { execute } from '@/bff/pothos/errors'
+import { SearchResultRef } from '@/bff/pothos/assistant/assistant.ref'
 
 builder.mutationFields((t) => ({
   nlSearch: t.field({

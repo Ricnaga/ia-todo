@@ -1,26 +1,7 @@
-import { builder } from '@/bff/graphql/builder'
-import {
-  CreateTodoInput,
-  DraftInput,
-  TodoRef,
-  TodoSuggestionRef,
-  UpdateTodoInput,
-} from '@/bff/graphql/types'
-import { execute } from '@/bff/graphql/errors'
-
-builder.queryFields((t) => ({
-  todos: t.field({
-    type: [TodoRef],
-    resolve: (_root, _args, ctx) => execute(() => ctx.adapters.todo.list()),
-  }),
-  todo: t.field({
-    type: TodoRef,
-    args: {
-      id: t.arg.string({ required: true }),
-    },
-    resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.getById(args.id)),
-  }),
-}))
+import { builder } from '@/bff/pothos/builder'
+import { execute } from '@/bff/pothos/errors'
+import { CreateTodoInput, UpdateTodoInput, DraftInput } from '@/bff/pothos/todo/todo.inputs'
+import { TodoRef, TodoSuggestionRef } from '@/bff/pothos/todo/todo.ref'
 
 builder.mutationFields((t) => ({
   createTodo: t.field({

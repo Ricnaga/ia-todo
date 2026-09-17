@@ -1,6 +1,6 @@
 import { createYoga } from 'graphql-yoga'
 import { createContext } from '@/bff/context'
-import { schema } from '@/bff/graphql/schema'
+import { schema } from '@/bff/pothos/schema'
 
 export function createGraphQLHandler() {
   return createYoga({

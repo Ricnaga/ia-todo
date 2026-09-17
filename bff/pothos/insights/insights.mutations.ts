@@ -1,6 +1,6 @@
-import { builder } from '@/bff/graphql/builder'
-import { DaySummaryRef } from '@/bff/graphql/types'
-import { execute } from '@/bff/graphql/errors'
+import { builder } from '@/bff/pothos/builder'
+import { execute } from '@/bff/pothos/errors'
+import { DaySummaryRef } from '@/bff/pothos/insights/insights.ref'
 
 builder.mutationFields((t) => ({
   summarizeDay: t.field({
