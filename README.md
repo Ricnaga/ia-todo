@@ -87,6 +87,8 @@ pnpm dev
 
 Abra [http://localhost:3000](http://localhost:3000).
 
+GraphQL (GraphiQL): [http://localhost:3000/api/graphql](http://localhost:3000/api/graphql) — endpoint único (UI + clientes externos); o GraphiQL abre no browser.
+
 ## Variáveis de ambiente
 
 | Variável         | Obrigatória | Descrição                                   |
@@ -111,7 +113,3 @@ Abra [http://localhost:3000](http://localhost:3000).
 | `pnpm format:check` | verificação Prettier                 |
 | `pnpm db:studio`    | Prisma Studio (browser do banco)     |
 | `pnpm commit`       | commit com commitizen (convencional) |
-
-## Roadmap
-
-- [ ] Smoke tests automatizados (vitest/playwright)
