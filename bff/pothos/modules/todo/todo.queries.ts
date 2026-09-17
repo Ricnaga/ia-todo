@@ -1,6 +1,6 @@
 import { builder } from '@/bff/pothos/builder'
 import { execute } from '@/bff/pothos/errors'
-import { TodoRef } from '@/bff/pothos/todo/todo.ref'
+import { TodoRef } from '@/bff/pothos/modules/todo/todo.ref'
 
 builder.queryFields((t) => ({
   todos: t.field({

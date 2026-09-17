@@ -1,7 +1,5 @@
 import './scalars'
-import './todo'
-import './assistant'
-import './insights'
+import './modules'
 
 import { builder } from '@/bff/pothos/builder'
 

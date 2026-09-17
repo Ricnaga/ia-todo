@@ -1,7 +1,7 @@
 import type { Todo, TodoSuggestion, TodoSubtask } from '@/lib/schemas/todo'
 import { builder } from '@/bff/pothos/builder'
 import { DateTimeScalar } from '@/bff/pothos/scalars'
-import { PriorityEnum } from '@/bff/pothos/todo/todo.enums'
+import { PriorityEnum } from '@/bff/pothos/modules/todo/todo.enums'
 
 export const TodoRef = builder.objectRef<Todo>('Todo')
 

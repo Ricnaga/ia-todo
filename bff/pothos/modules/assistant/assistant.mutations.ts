@@ -1,6 +1,6 @@
 import { builder } from '@/bff/pothos/builder'
 import { execute } from '@/bff/pothos/errors'
-import { SearchResultRef } from '@/bff/pothos/assistant/assistant.ref'
+import { SearchResultRef } from '@/bff/pothos/modules/assistant/assistant.ref'
 
 builder.mutationFields((t) => ({
   nlSearch: t.field({

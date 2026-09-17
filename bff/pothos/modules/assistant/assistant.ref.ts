@@ -5,8 +5,8 @@ import {
   SearchStatusEnum,
   SearchPriorityEnum,
   SearchDueEnum,
-} from '@/bff/pothos/assistant/assistant.enums'
-import { TodoRef } from '@/bff/pothos/todo'
+} from '@/bff/pothos/modules/assistant/assistant.enums'
+import { TodoRef } from '@/bff/pothos/modules/todo'
 
 export const SearchCriteriaRef = builder.objectRef<SearchCriteria>('SearchCriteria')
 

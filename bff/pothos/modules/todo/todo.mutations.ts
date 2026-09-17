@@ -1,7 +1,7 @@
 import { builder } from '@/bff/pothos/builder'
 import { execute } from '@/bff/pothos/errors'
-import { CreateTodoInput, UpdateTodoInput, DraftInput } from '@/bff/pothos/todo/todo.inputs'
-import { TodoRef, TodoSuggestionRef } from '@/bff/pothos/todo/todo.ref'
+import { CreateTodoInput, UpdateTodoInput, DraftInput } from '@/bff/pothos/modules/todo/todo.inputs'
+import { TodoRef, TodoSuggestionRef } from '@/bff/pothos/modules/todo/todo.ref'
 
 builder.mutationFields((t) => ({
   createTodo: t.field({

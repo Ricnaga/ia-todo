@@ -1,6 +1,6 @@
 import { builder } from '@/bff/pothos/builder'
 import { DateTimeScalar } from '@/bff/pothos/scalars'
-import { PriorityEnum } from '@/bff/pothos/todo/todo.enums'
+import { PriorityEnum } from '@/bff/pothos/modules/todo/todo.enums'
 
 export const CreateTodoInput = builder.inputType('CreateTodoInput', {
   fields: (t) => ({
