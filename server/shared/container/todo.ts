@@ -1,4 +1,6 @@
 import { PrismaTodoRepository } from '@/server/modules/todos/infra/prisma-todo.repository'
+import type { ITodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
+import { prisma } from '@/server/db/prisma'
 import { ListTodosUseCase } from '@/server/modules/todos/use-cases/list-todos.use-case'
 import { FindTodoByIdUseCase } from '@/server/modules/todos/use-cases/find-todo-by-id.use-case'
 import { CreateTodoUseCase } from '@/server/modules/todos/use-cases/create-todo.use-case'
@@ -6,14 +8,10 @@ import { UpdateTodoUseCase } from '@/server/modules/todos/use-cases/update-todo.
 import { DeleteTodoUseCase } from '@/server/modules/todos/use-cases/delete-todo.use-case'
 import { SuggestTodoUseCase } from '@/server/modules/todos/use-cases/suggest-todo.use-case'
 import { TodoController } from '@/server/modules/todos/controllers/todo.controller'
-import { NlSearchUseCase } from '@/server/modules/assistant/use-cases/nl-search.use-case'
-import { AssistantController } from '@/server/modules/assistant/controllers/assistant.controller'
-import { SummarizeDayUseCase } from '@/server/modules/insights/use-cases/summarize-day.use-case'
-import { InsightsController } from '@/server/modules/insights/controllers/insights.controller'
-import { GeminiAiService } from '@/server/shared/ai/gemini-ai.service'
+import type { ITodoUseCase } from '@/server/modules/todos/use-cases/todo.use-case.interface'
+import { aiService } from './infra'
 
-const todoRepository = new PrismaTodoRepository()
-const aiService = new GeminiAiService()
+const todoRepository: ITodoRepository = new PrismaTodoRepository(prisma)
 
 const listTodos = new ListTodosUseCase(todoRepository)
 const findTodoById = new FindTodoByIdUseCase(todoRepository)
@@ -22,23 +20,13 @@ const updateTodo = new UpdateTodoUseCase(todoRepository)
 const deleteTodo = new DeleteTodoUseCase(todoRepository)
 const suggestTodo = new SuggestTodoUseCase(aiService)
 
-export const todoController = new TodoController({
-  list: listTodos,
-  findById: findTodoById,
-  create: createTodo,
-  update: updateTodo,
-  delete: deleteTodo,
-  suggestTodo,
-})
+const todoUseCase: ITodoUseCase = {
+  list: () => listTodos.execute(),
+  getById: (id) => findTodoById.execute(id),
+  create: (input) => createTodo.execute(input),
+  update: (id, input) => updateTodo.execute(id, input),
+  delete: (id) => deleteTodo.execute(id),
+  suggestTodo: (draft) => suggestTodo.execute(draft),
+}
 
-const nlSearch = new NlSearchUseCase(aiService)
-
-export const assistantController = new AssistantController({
-  nlSearch,
-})
-
-const summarizeDay = new SummarizeDayUseCase(aiService)
-
-export const insightsController = new InsightsController({
-  summarizeDay,
-})
+export const todoController = new TodoController(todoUseCase)
