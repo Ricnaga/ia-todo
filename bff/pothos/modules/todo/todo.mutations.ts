@@ -1,13 +1,17 @@
 import { builder } from '@/bff/pothos/builder'
 import { execute } from '@/bff/pothos/errors'
-import { CreateTodoInput, UpdateTodoInput, DraftInput } from '@/bff/pothos/modules/todo/todo.inputs'
+import {
+  CreateTodoGqlInput,
+  UpdateTodoGqlInput,
+  DraftGqlInput,
+} from '@/bff/pothos/modules/todo/todo.inputs'
 import { TodoRef, TodoSuggestionRef } from '@/bff/pothos/modules/todo/todo.ref'
 
 builder.mutationFields((t) => ({
   createTodo: t.field({
     type: TodoRef,
     args: {
-      input: t.arg({ type: CreateTodoInput, required: true }),
+      input: t.arg({ type: CreateTodoGqlInput, required: true }),
     },
     resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.create(args.input)),
   }),
@@ -15,7 +19,7 @@ builder.mutationFields((t) => ({
     type: TodoRef,
     args: {
       id: t.arg.string({ required: true }),
-      input: t.arg({ type: UpdateTodoInput, required: true }),
+      input: t.arg({ type: UpdateTodoGqlInput, required: true }),
     },
     resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.update(args.id, args.input)),
   }),
@@ -31,7 +35,7 @@ builder.mutationFields((t) => ({
   suggestTodo: t.field({
     type: TodoSuggestionRef,
     args: {
-      draft: t.arg({ type: DraftInput, required: true }),
+      draft: t.arg({ type: DraftGqlInput, required: true }),
     },
     resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.suggestTodo(args.draft)),
   }),

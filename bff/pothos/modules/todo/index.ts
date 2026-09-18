@@ -6,4 +6,4 @@ import './todo.mutations'
 
 export { PriorityEnum } from './todo.enums'
 export { TodoRef, TodoSuggestionRef } from './todo.ref'
-export { CreateTodoInput, UpdateTodoInput, DraftInput } from './todo.inputs'
+export { CreateTodoGqlInput, UpdateTodoGqlInput, DraftGqlInput } from './todo.inputs'

@@ -2,7 +2,7 @@ import { builder } from '@/bff/pothos/builder'
 import { DateTimeScalar } from '@/bff/pothos/scalars'
 import { PriorityEnum } from '@/bff/pothos/modules/todo/todo.enums'
 
-export const CreateTodoInput = builder.inputType('CreateTodoInput', {
+export const CreateTodoGqlInput = builder.inputType('CreateTodoInput', {
   fields: (t) => ({
     title: t.string({ required: true }),
     description: t.string(),
@@ -11,7 +11,7 @@ export const CreateTodoInput = builder.inputType('CreateTodoInput', {
   }),
 })
 
-export const UpdateTodoInput = builder.inputType('UpdateTodoInput', {
+export const UpdateTodoGqlInput = builder.inputType('UpdateTodoInput', {
   fields: (t) => ({
     title: t.string(),
     description: t.string(),
@@ -21,7 +21,7 @@ export const UpdateTodoInput = builder.inputType('UpdateTodoInput', {
   }),
 })
 
-export const DraftInput = builder.inputType('DraftInput', {
+export const DraftGqlInput = builder.inputType('DraftInput', {
   fields: (t) => ({
     title: t.string(),
     description: t.string(),
