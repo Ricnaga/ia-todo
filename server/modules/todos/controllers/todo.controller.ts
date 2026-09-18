@@ -1,45 +1,32 @@
-import type { ListTodosUseCase } from '@/server/modules/todos/use-cases/list-todos.use-case'
-import type { FindTodoByIdUseCase } from '@/server/modules/todos/use-cases/find-todo-by-id.use-case'
-import type { CreateTodoUseCase } from '@/server/modules/todos/use-cases/create-todo.use-case'
-import type { UpdateTodoUseCase } from '@/server/modules/todos/use-cases/update-todo.use-case'
-import type { DeleteTodoUseCase } from '@/server/modules/todos/use-cases/delete-todo.use-case'
-import type { SuggestTodoUseCase } from '@/server/modules/todos/use-cases/suggest-todo.use-case'
+import type { ITodoUseCase } from '@/server/modules/todos/use-cases/todo.use-case.interface'
 import type { Todo } from '@/lib/schemas/todo'
 import type { TodoSuggestion } from '@/lib/schemas/todo'
-
-type TodoUseCases = {
-  list: ListTodosUseCase
-  findById: FindTodoByIdUseCase
-  create: CreateTodoUseCase
-  update: UpdateTodoUseCase
-  delete: DeleteTodoUseCase
-  suggestTodo: SuggestTodoUseCase
-}
+import type { CreateTodoInput, UpdateTodoInput, DraftInput } from '@/lib/schemas/todo'
 
 export class TodoController {
-  constructor(private readonly useCases: TodoUseCases) {}
+  constructor(private readonly todoUseCase: ITodoUseCase) {}
 
   list(): Promise<Todo[]> {
-    return this.useCases.list.execute()
+    return this.todoUseCase.list()
   }
 
   getById(id: string): Promise<Todo> {
-    return this.useCases.findById.execute(id)
+    return this.todoUseCase.getById(id)
   }
 
-  create(raw: unknown): Promise<Todo> {
-    return this.useCases.create.execute(raw)
+  create(input: CreateTodoInput): Promise<Todo> {
+    return this.todoUseCase.create(input)
   }
 
-  update(id: string, raw: unknown): Promise<Todo> {
-    return this.useCases.update.execute(id, raw)
+  update(id: string, input: UpdateTodoInput): Promise<Todo> {
+    return this.todoUseCase.update(id, input)
   }
 
   delete(id: string): Promise<void> {
-    return this.useCases.delete.execute(id)
+    return this.todoUseCase.delete(id)
   }
 
-  suggestTodo(raw: unknown): Promise<TodoSuggestion> {
-    return this.useCases.suggestTodo.execute(raw)
+  suggestTodo(draft: DraftInput): Promise<TodoSuggestion> {
+    return this.todoUseCase.suggestTodo(draft)
   }
 }

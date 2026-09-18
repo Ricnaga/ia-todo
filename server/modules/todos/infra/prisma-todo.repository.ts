@@ -1,8 +1,8 @@
-import { Prisma } from '@/server/db/generated/prisma/client'
-import { prisma } from '@/server/db/prisma'
+import { Prisma, type PrismaClient } from '@/server/db/generated/prisma/client'
 import { TodoNotFoundError } from '@/server/modules/todos/errors'
-import type { TodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
-import type { CreateTodoInput, Todo, TodoSubtask, UpdateTodoInput } from '@/lib/schemas/todo'
+import type { ITodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
+import type { Todo, TodoSubtask } from '@/lib/schemas/todo'
+import type { CreateTodoOutput, UpdateTodoOutput } from '@/lib/schemas/todo'
 
 type TodoRow = Prisma.TodoGetPayload<object>
 
@@ -20,21 +20,23 @@ function toDomain(row: TodoRow): Todo {
   }
 }
 
-export class PrismaTodoRepository implements TodoRepository {
+export class PrismaTodoRepository implements ITodoRepository {
+  constructor(private readonly db: PrismaClient) {}
+
   async list(): Promise<Todo[]> {
-    const rows = await prisma.todo.findMany({
+    const rows = await this.db.todo.findMany({
       orderBy: { createdAt: 'desc' },
     })
     return rows.map(toDomain)
   }
 
   async getById(id: string): Promise<Todo | null> {
-    const row = await prisma.todo.findUnique({ where: { id } })
+    const row = await this.db.todo.findUnique({ where: { id } })
     return row ? toDomain(row) : null
   }
 
-  async create(input: CreateTodoInput): Promise<Todo> {
-    const row = await prisma.todo.create({
+  async create(input: CreateTodoOutput): Promise<Todo> {
+    const row = await this.db.todo.create({
       data: {
         title: input.title,
         description: input.description ?? null,
@@ -45,8 +47,8 @@ export class PrismaTodoRepository implements TodoRepository {
     return toDomain(row)
   }
 
-  async update(id: string, input: UpdateTodoInput): Promise<Todo> {
-    const row = await prisma.todo
+  async update(id: string, input: UpdateTodoOutput): Promise<Todo> {
+    const row = await this.db.todo
       .update({
         where: { id },
         data: {
@@ -67,7 +69,7 @@ export class PrismaTodoRepository implements TodoRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.todo.delete({ where: { id } }).catch((error: unknown) => {
+    await this.db.todo.delete({ where: { id } }).catch((error: unknown) => {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new TodoNotFoundError(id)
       }

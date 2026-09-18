@@ -1,12 +1,11 @@
-import { updateTodoSchema } from '@/lib/schemas/todo'
-import type { TodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
+import { updateTodoSchema, type UpdateTodoInput } from '@/lib/schemas/todo'
+import type { ITodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
 import type { Todo } from '@/lib/schemas/todo'
 
 export class UpdateTodoUseCase {
-  constructor(private readonly repository: TodoRepository) {}
+  constructor(private readonly todoRepository: ITodoRepository) {}
 
-  async execute(id: string, raw: unknown): Promise<Todo> {
-    const input = updateTodoSchema.parse(raw)
-    return this.repository.update(id, input)
+  async execute(id: string, input: UpdateTodoInput): Promise<Todo> {
+    return this.todoRepository.update(id, updateTodoSchema.parse(input))
   }
 }
