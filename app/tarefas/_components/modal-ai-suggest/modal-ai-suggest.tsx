@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { Badge, Button, Card, Group, Modal, Stack, Text, Textarea, TextInput } from '@mantine/core'
 import { IconPlus, IconSparkles } from '@tabler/icons-react'
-import type { TodoSuggestion, DraftInput } from '@/lib/schemas/todo'
-import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
+import type { TodoSuggestion } from '@/lib/schemas/todo'
+import type { DraftInput } from '@/lib/schemas/todo'
+import { priorityColors, priorityLabels } from '@/lib/constants/todo.constants'
 import { notifyError } from '@/lib/utils/notifications'
 import { useSuggestTodoMutation } from '@/services/todo/todo.mutation'
 

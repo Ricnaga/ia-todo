@@ -1,7 +1,7 @@
 import { Badge, Button, Checkbox, Group, Stack, Table, Text } from '@mantine/core'
 import { IconClipboardList, IconPencil, IconTrash } from '@tabler/icons-react'
 import type { Todo } from '@/lib/schemas/todo'
-import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
+import { priorityColors, priorityLabels } from '@/lib/constants/todo.constants'
 import { formatDate } from '@/lib/utils/date'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'

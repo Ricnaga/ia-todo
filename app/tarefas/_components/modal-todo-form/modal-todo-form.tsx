@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Group, Modal, Select, Stack, TextInput, Textarea } from '@mantine/core'
 import { IconX } from '@tabler/icons-react'
 import type { Todo } from '@/lib/schemas/todo'
-import { priorityOptions } from '@/lib/shared/todos/todo.ui'
+import { priorityOptions } from '@/lib/constants/todo.constants'
 import { toDateInputValue } from '@/lib/utils/date'
 import { createTodoSchema, type CreateTodoFormInput } from '@/lib/schemas/todo'
 
