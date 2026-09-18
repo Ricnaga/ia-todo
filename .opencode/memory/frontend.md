@@ -20,7 +20,7 @@ Features de IA na UI (via Gemini, structured output validado por zod no server):
 
 - **Next.js 16** (App Router) + React 19 + TypeScript strict
 - **UI**: Mantine (core, dates, form, hooks, notifications) + Tabler Icons + Tailwind 4
-- **Data fetching**: @tanstack/react-query consumindo **GraphQL** (`/api/graphql`) via wrapper tipado em `lib/graphql/client.ts`; + @tanstack/react-table
+- **Data fetching**: @tanstack/react-query consumindo **GraphQL** (`/api/graphql`) via wrapper tipado em `services/graphql/base.ts`; + @tanstack/react-table
 - **State**: zustand (client-side)
 - **Formulários/validação**: react-hook-form + zod (@hookform/resolvers)
 
@@ -38,20 +38,26 @@ app/                   → páginas (Server Components/Client por necessidade)
   <rota>/_components/  → componentes usados só naquela page (e seus subcomponents)
 components/            → apenas componentes compartilhados entre várias pages (nav-shell)
 providers/             → provedores globais (QueryClient, Mantine)
-services/              → hooks de dados por contexto (todo, ai): query/mutation + query keys
-lib/graphql/           → cliente GraphQL da UI (graphql-request) + operações tipadas
+services/              → vertical de dados do front por contexto: *.request.ts (operações cruas) + hooks query/mutation + query keys
+services/graphql/      → cliente GraphQL da UI (graphql-request) + base request<T> + fragments
 ```
 
 ## Data layer (`services/`)
 
 - Um arquivo por responsabilidade, por contexto:
+  - `services/graphql/base.ts` → `GraphQLClient` singleton + `request<T>` (normaliza `ClientError` → `errors[0].message`)
+  - `services/graphql/fragments.ts` → `TODO_FIELDS`, fragmento GraphQL compartilhado entre contextos
+  - `services/todo/todo.request.ts` → operações GraphQL cruas (sem react-query): `listTodos`/`getTodo`/`createTodo`/`updateTodo`/`deleteTodo`/`suggestTodo` + `TodoCreateRequest`/`TodoUpdateRequest` + parse via `todoSchema`
+  - `services/assistant/assistant.request.ts` → `nlSearch` (parse via `assistantSchema` → `Assistant`)
+  - `services/insights/insights.request.ts` → `summarizeDay`
   - `services/todo/todo.keys.ts` → **query key factory** em UPPERCASE com underline (ex.: `todoQueryKeys.all = ['TODO_LIST']`, `todoQueryKeys.detail(id) = ['TODO_DETAIL', id]`); `as const` para manter o literal
   - `services/todo/todo.query.ts` → `useTodosQuery()` (queryKey + queryFn)
   - `services/todo/todo.mutation.ts` → `useCreateTodoMutation`/`useUpdateTodoMutation`/`useDeleteTodoMutation`/`useSuggestTodoMutation` (casts `unknown → TodoCreateRequest/TodoUpdateRequest` e `invalidateQueries(todoQueryKeys.all)` ficam aqui; suggestTodo pertence ao context todos, igual no server)
   - `services/assistant/assistant.mutation.ts` → `useNlSearchMutation`
   - `services/insights/insights.mutation.ts` → `useSummarizeDayMutation`
+- A camada `*.request.ts` importa apenas `services/graphql/*` e `lib/schemas/*`; hooks importam `*.request.ts` — dependência unidirecional
 - Hooks de IA ficam no contexto de negócio (assistant/insights/todos), **não** em uma pasta `ai` — `server/shared/ai` (infra do provider) fica imune
-- Componentes **nunca** chamam `lib/graphql/client` direto: usam os hooks de `services/*`
+- Componentes **nunca** chamam `services/graphql/base` direto: usam os hooks de `services/*`
 - Toasts/notificações vêm dos componentes como **callbacks por chamada** (`mutateAsync(vars, { onSuccess, onError })`) — o `onSuccess` do service é exclusivo da invalidação
 
 ## Convenções frontend
@@ -63,7 +69,7 @@ lib/graphql/           → cliente GraphQL da UI (graphql-request) + operações
 - Nome de componente começa pelo tipo UI (Card, Form, Table, Modal, Button…) + nome (ex.: `FormNlSearch`, `CardDaySummary`, `TableTodoManager`, `ModalTodoForm`)
 - Validação de input reutiliza schemas zod compartilhados com o server
 - Padrão de Card do Mantine: `shadow="sm" padding="lg" withBorder` (aplicado em todos os `<Card>` do app)
-- A UI fala com o server **só via GraphQL** (`lib/graphql/client.ts`), sempre através dos hooks de `services/*`; não existe mais REST
-- Erros de operação chegam normalizados pela `lib/graphql/client.ts` (usa `errors[0].message` do envelope do Yoga)
+- A UI fala com o server **só via GraphQL** (`services/graphql/base.ts`), sempre através dos hooks de `services/*`; não existe mais REST
+- Erros de operação chegam normalizados pela `services/graphql/base.ts` (usa `errors[0].message` do envelope do Yoga)
 - Estilo de código segue prettier (single quote, sem semicolon)
 - Server Components por padrão; "use client" só onde há interatividade/estado
