@@ -1,10 +1,10 @@
 import { builder } from '@/bff/pothos/builder'
 import { execute } from '@/bff/pothos/errors'
-import { SearchResultRef } from '@/bff/pothos/modules/assistant/assistant.ref'
+import { AssistantRef } from '@/bff/pothos/modules/assistant/assistant.ref'
 
 builder.mutationFields((t) => ({
   nlSearch: t.field({
-    type: SearchResultRef,
+    type: AssistantRef,
     args: {
       query: t.arg.string({ required: true }),
     },

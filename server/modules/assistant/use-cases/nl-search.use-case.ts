@@ -1,6 +1,5 @@
-import { searchCriteriaSchema, type SearchCriteria } from '@/lib/schemas/assistant'
+import { criteriaSchema, type Assistant, type Criteria } from '@/lib/schemas/assistant'
 import type { Todo } from '@/lib/schemas/todo'
-import type { SearchResult } from '@/lib/shared/assistant/search'
 import type { AiService } from '@/server/shared/ai/ai.service.interface'
 
 const SYSTEM_INSTRUCTION = `Você interpreta buscas em linguagem natural dentro de um app de tarefas (todo).
@@ -19,7 +18,7 @@ function startOfDay(date: Date): Date {
   return d
 }
 
-function matchesDue(todo: Todo, due: SearchCriteria['due']): boolean {
+function matchesDue(todo: Todo, due: Criteria['due']): boolean {
   if (due === 'any') return true
   if (due === 'none') return todo.dueDate === null
 
@@ -43,7 +42,7 @@ function matchesDue(todo: Todo, due: SearchCriteria['due']): boolean {
   return dueDate >= start && dueDate <= end
 }
 
-function matchesCriteria(todo: Todo, criteria: SearchCriteria): boolean {
+function matchesCriteria(todo: Todo, criteria: Criteria): boolean {
   const text = `${todo.title} ${todo.description ?? ''}`.toLowerCase()
   const keywords = criteria.keywords.map((keyword) => keyword.toLowerCase())
   if (keywords.some((keyword) => !text.includes(keyword))) return false
@@ -59,16 +58,16 @@ function matchesCriteria(todo: Todo, criteria: SearchCriteria): boolean {
 export class NlSearchUseCase {
   constructor(private readonly aiService: AiService) {}
 
-  async execute(query: string, todos: Todo[]): Promise<SearchResult> {
+  async execute(query: string, todos: Todo[]): Promise<Assistant> {
     const criteria = await this.aiService.generateStructured({
       systemInstruction: SYSTEM_INSTRUCTION,
       prompt: `Consulta: "${query}"`,
-      schema: searchCriteriaSchema,
+      schema: criteriaSchema,
       temperature: 0.2,
     })
 
-    const results = todos.filter((todo) => matchesCriteria(todo, criteria))
+    const matchingTodos = todos.filter((todo) => matchesCriteria(todo, criteria))
 
-    return { criteria, results }
+    return { criteria, todos: matchingTodos }
   }
 }

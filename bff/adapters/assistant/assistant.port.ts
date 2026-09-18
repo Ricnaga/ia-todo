@@ -1,6 +1,6 @@
 import type { Todo } from '@/lib/schemas/todo'
-import type { SearchResult } from '@/lib/shared/assistant/search'
+import type { Assistant } from '@/lib/schemas/assistant'
 
 export interface AssistantPort {
-  nlSearch(query: string, todos: Todo[]): Promise<SearchResult>
+  nlSearch(query: string, todos: Todo[]): Promise<Assistant>
 }

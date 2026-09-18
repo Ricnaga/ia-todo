@@ -1,20 +1,19 @@
 import Link from 'next/link'
 import { Badge, Card, Group, Stack, Text } from '@mantine/core'
 import type { Todo } from '@/lib/schemas/todo'
-import type { SearchResult } from '@/lib/shared/assistant/search'
-import type { SearchCriteria } from '@/lib/schemas/assistant'
+import type { Assistant, Criteria } from '@/lib/schemas/assistant'
 import { priorityColors, priorityLabels } from '@/lib/shared/todos/todo.ui'
 import { paths } from '@/lib/constants/router-paths'
 import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 import { EmptyState } from '../empty-state/empty-state'
 
-const statusLabels: Record<SearchCriteria['status'], string> = {
+const statusLabels: Record<Criteria['status'], string> = {
   any: 'qualquer',
   pending: 'pendente',
   completed: 'concluída',
 }
 
-const dueLabels: Record<SearchCriteria['due'], string> = {
+const dueLabels: Record<Criteria['due'], string> = {
   any: 'qualquer',
   today: 'hoje',
   thisWeek: 'esta semana',
@@ -22,7 +21,7 @@ const dueLabels: Record<SearchCriteria['due'], string> = {
   none: 'sem data',
 }
 
-function formatCriteria(criteria: SearchCriteria): string {
+function formatCriteria(criteria: Criteria): string {
   const parts: string[] = []
   if (criteria.keywords.length > 0) {
     parts.push(criteria.keywords.map((keyword) => `“${keyword}”`).join(', '))
@@ -36,7 +35,7 @@ function formatCriteria(criteria: SearchCriteria): string {
 }
 
 type CardSearchResultListProps = {
-  result: SearchResult | undefined
+  result: Assistant | undefined
   isPending: boolean
 }
 
@@ -53,7 +52,7 @@ export function CardSearchResultList({ result, isPending }: CardSearchResultList
     return <EmptyState message="Descreva uma busca para começar." />
   }
 
-  if (result.results.length === 0) {
+  if (result.todos.length === 0) {
     return <EmptyState message="Nenhuma tarefa corresponde à busca." />
   }
 
@@ -70,7 +69,7 @@ export function CardSearchResultList({ result, isPending }: CardSearchResultList
         </Group>
 
         <Stack gap="xs">
-          {result.results.map((todo: Todo) => (
+          {result.todos.map((todo: Todo) => (
             <Card key={todo.id} withBorder shadow="sm" padding="lg">
               <Group justify="space-between" wrap="nowrap">
                 <Stack gap={2}>
@@ -95,7 +94,7 @@ export function CardSearchResultList({ result, isPending }: CardSearchResultList
           <Link href={paths.TAREFAS} className="underline">
             Ver todas as tarefas
           </Link>{' '}
-          · {result.results.length} resultado(s)
+          · {result.todos.length} resultado(s)
         </Text>
       </Stack>
     </Card>

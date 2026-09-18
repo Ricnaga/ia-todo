@@ -1,16 +1,9 @@
 import { request } from '@/services/graphql/base'
 import { TODO_FIELDS } from '@/services/graphql/fragments'
-import { todoSchema } from '@/lib/schemas/todo'
-import type { SearchCriteria } from '@/lib/schemas/assistant'
-import type { SearchResult } from '@/lib/shared/assistant/search'
+import { assistantSchema, type Assistant } from '@/lib/schemas/assistant'
 
-type SearchResultWire = {
-  criteria: SearchCriteria
-  results: unknown[]
-}
-
-export async function nlSearch(query: string): Promise<SearchResult> {
-  const data = await request<{ nlSearch: SearchResultWire }>(
+export async function nlSearch(query: string): Promise<Assistant> {
+  const data = await request<{ nlSearch: unknown }>(
     `
       mutation NlSearch($query: String!) {
         nlSearch(query: $query) {
@@ -21,7 +14,7 @@ export async function nlSearch(query: string): Promise<SearchResult> {
             priority
             due
           }
-          results {
+          todos {
             ${TODO_FIELDS}
           }
         }
@@ -29,8 +22,5 @@ export async function nlSearch(query: string): Promise<SearchResult> {
     `,
     { query },
   )
-  return {
-    criteria: data.nlSearch.criteria,
-    results: data.nlSearch.results.map((raw) => todoSchema.parse(raw)),
-  }
+  return assistantSchema.parse(data.nlSearch)
 }

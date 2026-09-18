@@ -1,5 +1,4 @@
-import type { SearchCriteria } from '@/lib/schemas/assistant'
-import type { SearchResult } from '@/lib/shared/assistant/search'
+import type { Assistant, Criteria } from '@/lib/schemas/assistant'
 import { builder } from '@/bff/pothos/builder'
 import {
   SearchStatusEnum,
@@ -8,11 +7,11 @@ import {
 } from '@/bff/pothos/modules/assistant/assistant.enums'
 import { TodoRef } from '@/bff/pothos/modules/todo'
 
-export const SearchCriteriaRef = builder.objectRef<SearchCriteria>('SearchCriteria')
+export const CriteriaRef = builder.objectRef<Criteria>('Criteria')
 
-export const SearchResultRef = builder.objectRef<SearchResult>('SearchResult')
+export const AssistantRef = builder.objectRef<Assistant>('Assistant')
 
-SearchCriteriaRef.implement({
+CriteriaRef.implement({
   fields: (t) => ({
     query: t.exposeString('query'),
     keywords: t.exposeStringList('keywords'),
@@ -22,9 +21,9 @@ SearchCriteriaRef.implement({
   }),
 })
 
-SearchResultRef.implement({
+AssistantRef.implement({
   fields: (t) => ({
-    criteria: t.expose('criteria', { type: SearchCriteriaRef }),
-    results: t.expose('results', { type: [TodoRef] }),
+    criteria: t.expose('criteria', { type: CriteriaRef }),
+    todos: t.expose('todos', { type: [TodoRef] }),
   }),
 })
