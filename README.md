@@ -25,8 +25,11 @@ IA aplicada ao ciclo de vida da tarefa — 3 features:
 
 ```
 lib/
-├── shared/      → contratos comuns frontend/server (Tipos + constantes de UI: prioridades)
-├── schemas/     → zod compartilhado entre as fronteiras (published language)
+├── constants/  → constantes frontend-only (UI tokens: priorityLabels/Colors/Options; router paths) — front não importa de lib/constants de outro lugar
+├── schemas/     → zod compartilhado entre as fronteiras (published language), 1 pasta por contexto com barrel (index.ts)
+│   ├── todo/        → todo.model.ts (canônico: Todo, TodoSuggestion, subtasks) + todo.io.ts (IO da fronteira: z.input/z.output)
+│   ├── assistant/   → assistant.model.ts (models: Criteria, Assistant)
+│   └── insights/    → insights.model.ts (models: DaySummary)
 └── graphql/     → cliente GraphQL da UI (graphql-request) + operações tipadas
 
 server/          → núcleo de negócio (zero dependência de Next), DDD por bounded contexts

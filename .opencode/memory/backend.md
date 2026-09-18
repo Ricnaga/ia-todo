@@ -27,10 +27,12 @@ alwaysApply: true
 
 ```
 lib/
-├── shared/          → contratos usados por frontend e server (constantes de UI)
-│   └── todos/       → todo.ui.ts (constantes de UI: priorityLabels/Colors/Options)
-├── schemas/         → zod compartilhado entre fronteiras (todo.ts, assistant.ts, insights.ts) — published language
-│   todos/todo.ts    → todoSchema é a BASE canônica (type Todo); create/update/draft/suggestion derivam dela via pick/extend
+├── constants/       → constantes FRONTEND-only (tokens de UI: `todo.constants.ts` priorityLabels/Colors/Options; `router-paths.ts`) — server/bff não importam daqui
+├── schemas/         → zod compartilhado entre fronteiras — published language, 1 pasta por contexto com barrel index.ts (path público `@/lib/schemas/{context}`)
+│   todos/todo.model.ts → canônico (models): todoSchema é a BASE (type Todo); todoSuggestionSchema (type TodoSuggestion); subtaskSchema; prioritySchema
+│   todos/todo.io.ts → IO da fronteira: createTodoSchema/updateTodoSchema/draftInputSchema + tipos z.input/z.output (ex.: CreateTodoInput=z.input, CreateTodoOutput=z.infer). z.input tolera null vindo do GraphQL; update trata null como "não alterar"/"limpar" por campo
+│   assistant/assistant.model.ts → models (criteriaSchema, assistantSchema: Criteria, Assistant)
+│   insights/insights.model.ts → models (daySummarySchema: DaySummary)
 
 server/              → núcleo de negócio (zero dependência de Next), DDD por bounded contexts
 ├── modules/
@@ -78,8 +80,8 @@ app/api/graphql/route.ts → único endpoint: sobe o handler via createGraphQLHa
 
 Regras da divisão:
 
-- **Frontend (Client Components) importa só de `lib/shared`, `lib/schemas` e `services/graphql`** — nunca de `server/` nem `bff/`. `lib/shared` guarda só constantes de UI (`priorityLabels/Colors/Options`); `Todo`, `Assistant`, `Criteria` e os inputs (`CreateTodoInput`/`UpdateTodoInput`) vêm de `lib/schemas/*`; `services/graphql/base.ts` é a única ponte de dados da UI para o server.
-- `server/` não depende de Next (`next/server`), nem de `app/api`; só de `lib/shared`, `lib/schemas` e de si mesmo. Testável sem mockar Next.
+- **Frontend (Client Components) importa só de `lib/constants`, `lib/schemas`, `lib/utils` e `services/graphql`** — nunca de `server/` nem `bff/`. `lib/constants` guarda só constantes frontend-only (`priorityLabels/Colors/Options` em `todo.constants.ts`, `router-paths.ts`); `Todo`, `Assistant`, `Criteria` e os inputs (`CreateTodoInput`/`UpdateTodoInput`, em `lib/schemas/todo.io.ts`) vêm de `lib/schemas/*`; `services/graphql/base.ts` é a única ponte de dados da UI para o server.
+- `server/` não depende de Next (`next/server`), nem de `app/api`; só de `lib/schemas` e de si mesmo. Testável sem mockar Next.
 - `bff/pothos` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container.ts`), nunca por import direto nos resolvers/adpaters — limpo de server exceto nos adapters (que tipam os controllers).
 - `app/api/graphql/route.ts` é o único endpoint (não há mais REST).
 - Passo do Prisma: gerar client para `server/db/generated/prisma` (schema.prisma → output).
@@ -90,7 +92,7 @@ Regras da divisão:
 - DDD: bounded contexts por domínio (`todos` core, `assistant`/`insights` supporting) espelhados no BFF; assistant/insights são consumidores do aggregate `Todo` (recebem `Todo[]` via parâmetro, sem port próprio) — regra de negócio nunca vaza para o resolver (ex.: `summarizeDay` filtra `!completed` dentro do use-case)
 - IA é infra genérica (`server/shared/ai`): use-cases dependem do port `AiService`, nunca do SDK Gemini; troca de provider = novo adapter, sem tocar nos contexts
 - Camada de negócio (`server/modules`) isolada de HTTP/GraphQL (ports & adapters); `server/` nunca importa de `app/api` nem de `next/server`
-- Frontend importa só `lib/shared`, `lib/schemas` e `lib/graphql` (contratos e cliente); nunca `server/`/`bff/`
+- Frontend importa só `lib/constants`, `lib/schemas`, `lib/utils` e `lib/graphql` (contratos e cliente); nunca `server/`/`bff/`
 - Validação de input com zod em todas as fronteiras
 - Erros tratados de forma consistente: a UI Normaliza `errors[0].message` no wrapper (`lib/graphql/client.ts`); o bff mapeia `DomainError`/`ZodError` → `GraphQLError` (`bff/pothos/errors.ts`); nunca expor stack trace em produção
 - Estilo de código segue prettier (single quote, sem semicolon)

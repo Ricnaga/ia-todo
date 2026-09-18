@@ -47,10 +47,9 @@ app/tarefas/
 
 ## Camada `lib/` (contratos vs helpers de front)
 
-- `lib/shared/` — contrato de domínio usado por front, server e bff (types, schemas, labels **sem** dependência de UI).
-- `lib/schemas/*`, `lib/graphql/*` — contrato (importadas por server/bff).
-- `lib/utils/*`, `lib/constants/*` — **frontend-only**: `lib/utils/notifications.ts` (toasts `notifyError`/`notifySuccess`/`toErrorMessage`, dependem de `@mantine/notifications`); `lib/utils/date.ts` (`formatDate`, `toDateInputValue`, `defaultDateOptions`).
-- ❌ Nunca importar módulo com dependência de UI (`lib/utils/*`, `lib/constants/*`) de dentro de `lib/shared/` — vazaria Mantine para o server.
+- `lib/schemas/*`, `lib/graphql/*` — contrato de domínio compartilhado, usado por front, server e bff (importadas por server/bff) **sem** dependência de UI.
+- `lib/utils/*`, `lib/constants/*` — **frontend-only**: `lib/utils/notifications.ts` (toasts `notifyError`/`notifySuccess`/`toErrorMessage`, dependem de `@mantine/notifications`); `lib/utils/date.ts` (`formatDate`, `toDateInputValue`, `defaultDateOptions`); `lib/constants/todo.constants.ts` (tokens de UI `priorityLabels/Colors/Options`); `lib/constants/router-paths.ts`.
+- ❌ Server/bff nunca importam `lib/utils/*` nem `lib/constants/*` — vazaria Mantine para o server.
 - Utils de data/toast são **centralizadas** em `lib/utils/*`, nunca duplicadas no componente (`formatDate` expõe `Intl.DateTimeFormatOptions` como 2º argumento).
 
 ## Server Components (padrão)
