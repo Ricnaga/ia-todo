@@ -1,50 +1,12 @@
-import { ClientError, GraphQLClient } from 'graphql-request'
-import { todoSchema, type Todo, type TodoPriority } from '@/lib/schemas/todo'
-import type { DaySummary } from '@/lib/schemas/insights'
-import type { DraftInput, TodoSuggestion } from '@/lib/schemas/todo'
-import type { SearchCriteria } from '@/lib/schemas/assistant'
-import type { SearchResult } from '@/lib/shared/assistant/search'
-
-const client = new GraphQLClient('/api/graphql')
-
-type SearchResultWire = {
-  criteria: SearchCriteria
-  results: unknown[]
-}
-
-function toTodo(raw: unknown): Todo {
-  return todoSchema.parse(raw)
-}
-
-function toSearchResult(result: SearchResultWire): SearchResult {
-  return {
-    criteria: result.criteria,
-    results: result.results.map(toTodo),
-  }
-}
-
-async function request<T>(document: string, variables?: Record<string, unknown>): Promise<T> {
-  try {
-    return await client.request<T>(document, variables)
-  } catch (error) {
-    if (error instanceof ClientError) {
-      throw new Error(error.response.errors?.[0]?.message ?? error.message)
-    }
-    throw error
-  }
-}
-
-const TODO_FIELDS = `
-  id
-  title
-  description
-  priority
-  dueDate
-  completed
-  createdAt
-  updatedAt
-  subtasks { id title done }
-`
+import { request } from '@/services/graphql/base'
+import { TODO_FIELDS } from '@/services/graphql/fragments'
+import {
+  todoSchema,
+  type DraftInput,
+  type Todo,
+  type TodoPriority,
+  type TodoSuggestion,
+} from '@/lib/schemas/todo'
 
 export type TodoCreateRequest = {
   title: string
@@ -54,6 +16,8 @@ export type TodoCreateRequest = {
 }
 
 export type TodoUpdateRequest = Partial<TodoCreateRequest> & { completed?: boolean }
+
+const toTodo = (raw: unknown): Todo => todoSchema.parse(raw)
 
 export async function listTodos(): Promise<Todo[]> {
   const data = await request<{ todos: unknown[] }>(`
@@ -134,42 +98,4 @@ export async function suggestTodo(draft: DraftInput): Promise<TodoSuggestion> {
     { draft },
   )
   return data.suggestTodo
-}
-
-export async function summarizeDay(): Promise<DaySummary> {
-  const data = await request<{ summarizeDay: DaySummary }>(
-    `
-      mutation SummarizeDay {
-        summarizeDay {
-          summary
-          focus
-          suggestedOrder
-        }
-      }
-    `,
-  )
-  return data.summarizeDay
-}
-
-export async function nlSearch(query: string): Promise<SearchResult> {
-  const data = await request<{ nlSearch: SearchResultWire }>(
-    `
-      mutation NlSearch($query: String!) {
-        nlSearch(query: $query) {
-          criteria {
-            query
-            keywords
-            status
-            priority
-            due
-          }
-          results {
-            ${TODO_FIELDS}
-          }
-        }
-      }
-    `,
-    { query },
-  )
-  return toSearchResult(data.nlSearch)
 }

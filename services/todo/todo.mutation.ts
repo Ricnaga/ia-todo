@@ -4,8 +4,8 @@ import {
   deleteTodo as deleteTodoRequest,
   suggestTodo as suggestTodoRequest,
   updateTodo as updateTodoRequest,
-} from '@/lib/graphql/client'
-import type { TodoCreateRequest, TodoUpdateRequest } from '@/lib/graphql/client'
+} from './todo.request'
+import type { TodoCreateRequest, TodoUpdateRequest } from './todo.request'
 import type { Todo } from '@/lib/schemas/todo'
 import type { TodoSuggestion } from '@/lib/schemas/todo'
 import type { CreateTodoFormInput } from '@/lib/schemas/todo'
