@@ -29,7 +29,7 @@ export function toGeminiSchema(schema: z.ZodType): Schema {
       const required: string[] = []
       for (const [key, value] of Object.entries(shape)) {
         properties[key] = toGeminiSchema(value)
-        if (!value.isOptional()) required.push(key)
+        if (!value.safeParse(undefined).success) required.push(key)
       }
 
       return {
