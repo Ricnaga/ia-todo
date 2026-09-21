@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai'
 import { env } from '@/server/config/environment'
-import { toGeminiSchema } from '@/server/shared/ai/gemini-schema.mapper'
-import type { AiGenerateOptions, AiService } from '@/server/shared/ai/ai.service.interface'
+import { toGeminiSchema } from './gemini-schema.mapper'
+import type { AiGenerateOptions, AiService } from '../ai.service.interface'
 
 export class GeminiAiService implements AiService {
   private model: GenerativeModel | null = null

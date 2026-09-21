@@ -20,7 +20,7 @@ alwaysApply: true
 
 - **Banco**: Prisma 7 (SQLite via better-sqlite3), schema em `prisma/schema.prisma`, cliente em `server/db/prisma.ts`
 - **API**: GraphQL (graphql-yoga + @pothos/core)
-- **IA**: @google/generative-ai (Gemini), acessado via `server/shared/ai` (port `AiService` + `GeminiAiService` — provider encapsulado; os use-cases injetam só a abstração)
+- **IA**: @google/generative-ai (Gemini), acessado via `server/shared/ai` (port `AiService` na raiz + adapters por provider em `ai/<provider>/`; os use-cases injetam só a abstração)
 - **Validação**: zod (schemas compartilhados com o frontend)
 
 ## Arquitetura — núcleo único, porta GraphQL, DDD por bounded contexts
@@ -44,9 +44,11 @@ server/              → núcleo de negócio (zero dependência de Next), DDD po
 │   └── insights/    → context SUPPORTING: summarizeDay (resumo do dia). Recebe Todo[] via parâmetro
 │   │                → filtra '!completed' DENTRO do use-case (regra de negócio no domínio, não no resolver)
 ├── shared/
-│   ├── ai/          → INFRA genérica: ai.service.interface.ts (port AiService), gemini-ai.service.ts (GeminiAiService),
-│   │                → gemini-schema.mapper.ts (converte zod → Schema Gemini; caso sem suporte → throws)
-│   └── container.ts → composition root: DI manual (sem inversify), resolve todos controladores
+│   ├── ai/          → INFRA genérica: ai.service.interface.ts (port AiService, acessível em @/server/shared/ai/ai.service.interface,
+│   │                → use-cases dependem SÓ do port) — adapter por provider em pasta própria com barrel (path público @/server/shared/ai/gemini)
+│   │                → gemini/: gemini-ai.service.ts (GeminiAiService implements AiService) + gemini-schema.mapper.ts
+│   │                → (converte zod → Schema Gemini; caso sem suporte → throws) + index.ts (exporta GeminiAiService)
+│   └── container/   → composition root: DI manual (sem inversify), resolve todos controladores; index.ts (agregador) + 1 arquivo por context (todo/assistant/insights) + infra.ts (serviços compartilhados)
 ├── config/          → environment.ts (env com parse zod, UPPERCASE)
 ├── db/              → prisma.ts (singleton) + generated/ (Prisma Client gerado)
 └── utils/           → helpers genéricos
@@ -82,7 +84,7 @@ Regras da divisão:
 
 - **Frontend (Client Components) importa só de `lib/constants`, `lib/schemas`, `lib/utils` e `services/graphql`** — nunca de `server/` nem `bff/`. `lib/constants` guarda só constantes frontend-only (`priorityLabels/Colors/Options` em `todo.constants.ts`, `router-paths.ts`); `Todo`, `Assistant`, `Criteria` e os inputs (`CreateTodoInput`/`UpdateTodoInput`, em `lib/schemas/todo.io.ts`) vêm de `lib/schemas/*`; `services/graphql/base.ts` é a única ponte de dados da UI para o server.
 - `server/` não depende de Next (`next/server`), nem de `app/api`; só de `lib/schemas` e de si mesmo. Testável sem mockar Next.
-- `bff/pothos` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container.ts`), nunca por import direto nos resolvers/adpaters — limpo de server exceto nos adapters (que tipam os controllers).
+- `bff/pothos` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container/`), nunca por import direto nos resolvers/adpaters — limpo de server exceto nos adapters (que tipam os controllers).
 - `app/api/graphql/route.ts` é o único endpoint (não há mais REST).
 - Passo do Prisma: gerar client para `server/db/generated/prisma` (schema.prisma → output).
 
@@ -90,7 +92,7 @@ Regras da divisão:
 
 - Tipar sempre com TypeScript explícito; sem `any` sem justificativa
 - DDD: bounded contexts por domínio (`todos` core, `assistant`/`insights` supporting) espelhados no BFF; assistant/insights são consumidores do aggregate `Todo` (recebem `Todo[]` via parâmetro, sem port próprio) — regra de negócio nunca vaza para o resolver (ex.: `summarizeDay` filtra `!completed` dentro do use-case)
-- IA é infra genérica (`server/shared/ai`): use-cases dependem do port `AiService`, nunca do SDK Gemini; troca de provider = novo adapter, sem tocar nos contexts
+- IA é infra genérica (`server/shared/ai`): use-cases dependem do port `AiService` (raiz), nunca do SDK Gemini; troca de provider = novo adapter em `ai/<provider>/` (com barrel próprio), sem tocar nos contexts
 - Camada de negócio (`server/modules`) isolada de HTTP/GraphQL (ports & adapters); `server/` nunca importa de `app/api` nem de `next/server`
 - Frontend importa só `lib/constants`, `lib/schemas`, `lib/utils` e `lib/graphql` (contratos e cliente); nunca `server/`/`bff/`
 - Validação de input com zod em todas as fronteiras
