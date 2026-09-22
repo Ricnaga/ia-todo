@@ -16,11 +16,11 @@ type FormModalState = {
   todo?: Todo
 }
 
-export function TableTodoManager() {
+export function ContentTodoManager() {
   const [formModal, setFormModal] = useState<FormModalState | null>(null)
   const [aiOpened, setAiOpened] = useState<boolean>(false)
 
-  const { data: todos = [], isLoading } = useTodosQuery()
+  const { data: todos } = useTodosQuery()
 
   const createMutation = useCreateTodoMutation()
   const updateMutation = useUpdateTodoMutation()
@@ -77,11 +77,7 @@ export function TableTodoManager() {
       </Group>
 
       <Card withBorder shadow="sm" padding="lg" pos="relative">
-        <TableTodoList
-          todos={todos}
-          isLoading={isLoading}
-          onEdit={(todo) => setFormModal({ mode: 'edit', todo })}
-        />
+        <TableTodoList todos={todos} onEdit={(todo) => setFormModal({ mode: 'edit', todo })} />
       </Card>
 
       {formModal && (
