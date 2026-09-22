@@ -27,14 +27,6 @@ export const changeEmailSchema = z.object({
 export type ChangeEmailInput = z.input<typeof changeEmailSchema>
 export type ChangeEmailOutput = z.infer<typeof changeEmailSchema>
 
-export const linkAccountSchema = z.object({
-  provider: z.enum(['google', 'github']),
-  callbackURL: z.string().url().optional(),
-})
-
-export type LinkAccountInput = z.input<typeof linkAccountSchema>
-export type LinkAccountOutput = z.infer<typeof linkAccountSchema>
-
 export const unlinkAccountSchema = z.object({
   accountId: z.string().min(1),
 })
