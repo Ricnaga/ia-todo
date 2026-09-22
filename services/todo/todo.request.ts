@@ -14,14 +14,18 @@ export type TodoUpdateRequest = Partial<TodoCreateRequest> & { completed?: boole
 
 const toTodo = (raw: unknown): Todo => todoSchema.parse(raw)
 
-export async function listTodos(): Promise<Todo[]> {
-  const data = await request<{ todos: unknown[] }>(`
-    query ListTodos {
-      todos {
-        ${TODO_FIELDS}
+export async function listTodos(requestHeaders?: Record<string, string>): Promise<Todo[]> {
+  const data = await request<{ todos: unknown[] }>(
+    `
+      query ListTodos {
+        todos {
+          ${TODO_FIELDS}
+        }
       }
-    }
-  `)
+    `,
+    undefined,
+    requestHeaders,
+  )
   return data.todos.map(toTodo)
 }
 

@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { listTodos } from './todo.request'
 import { todoQueryKeys } from './todo.keys'
 
 export function useTodosQuery() {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: todoQueryKeys.all,
-    queryFn: listTodos,
+    queryFn: () => listTodos(),
   })
 }
