@@ -99,7 +99,6 @@ Ao revisar, usar este formato:
 
 ## Interações com Outros Agents
 
-- **Para `ai-architect`**: Valida se implementação segue a arquitetura definida
 - **Para `frontend-engineer`/`backend-engineer`**: Fornece feedback e mentoria técnica
 
 ## Quando Usar

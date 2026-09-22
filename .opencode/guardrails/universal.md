@@ -23,5 +23,5 @@ Valem para **TODOS** os agents, independentemente do seu escopo.
 ## Limites de complexidade
 
 - Máximo 10 arquivos modificados por tarefa (senão, dividir em subtarefas)
-- Se a tarefa envolver mais de 3 módulos, escalar para `@ai-architect`
+- Se a tarefa envolver mais de 3 módulos, escalar para `@staff-engineer` antes de implementar
 - Máximo 300 linhas por arquivo (extrair responsabilidade se maior)
