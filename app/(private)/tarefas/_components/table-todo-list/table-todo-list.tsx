@@ -4,16 +4,14 @@ import type { Todo } from '@/lib/schemas/todo'
 import { priorityColors, priorityLabels } from '@/lib/constants/todo.constants'
 import { formatDate } from '@/lib/utils/date'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
-import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 import { useDeleteTodoMutation, useUpdateTodoMutation } from '@/services/todo/todo.mutation'
 
 type TableTodoListProps = {
   todos: Todo[]
-  isLoading: boolean
   onEdit: (todo: Todo) => void
 }
 
-export function TableTodoList({ todos, isLoading, onEdit }: TableTodoListProps) {
+export function TableTodoList({ todos, onEdit }: TableTodoListProps) {
   const updateMutation = useUpdateTodoMutation()
   const deleteMutation = useDeleteTodoMutation()
 
@@ -22,10 +20,6 @@ export function TableTodoList({ todos, isLoading, onEdit }: TableTodoListProps) 
       { id: todo.id, input: { completed } },
       { onError: notifyError('Erro ao atualizar') },
     )
-  }
-
-  if (isLoading) {
-    return <SkeletonStack lines={8} rowHeight={36} />
   }
 
   if (todos.length === 0) {
