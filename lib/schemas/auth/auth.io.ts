@@ -9,8 +9,11 @@ export type UpdateProfileInput = z.input<typeof updateProfileSchema>
 export type UpdateProfileOutput = z.infer<typeof updateProfileSchema>
 
 export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1),
-  newPassword: z.string().min(8).max(128),
+  currentPassword: z.string().min(1, 'Informe sua senha atual'),
+  newPassword: z
+    .string()
+    .min(8, 'A nova senha deve ter ao menos 8 caracteres')
+    .max(128, 'A senha deve ter no máximo 128 caracteres'),
 })
 
 export type ChangePasswordInput = z.input<typeof changePasswordSchema>
