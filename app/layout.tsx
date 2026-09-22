@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import { Providers } from '@/providers'
-import { NavShell } from '@/components/nav-shell'
 import './globals.css'
 
 const geistSans = Geist({
@@ -23,7 +23,11 @@ export const metadata: Metadata = {
     'Gerenciador de tarefas com assistência de IA: sugestões, resumo diário e busca em linguagem natural.',
 }
 
-export default function RootLayout({ children }: LayoutProps<'/'>) {
+type RootLayoutProps = {
+  children: ReactNode
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html
       lang="pt-BR"
@@ -34,9 +38,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <ColorSchemeScript />
       </head>
       <body className="min-h-full">
-        <Providers>
-          <NavShell>{children}</NavShell>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
