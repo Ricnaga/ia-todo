@@ -18,8 +18,10 @@ alwaysApply: true
 
 ## Stack backend
 
-- **Banco**: Prisma 7 (SQLite via better-sqlite3), schema em `prisma/schema.prisma`, cliente em `server/db/prisma.ts`
-- **API**: GraphQL (graphql-yoga + @pothos/core)
+- **Banco**: Prisma 7 (SQLite via better-sqlite3), schema em `prisma/schema.prisma`, cliente em `server/db/prisma.ts`. Modelos do Better Auth (`User`, `Session`, `Account`, `Verification`) + `Todo.userId` (FK + index)
+- **Auth**: better-auth 1.7.5 (`server/modules/auth/infra/better-auth.ts`), email/password + Google/GitHub (condicionais a credenciais no `.env`) + account linking; `user.changeEmail.enabled` + `updateEmailWithoutVerification` (dev); verificação de email só loga URL no console
+- **API**: GraphQL (graphql-yoga + @pothos/core) + REST do Better Auth (`app/api/auth/[...all]/route.ts`, só fluxos de sessão/cookies)
+- **Cache**: Redis (cache-aside por `userId`), fallback silencioso se Redis indisponível — `server/shared/cache/` + `docker-compose.yml` (redis:7-alpine)
 - **IA**: @google/generative-ai (Gemini), acessado via `server/shared/ai` (port `AiService` na raiz + adapters por provider em `ai/<provider>/`; os use-cases injetam só a abstração)
 - **Validação**: zod (schemas compartilhados com o frontend)
 
@@ -33,12 +35,18 @@ lib/
 │   todos/todo.io.ts → IO da fronteira: createTodoSchema/updateTodoSchema/draftInputSchema + tipos z.input/z.output (ex.: CreateTodoInput=z.input, CreateTodoOutput=z.infer). z.input tolera null vindo do GraphQL; update trata null como "não alterar"/"limpar" por campo
 │   assistant/assistant.model.ts → models (criteriaSchema, assistantSchema: Criteria, Assistant)
 │   insights/insights.model.ts → models (daySummarySchema: DaySummary)
+│   auth/auth.model.ts, auth/auth.io.ts → models de user/conta/sessão + schemas de input (updateProfile, changeEmail, changePassword, linkAccount, unlinkAccount, revokeSession)
 
 server/              → núcleo de negócio (zero dependência de Next), DDD por bounded contexts
 ├── modules/
 │   ├── todos/       → context CORE: Todo aggregate + CRUD + suggestTodo (shaping de todo com IA)
 │   │                → clean architecture: controllers/ (orquestram use-cases), use-cases/ (por operação),
-│   │                → repositories/ (port), infra/ (impl Prisma), errors.ts
+│   │                → repositories/ (port), infra/ (impl Prisma + CachedTodoRepository), errors.ts
+│   │                → TODAS as operações são scoped por userId (ITodoRepository.list/getById/create/update/delete recebem userId)
+│   ├── auth/        → context SUPPORTING: port `IAuthService` (resolveSession/getProfile/updateProfile/changeEmail/changePassword/
+│   │                → listAccounts/linkAccount/unlinkAccount/listSessions/revokeSession/revokeOtherSessions)
+│   │                → infra/better-auth.ts (instância, NÃO exporta mais além de `auth`) + infra/better-auth.service.ts
+│   │                → service traduz APIError do better-auth → AuthActionFailedError (mensagens pt-BR), ex.: INVALID_PASSWORD→"Senha atual incorreta."
 │   ├── assistant/   → context SUPPORTING: nlSearch (busca em linguagem natural). Recebe Todo[] via parâmetro
 │   │                → caixa-preta, consumidora do aggregate de todos (Customer-Supplier), sem port próprio
 │   └── insights/    → context SUPPORTING: summarizeDay (resumo do dia). Recebe Todo[] via parâmetro
@@ -48,8 +56,13 @@ server/              → núcleo de negócio (zero dependência de Next), DDD po
 │   │                → use-cases dependem SÓ do port) — adapter por provider em pasta própria com barrel (path público @/server/shared/ai/gemini)
 │   │                → gemini/: gemini-ai.service.ts (GeminiAiService implements AiService) + gemini-schema.mapper.ts
 │   │                → (converte zod → Schema Gemini; caso sem suporte → throws) + index.ts (exporta GeminiAiService)
-│   └── container/   → composition root: DI manual (sem inversify), resolve todos controladores; index.ts (agregador) + 1 arquivo por context (todo/assistant/insights) + infra.ts (serviços compartilhados)
-├── config/          → environment.ts (env com parse zod, UPPERCASE)
+│   ├── cache/       → cache.interface.ts (ICache get/set/delete com TTL) + redis/ (RedisCache, lazy connect, connectTimeout 2s,
+│   │                → reconnectStrategy: false, JSON serialization, fallback silencioso) + index.ts singletons (RedisCache via env.REDIS_URL)
+│   ├── domain-error.ts → DomainError { code, message } base
+│   └── container/   → composition root: DI manual (sem inversify), resolve controladores; index.ts (agregador) + 1 arquivo por context
+│                    → (todo/assistant/insights/auth) + infra.ts (serviços compartilhados). Todo: CachedTodoRepository(PrismaTodoRepository, cache)
+├── config/          → environment.ts (env com parse zod, UPPERCASE: DATABASE_URL, GEMINI_API_KEY, GEMINI_MODEL, BETTER_AUTH_URL,
+│                    → BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID/SECRET, GITHUB_CLIENT_ID/SECRET, REDIS_URL default redis://localhost:6379)
 ├── db/              → prisma.ts (singleton) + generated/ (Prisma Client gerado)
 └── utils/           → helpers genéricos
 
@@ -57,45 +70,45 @@ bff/                 → camada de apresentação de API (GraphQL) — NÚCLEO H
 ├── adapters/        → ports + adapters por context (a fronteira que o resolver consome)
 │   ├── todo/        → todo.port.ts (interface TodoPort: CRUD + suggestTodo, SEM import de server/) + todo.adapter.ts
 │   ├── assistant/   → assistant.port.ts (AssistantPort: nlSearch) + assistant.adapter.ts
-│   └── insights/    → insights.port.ts (InsightsPort: summarizeDay) + insights.adapter.ts
+│   ├── insights/    → insights.port.ts (InsightsPort: summarizeDay) + insights.adapter.ts
+│   └── auth/        → auth.port.ts (AuthPort) + auth.adapter.ts (todas os métodos: me/perfil/email/senha/contas/sessões)
 │   fluxo: resolver → ctx.adapters.todo (Port) → adapter → controller (server)
-├── context.ts       → GraphQLContext { adapters: { todo, assistant, insights } } — ÚNICO ponto que importa de server/ (composition root do BFF)
-├── graphql.ts       → createGraphQLHandler() — Yoga montado com schema + context
-└── pothos/          → camada GraphQL/Pothos (builder, errors, schema) + 1 pasta por bounded context
-    ├── builder.ts   → SchemaBuilder (tipagem Context + Scalars) + Query/Mutation raiz (SÓ ISSO — enums vivem nos contexts; scalars em scalars/)
-    ├── errors.ts    → raiseResolvable + execute: mapeia DomainError/ZodError → GraphQLError (yoga mascara o resto)
-    ├── scalars/     → scalars globais ({name}.ts + barrel index.ts): datetime.ts (DateTimeScalar, builder.scalarType)
-    ├── modules/     → bounded contexts do Pothos, espelhando server/modules (CORE + SUPPORTING)
-    │   ├── todo/        → CORE: enums/ref/inputs/queries/mutations (o context espelha server/modules/todos)
-    │   │                → NÃO importam server; pegam via ctx.adapters (3º argumento do resolver) + executam via errors.execute
-    │   │                → orquestração todo→assistant/insights fica no resolver (busca bruta + delegação MECÂNICA, sem regra)
-    │   ├── assistant/   → SUPPORTING: enums/ref/mutations (nlSearch)
-    │   └── insights/    → SUPPORTING: ref/mutations (summarizeDay)
-    └── schema.ts    → importa scalars + modules (side-effect, barrels) e exporta builder.toSchema()
+├── factories/       → instâncias dos adapters (1 pasta por context, ex.: auth.factory.ts) montadas por `bff/factories/index.ts`
+├── context.ts       → GraphQLContext { adapters: { todo, assistant, insights, auth }, user: AuthUser|null, session: {id,token}|null, headers }
+│                    → ÚNICO ponto que importa de server/ (composition root do BFF); resolve sessão via authService.resolveSession(headers)
+├── graphql.ts       → createGraphQLHandler() — Yoga com schema + context + maskedErrors (maskError: DomainError com code →
+│                    → GraphQLError { message, extensions.code }; resto → "Erro interno do servidor.", sem stack trace)
+├── pothos/          → camada GraphQL/Pothos (builder, errors, schema, require-user) + 1 pasta por bounded context
+│   ├── builder.ts   → SchemaBuilder (tipagem Context + Scalars) + Query/Mutation raiz
+│   ├── require-user.ts → requireUser(ctx): lança GraphQLError UNAUTHENTICATED se !ctx.user (usado nas queries/mutations protegidas)
+│   ├── errors.ts    → raiseResolvable + execute: mapeia DomainError/ZodError → GraphQLError (yoga mascara o resto)
+│   ├── scalars/     → scalars globais ({name}.ts + barrel index.ts): datetime.ts
+│   ├── modules/     → bounded contexts do Pothos: todo/, assistant/, insights/, auth/
+│   │                → auth/: queries me (nullable), myAccounts, mySessions + mutations updateProfile, changeEmail, changePassword,
+│   │                → linkAccount (→String URL, caller faz window.location.assign), unlinkAccount, revokeSession, revokeOtherSessions
+│   │                → resolvers usam requireUser(ctx) e sanificam null → undefined no input
+│   └── schema.ts    → importa scalars + modules (side-effect, barrels) e exporta builder.toSchema()
 ```
 
-(convenção por context: `{context}.enums.ts`, `{context}.ref.ts`, `{context}.inputs.ts`, `{context}.queries.ts`, `{context}.mutations.ts` + barrel `index.ts`; scalars globais em `scalars/{name}.ts` + barrel, registrados por side-effect no schema.ts; `SubtaskRef` é privado em todo.ref.ts; barrel exporta só o que clientes cross-context consomem, ex.: assistant.ref usa `TodoRef` do barrel de todo)
+app/api/graphql/route.ts → endpoint GraphQL (createGraphQLHandler) — transporte fino
+app/api/auth/[...all]/route.ts → toNextJsHandler(auth) — REST do Better Auth (fluxos de sessão, cookies automáticos)
 
-app/api/graphql/route.ts → único endpoint: sobe o handler via createGraphQLHandler() (transporte fino)
+## Regras da divisão
 
-```
-
-Regras da divisão:
-
-- **Frontend (Client Components) importa só de `lib/constants`, `lib/schemas`, `lib/utils` e `services/graphql`** — nunca de `server/` nem `bff/`. `lib/constants` guarda só constantes frontend-only (`priorityLabels/Colors/Options` em `todo.constants.ts`, `router-paths.ts`); `Todo`, `Assistant`, `Criteria` e os inputs (`CreateTodoInput`/`UpdateTodoInput`, em `lib/schemas/todo.io.ts`) vêm de `lib/schemas/*`; `services/graphql/base.ts` é a única ponte de dados da UI para o server.
+- **Frontend (Client Components) importa só de `lib/constants`, `lib/schemas` e `services/`** — nunca de `server/` nem `bff/`. `services/auth/*` + `services/graphql/*` são as únicas pontes de dados da UI.
 - `server/` não depende de Next (`next/server`), nem de `app/api`; só de `lib/schemas` e de si mesmo. Testável sem mockar Next.
-- `bff/pothos` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container/`), nunca por import direto nos resolvers/adpaters — limpo de server exceto nos adapters (que tipam os controllers).
-- `app/api/graphql/route.ts` é o único endpoint (não há mais REST).
+- `bff/pothos` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container/`), nunca por import direto nos resolvers/adapters.
+- App Router: route groups `(public)` (não autenticado: `/`, `/login`, `/register`) e `(private)` (autenticado: `/dashboard`, `/tarefas`, `/resumo`, `/busca`, `/settings`); `(private)/layout.tsx` chama `verifySession()`; `proxy.ts` bloqueia rotas protegidas sem cookie `better-auth.session_token` (redirect `/?next=`). Matcher exclui `api|_next/static|_next/image|favicon.ico|.*\..*`.
 - Passo do Prisma: gerar client para `server/db/generated/prisma` (schema.prisma → output).
 
 ## Convenções backend
 
 - Tipar sempre com TypeScript explícito; sem `any` sem justificativa
-- DDD: bounded contexts por domínio (`todos` core, `assistant`/`insights` supporting) espelhados no BFF; assistant/insights são consumidores do aggregate `Todo` (recebem `Todo[]` via parâmetro, sem port próprio) — regra de negócio nunca vaza para o resolver (ex.: `summarizeDay` filtra `!completed` dentro do use-case)
+- DDD: bounded contexts por domínio (`todos` core, `auth`/`assistant`/`insights` supporting) espelhados no BFF; assistant/insights são consumidores do aggregate `Todo` (recebem `Todo[]` via parâmetro, sem port próprio) — regra de negócio nunca vaza para o resolver
 - IA é infra genérica (`server/shared/ai`): use-cases dependem do port `AiService` (raiz), nunca do SDK Gemini; troca de provider = novo adapter em `ai/<provider>/` (com barrel próprio), sem tocar nos contexts
 - Camada de negócio (`server/modules`) isolada de HTTP/GraphQL (ports & adapters); `server/` nunca importa de `app/api` nem de `next/server`
-- Frontend importa só `lib/constants`, `lib/schemas`, `lib/utils` e `lib/graphql` (contratos e cliente); nunca `server/`/`bff/`
 - Validação de input com zod em todas as fronteiras
-- Erros tratados de forma consistente: a UI Normaliza `errors[0].message` no wrapper (`lib/graphql/client.ts`); o bff mapeia `DomainError`/`ZodError` → `GraphQLError` (`bff/pothos/errors.ts`); nunca expor stack trace em produção
+- Erros: `DomainError` (code+message pt-BR) nas bordas do domínio; service de auth traduz APIError do better-auth → `AuthActionFailedError`; Yoga `maskedErrors` expõe só message+code (nunca stack trace)
+- Cache: cache-aside por `userId` (`todos:{userId}`, TTL 300s); invalidação em create/update/delete; cache nunca derruba consulta (fallback silencioso)
+- Nomes reais dos métodos do better-auth `auth.api` (v1.7.5): `getSession`, `updateUser` (sem email; retorna `{status}` → re-buscar via getSession), `changeEmail` (requer `user.changeEmail.enabled`; retorna `{status}`), `changePassword` (`{token,user}` → retornar true), `listUserAccounts` (array direto), `linkSocialAccount` (`{url,redirect}`), `unlinkAccount` (body: `accountId` = `Account.id`), `listSessions` (array direto), `revokeSession` (`{token,user}` → retornar true), `revokeOtherSessions` (`{status}`)
 - Estilo de código segue prettier (single quote, sem semicolon)
-```
