@@ -131,21 +131,6 @@ export async function changePasswordRequest(input: {
   return data.changePassword
 }
 
-export async function linkAccountRequest(input: {
-  provider: 'google' | 'github'
-  callbackURL?: string
-}): Promise<string> {
-  const data = await request<{ linkAccount: string | null }>(
-    `
-      mutation LinkAccount($input: LinkAccountInput!) {
-        linkAccount(input: $input)
-      }
-    `,
-    { input },
-  )
-  return data.linkAccount ?? ''
-}
-
 export async function unlinkAccountRequest(input: { accountId: string }): Promise<boolean> {
   const data = await request<{ unlinkAccount: boolean }>(
     `

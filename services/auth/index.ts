@@ -12,7 +12,6 @@ export {
   updateProfileRequest,
   changeEmailRequest,
   changePasswordRequest,
-  linkAccountRequest,
   unlinkAccountRequest,
   revokeSessionRequest,
   revokeOtherSessionsRequest,
