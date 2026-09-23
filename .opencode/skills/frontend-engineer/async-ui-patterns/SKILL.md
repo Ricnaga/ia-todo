@@ -48,11 +48,13 @@ A page (Server Component) que lê dados deve:
 
 ```tsx
 const queryClient = new QueryClient()
-await queryClient.prefetchQuery({
-  queryKey: authQueryKeys.accounts,
-  queryFn: () => fetchMyAccounts({ cookie: cookieStore.toString() }),
-  staleTime: 5_000, // casado com o default do client (providers/index.tsx)
-})
+await queryClient
+  .query({
+    queryKey: authQueryKeys.accounts,
+    queryFn: () => fetchMyAccounts({ cookie: cookieStore.toString() }),
+    staleTime: 5_000, // casado com o default do client (providers/index.tsx)
+  })
+  .catch(() => undefined) // restaura a semântica best-effort do prefetch
 // ...
 return (
   <HydrationBoundary state={dehydrate(queryClient)}>
