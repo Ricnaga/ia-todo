@@ -1,17 +1,19 @@
 import { builder } from '@/bff/pothos/builder'
-import { execute } from '@/bff/pothos/errors'
+import { execute } from '@/bff/errors'
 import { TodoRef } from '@/bff/pothos/modules/todo/todo.ref'
 
 builder.queryFields((t) => ({
-  todos: t.field({
+  todos: t.authField({
     type: [TodoRef],
-    resolve: (_root, _args, ctx) => execute(() => ctx.adapters.todo.list()),
+    authScopes: { loggedIn: true },
+    resolve: (_root, _args, ctx) => execute(() => ctx.adapters.todo.list(ctx.user.id)),
   }),
-  todo: t.field({
+  todo: t.authField({
     type: TodoRef,
+    authScopes: { loggedIn: true },
     args: {
       id: t.arg.string({ required: true }),
     },
-    resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.getById(args.id)),
+    resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.getById(args.id, ctx.user.id)),
   }),
 }))

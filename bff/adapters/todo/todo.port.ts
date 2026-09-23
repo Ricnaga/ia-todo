@@ -7,10 +7,10 @@ export type TodoUpdateInput = UpdateTodoInput
 export type SuggestTodoInput = DraftInput
 
 export interface TodoPort {
-  list(): Promise<Todo[]>
-  getById(id: string): Promise<Todo>
-  create(input: TodoCreateInput): Promise<Todo>
-  update(id: string, input: TodoUpdateInput): Promise<Todo>
-  delete(id: string): Promise<void>
+  list(userId: string): Promise<Todo[]>
+  getById(id: string, userId: string): Promise<Todo>
+  create(input: TodoCreateInput, userId: string): Promise<Todo>
+  update(id: string, input: TodoUpdateInput, userId: string): Promise<Todo>
+  delete(id: string, userId: string): Promise<void>
   suggestTodo(draft: SuggestTodoInput): Promise<TodoSuggestion>
 }

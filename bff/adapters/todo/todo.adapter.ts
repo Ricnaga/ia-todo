@@ -3,11 +3,11 @@ import type { TodoPort } from './todo.port'
 
 export function todoAdapter(controller: TodoController): TodoPort {
   return {
-    list: () => controller.list(),
-    getById: (id) => controller.getById(id),
-    create: (input) => controller.create(input),
-    update: (id, input) => controller.update(id, input),
-    delete: (id) => controller.delete(id),
+    list: (userId) => controller.list(userId),
+    getById: (id, userId) => controller.getById(id, userId),
+    create: (input, userId) => controller.create(input, userId),
+    update: (id, input, userId) => controller.update(id, input, userId),
+    delete: (id, userId) => controller.delete(id, userId),
     suggestTodo: (draft) => controller.suggestTodo(draft),
   }
 }
