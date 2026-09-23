@@ -32,6 +32,12 @@ importers:
       '@pothos/core':
         specifier: ^4.13.1
         version: 4.13.1(graphql@17.0.2)
+      '@pothos/plugin-scope-auth':
+        specifier: ^4.2.1
+        version: 4.2.1(@pothos/core@4.13.1(graphql@17.0.2))(graphql@17.0.2)
+      '@pothos/plugin-with-input':
+        specifier: ^4.1.5
+        version: 4.1.5(@pothos/core@4.13.1(graphql@17.0.2))(graphql@17.0.2)
       '@prisma/adapter-better-sqlite3':
         specifier: ^7.10.0
         version: 7.10.0
@@ -975,6 +981,18 @@ packages:
   '@pothos/core@4.13.1':
     resolution: {integrity: sha512-2hkLxmvrT7VnbiWAfYhfF09PjaHeflZ5HrBHYzU6Tn/P9tDviuZS7IS5xO4k/KnK5GkRo3YxDzXyn+HnkEkVNw==}
     peerDependencies:
+      graphql: ^16.10.0 || ^17.0.0
+
+  '@pothos/plugin-scope-auth@4.2.1':
+    resolution: {integrity: sha512-qH25sQ1QGfS30RH8ZDunLSM0KymEdimtRsEnf6fkLatBfRCqdZXG2+2wJWhxCNmeyzobRl8RI06sPz00p3neHA==}
+    peerDependencies:
+      '@pothos/core': '*'
+      graphql: ^16.10.0 || ^17.0.0
+
+  '@pothos/plugin-with-input@4.1.5':
+    resolution: {integrity: sha512-lRekMF2+NVXcCL9/Z61y+O3YYQ4Copsm7dUlAQdo6ZOWP+m0BukUFk/MNZmOtem7mridMR9Yu3CY+Au+mSiz+w==}
+    peerDependencies:
+      '@pothos/core': '*'
       graphql: ^16.10.0 || ^17.0.0
 
   '@prisma/adapter-better-sqlite3@7.10.0':
@@ -4738,6 +4756,16 @@ snapshots:
 
   '@pothos/core@4.13.1(graphql@17.0.2)':
     dependencies:
+      graphql: 17.0.2
+
+  '@pothos/plugin-scope-auth@4.2.1(@pothos/core@4.13.1(graphql@17.0.2))(graphql@17.0.2)':
+    dependencies:
+      '@pothos/core': 4.13.1(graphql@17.0.2)
+      graphql: 17.0.2
+
+  '@pothos/plugin-with-input@4.1.5(@pothos/core@4.13.1(graphql@17.0.2))(graphql@17.0.2)':
+    dependencies:
+      '@pothos/core': 4.13.1(graphql@17.0.2)
       graphql: 17.0.2
 
   '@prisma/adapter-better-sqlite3@7.10.0':
