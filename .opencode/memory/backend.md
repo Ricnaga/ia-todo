@@ -35,7 +35,7 @@ lib/
 │   todos/todo.io.ts → IO da fronteira: createTodoSchema/updateTodoSchema/draftInputSchema + tipos z.input/z.output (ex.: CreateTodoInput=z.input, CreateTodoOutput=z.infer). z.input tolera null vindo do GraphQL; update trata null como "não alterar"/"limpar" por campo
 │   assistant/assistant.model.ts → models (criteriaSchema, assistantSchema: Criteria, Assistant)
 │   insights/insights.model.ts → models (daySummarySchema: DaySummary)
-│   auth/auth.model.ts, auth/auth.io.ts → models de user/conta/sessão + schemas de input (updateProfile, changeEmail, changePassword, linkAccount, unlinkAccount, revokeSession)
+│   auth/auth.model.ts, auth/auth.io.ts → models de user/conta/sessão + schemas de input (updateProfile, changeEmail, changePassword, unlinkAccount, revokeSession)
 
 server/              → núcleo de negócio (zero dependência de Next), DDD por bounded contexts
 ├── modules/
@@ -44,7 +44,8 @@ server/              → núcleo de negócio (zero dependência de Next), DDD po
 │   │                → repositories/ (port), infra/ (impl Prisma + CachedTodoRepository), errors.ts
 │   │                → TODAS as operações são scoped por userId (ITodoRepository.list/getById/create/update/delete recebem userId)
 │   ├── auth/        → context SUPPORTING: port `IAuthService` (resolveSession/getProfile/updateProfile/changeEmail/changePassword/
-│   │                → listAccounts/linkAccount/unlinkAccount/listSessions/revokeSession/revokeOtherSessions)
+│   │                → listAccounts/unlinkAccount/listSessions/revokeSession/revokeOtherSessions)
+│   │                → vínculo de conta (OAuth) NÃO passa pelo GraphQL: o client chama `authClient.linkSocial` (REST `/api/auth/link-social`)
 │   │                → infra/better-auth.ts (instância, NÃO exporta mais além de `auth`) + infra/better-auth.service.ts
 │   │                → service traduz APIError do better-auth → AuthActionFailedError (mensagens pt-BR), ex.: INVALID_PASSWORD→"Senha atual incorreta."
 │   ├── assistant/   → context SUPPORTING: nlSearch (busca em linguagem natural). Recebe Todo[] via parâmetro
@@ -76,17 +77,23 @@ bff/                 → camada de apresentação de API (GraphQL) — NÚCLEO H
 ├── factories/       → instâncias dos adapters (1 pasta por context, ex.: auth.factory.ts) montadas por `bff/factories/index.ts`
 ├── context.ts       → GraphQLContext { adapters: { todo, assistant, insights, auth }, user: AuthUser|null, session: {id,token}|null, headers }
 │                    → ÚNICO ponto que importa de server/ (composition root do BFF); resolve sessão via authService.resolveSession(headers)
-├── graphql.ts       → createGraphQLHandler() — Yoga com schema + context + maskedErrors (maskError: DomainError com code →
-│                    → GraphQLError { message, extensions.code }; resto → "Erro interno do servidor.", sem stack trace)
-├── pothos/          → camada GraphQL/Pothos (builder, errors, schema, require-user) + 1 pasta por bounded context
+├── graphql.ts       → createGraphQLHandler() — Yoga com schema + context + maskedErrors (inclui maskError)
+├── errors.ts        → erros do layer GraphQL: raiseResolvable + execute (mapeia DomainError/ZodError → GraphQLError no resolver)
+│                    → + maskError: DomainError com code → GraphQLError { message, extensions.code }; resto → "Erro interno do servidor.", sem stack trace)
+├── pothos/          → camada GraphQL/Pothos (builder, schema) + 1 pasta por bounded context
 │   ├── builder.ts   → SchemaBuilder (tipagem Context + Scalars) + Query/Mutation raiz
-│   ├── require-user.ts → requireUser(ctx): lança GraphQLError UNAUTHENTICATED se !ctx.user (usado nas queries/mutations protegidas)
-│   ├── errors.ts    → raiseResolvable + execute: mapeia DomainError/ZodError → GraphQLError (yoga mascara o resto)
+│                    → + @pothos/plugin-scope-auth: scope loggedIn no queryType/mutationType (auth por campo declarativa,
+│                    → sem requireUser); unauthorizedError → GraphQLError UNAUTHENTICATED; AuthContexts + t.authField/withAuth
+│                    → (ctx.user não-null tipado); query pública usa skipTypeScopes (ex.: me)
+│                    → + @pothos/plugin-with-input: mutations usam t.withAuth(...).fieldWithInput(...) — input inline com
+│                    → t.input.X (removeu input types separados); withInput.typeOptions.name callback dropa prefixo Query/Mutation
+│                    → (CreateTodoInput, UpdateTodoInput...); exceção: suggestTodo mantém nome DraftInput + arg draft (interface com client)
 │   ├── scalars/     → scalars globais ({name}.ts + barrel index.ts): datetime.ts
 │   ├── modules/     → bounded contexts do Pothos: todo/, assistant/, insights/, auth/
-│   │                → auth/: queries me (nullable), myAccounts, mySessions + mutations updateProfile, changeEmail, changePassword,
-│   │                → linkAccount (→String URL, caller faz window.location.assign), unlinkAccount, revokeSession, revokeOtherSessions
-│   │                → resolvers usam requireUser(ctx) e sanificam null → undefined no input
+│   │                → auth/: queries me (nullable, skipTypeScopes), myAccounts, mySessions + mutations updateProfile, changeEmail, changePassword,
+│   │                → unlinkAccount, revokeSession, revokeOtherSessions
+│   │                → resolvers com user usam t.authField/withAuth (ctx.user não-null) e sanificam null → undefined no input;
+│   │                → mutations com input usam fieldWithInput (sem arquivos de inputs separados — inputs declarados inline)
 │   └── schema.ts    → importa scalars + modules (side-effect, barrels) e exporta builder.toSchema()
 ```
 
@@ -110,5 +117,6 @@ app/api/auth/[...all]/route.ts → toNextJsHandler(auth) — REST do Better Auth
 - Validação de input com zod em todas as fronteiras
 - Erros: `DomainError` (code+message pt-BR) nas bordas do domínio; service de auth traduz APIError do better-auth → `AuthActionFailedError`; Yoga `maskedErrors` expõe só message+code (nunca stack trace)
 - Cache: cache-aside por `userId` (`todos:{userId}`, TTL 300s); invalidação em create/update/delete; cache nunca derruba consulta (fallback silencioso)
-- Nomes reais dos métodos do better-auth `auth.api` (v1.7.5): `getSession`, `updateUser` (sem email; retorna `{status}` → re-buscar via getSession), `changeEmail` (requer `user.changeEmail.enabled`; retorna `{status}`), `changePassword` (`{token,user}` → retornar true), `listUserAccounts` (array direto), `linkSocialAccount` (`{url,redirect}`), `unlinkAccount` (body: `accountId` = `Account.id`), `listSessions` (array direto), `revokeSession` (`{token,user}` → retornar true), `revokeOtherSessions` (`{status}`)
+- Nomes reais dos métodos do better-auth `auth.api` (v1.7.5): `getSession`, `updateUser` (sem email; retorna `{status}` → re-buscar via getSession), `changeEmail` (requer `user.changeEmail.enabled`; retorna `{status}`), `changePassword` (`{token,user}` → retornar true), `listUserAccounts` (array direto), `unlinkAccount` (body: `accountId` = `Account.id`), `listSessions` (array direto), `revokeSession` (`{token,user}` → retornar true), `revokeOtherSessions` (`{status}`)
+- Vínculo OAuth usa o client (`authClient.linkSocial`, rota `/link-social`) — o redirectPlugin do client faz `window.location.href` quando a resposta tem `{url, redirect:true}`; aqui o `linkAccount` GraphQL foi removido (sem uso)
 - Estilo de código segue prettier (single quote, sem semicolon)
