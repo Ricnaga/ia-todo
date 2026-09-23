@@ -1,5 +1,5 @@
 import { Prisma, type PrismaClient } from '@/server/db/generated/prisma/client'
-import { TodoNotFoundError } from '@/server/modules/todos/errors'
+import { TodoNotFoundError } from '@/server/shared/errors/app.errors'
 import type { ITodoRepository } from '@/server/modules/todos/repositories/todo-repository.interface'
 import type { Todo, TodoSubtask } from '@/lib/schemas/todo'
 import type { CreateTodoOutput, UpdateTodoOutput } from '@/lib/schemas/todo'

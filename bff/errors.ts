@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql'
 import { ZodError } from 'zod'
-import { DomainError } from '@/server/modules/todos/errors'
+import { AppError } from '@/server/shared/errors/app.errors'
 
 export const INTERNAL_SERVER = {
   code: 'INTERNAL_SERVER_ERROR',
@@ -8,7 +8,7 @@ export const INTERNAL_SERVER = {
 } as const
 
 export function raiseResolvable(error: unknown): never {
-  if (error instanceof DomainError) {
+  if (error instanceof AppError) {
     throw new GraphQLError(error.message, { extensions: { code: error.code } })
   }
   if (error instanceof ZodError) {
