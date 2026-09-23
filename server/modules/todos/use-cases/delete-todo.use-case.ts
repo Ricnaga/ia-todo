@@ -3,7 +3,7 @@ import type { ITodoRepository } from '@/server/modules/todos/repositories/todo-r
 export class DeleteTodoUseCase {
   constructor(private readonly todoRepository: ITodoRepository) {}
 
-  async execute(id: string): Promise<void> {
-    await this.todoRepository.delete(id)
+  async execute(id: string, userId: string): Promise<void> {
+    await this.todoRepository.delete(id, userId)
   }
 }

@@ -4,7 +4,7 @@ import type { Todo } from '@/lib/schemas/todo'
 export class ListTodosUseCase {
   constructor(private readonly todoRepository: ITodoRepository) {}
 
-  async execute(): Promise<Todo[]> {
-    return this.todoRepository.list()
+  async execute(userId: string): Promise<Todo[]> {
+    return this.todoRepository.list(userId)
   }
 }

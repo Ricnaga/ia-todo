@@ -7,10 +7,10 @@ import type {
 } from '@/lib/schemas/todo'
 
 export interface ITodoUseCase {
-  list(): Promise<Todo[]>
-  getById(id: string): Promise<Todo>
-  create(input: CreateTodoInput): Promise<Todo>
-  update(id: string, input: UpdateTodoInput): Promise<Todo>
-  delete(id: string): Promise<void>
+  list(userId: string): Promise<Todo[]>
+  getById(id: string, userId: string): Promise<Todo>
+  create(input: CreateTodoInput, userId: string): Promise<Todo>
+  update(id: string, input: UpdateTodoInput, userId: string): Promise<Todo>
+  delete(id: string, userId: string): Promise<void>
   suggestTodo(draft: DraftInput): Promise<TodoSuggestion>
 }

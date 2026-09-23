@@ -23,57 +23,50 @@ function toDomain(row: TodoRow): Todo {
 export class PrismaTodoRepository implements ITodoRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async list(): Promise<Todo[]> {
+  async list(userId: string): Promise<Todo[]> {
     const rows = await this.db.todo.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
     })
     return rows.map(toDomain)
   }
 
-  async getById(id: string): Promise<Todo | null> {
-    const row = await this.db.todo.findUnique({ where: { id } })
+  async getById(id: string, userId: string): Promise<Todo | null> {
+    const row = await this.db.todo.findFirst({ where: { id, userId } })
     return row ? toDomain(row) : null
   }
 
-  async create(input: CreateTodoOutput): Promise<Todo> {
+  async create(input: CreateTodoOutput, userId: string): Promise<Todo> {
     const row = await this.db.todo.create({
       data: {
         title: input.title,
         description: input.description ?? null,
         priority: input.priority,
         dueDate: input.dueDate ?? null,
+        userId,
       },
     })
     return toDomain(row)
   }
 
-  async update(id: string, input: UpdateTodoOutput): Promise<Todo> {
-    const row = await this.db.todo
-      .update({
-        where: { id },
-        data: {
-          ...(input.title !== undefined ? { title: input.title } : {}),
-          ...(input.description !== undefined ? { description: input.description } : {}),
-          ...(input.priority !== undefined ? { priority: input.priority } : {}),
-          ...(input.dueDate !== undefined ? { dueDate: input.dueDate } : {}),
-          ...(input.completed !== undefined ? { completed: input.completed } : {}),
-        },
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-          throw new TodoNotFoundError(id)
-        }
-        throw error
-      })
+  async update(id: string, input: UpdateTodoOutput, userId: string): Promise<Todo> {
+    const result = await this.db.todo.updateMany({
+      where: { id, userId },
+      data: {
+        ...(input.title !== undefined ? { title: input.title } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.priority !== undefined ? { priority: input.priority } : {}),
+        ...(input.dueDate !== undefined ? { dueDate: input.dueDate } : {}),
+        ...(input.completed !== undefined ? { completed: input.completed } : {}),
+      },
+    })
+    if (result.count === 0) throw new TodoNotFoundError(id)
+    const row = await this.db.todo.findUniqueOrThrow({ where: { id } })
     return toDomain(row)
   }
 
-  async delete(id: string): Promise<void> {
-    await this.db.todo.delete({ where: { id } }).catch((error: unknown) => {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new TodoNotFoundError(id)
-      }
-      throw error
-    })
+  async delete(id: string, userId: string): Promise<void> {
+    const result = await this.db.todo.deleteMany({ where: { id, userId } })
+    if (result.count === 0) throw new TodoNotFoundError(id)
   }
 }

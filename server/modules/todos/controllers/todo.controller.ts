@@ -6,24 +6,24 @@ import type { CreateTodoInput, UpdateTodoInput, DraftInput } from '@/lib/schemas
 export class TodoController {
   constructor(private readonly todoUseCase: ITodoUseCase) {}
 
-  list(): Promise<Todo[]> {
-    return this.todoUseCase.list()
+  list(userId: string): Promise<Todo[]> {
+    return this.todoUseCase.list(userId)
   }
 
-  getById(id: string): Promise<Todo> {
-    return this.todoUseCase.getById(id)
+  getById(id: string, userId: string): Promise<Todo> {
+    return this.todoUseCase.getById(id, userId)
   }
 
-  create(input: CreateTodoInput): Promise<Todo> {
-    return this.todoUseCase.create(input)
+  create(input: CreateTodoInput, userId: string): Promise<Todo> {
+    return this.todoUseCase.create(input, userId)
   }
 
-  update(id: string, input: UpdateTodoInput): Promise<Todo> {
-    return this.todoUseCase.update(id, input)
+  update(id: string, input: UpdateTodoInput, userId: string): Promise<Todo> {
+    return this.todoUseCase.update(id, input, userId)
   }
 
-  delete(id: string): Promise<void> {
-    return this.todoUseCase.delete(id)
+  delete(id: string, userId: string): Promise<void> {
+    return this.todoUseCase.delete(id, userId)
   }
 
   suggestTodo(draft: DraftInput): Promise<TodoSuggestion> {
