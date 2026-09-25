@@ -1,6 +1,6 @@
 import { Badge, Button, Checkbox, Group, Stack, Table, Text } from '@mantine/core'
 import { IconClipboardList, IconPencil, IconTrash } from '@tabler/icons-react'
-import type { Todo } from '@/lib/schemas/todo'
+import type { Todo } from '@ia-task-manager/schemas/todo'
 import { priorityColors, priorityLabels } from '@/lib/constants/todo.constants'
 import { formatDate } from '@/lib/utils/date'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'

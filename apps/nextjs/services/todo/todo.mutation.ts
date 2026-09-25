@@ -6,9 +6,9 @@ import {
   updateTodo as updateTodoRequest,
 } from './todo.request'
 import type { TodoCreateRequest, TodoUpdateRequest } from './todo.request'
-import type { Todo } from '@/lib/schemas/todo'
-import type { TodoSuggestion } from '@/lib/schemas/todo'
-import type { CreateTodoFormInput } from '@/lib/schemas/todo'
+import type { Todo } from '@ia-task-manager/schemas/todo'
+import type { TodoSuggestion } from '@ia-task-manager/schemas/todo'
+import type { CreateTodoFormInput } from '@ia-task-manager/schemas/todo'
 import { todoQueryKeys } from './todo.keys'
 
 function useInvalidateTodos() {

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { AuthUser } from '@/lib/schemas/auth'
+import type { AuthUser } from '@ia-task-manager/schemas/auth'
 import {
   updateProfileRequest,
   changeEmailRequest,

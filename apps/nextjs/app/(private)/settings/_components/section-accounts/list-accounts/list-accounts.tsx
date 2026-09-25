@@ -3,7 +3,7 @@
 import { List } from '@mantine/core'
 import { IconBrandGithub, IconBrandGoogle } from '@tabler/icons-react'
 import type { Icon } from '@tabler/icons-react'
-import type { AuthAccount } from '@/lib/schemas/auth'
+import type { AuthAccount } from '@ia-task-manager/schemas/auth'
 import { paths } from '@/lib/constants/router-paths'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { authClient, useMyAccountsQuery, useUnlinkAccountMutation } from '@/services/auth'

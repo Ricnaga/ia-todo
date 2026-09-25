@@ -1,4 +1,4 @@
-import { createGraphQLHandler } from '@/bff/graphql'
+import { createGraphQLHandler } from '@ia-task-manager/bff'
 
 const handler = createGraphQLHandler()
 

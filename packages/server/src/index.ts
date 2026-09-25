@@ -1,0 +1,6 @@
+export * from './shared/container'
+export * from './shared/errors/app.errors'
+export type { TodoController } from './modules/todos/controllers/todo.controller'
+export type { AssistantController } from './modules/assistant/controllers/assistant.controller'
+export type { InsightsController } from './modules/insights/controllers/insights.controller'
+export type { AuthController } from './modules/auth/controllers/auth.controller'

@@ -1,7 +1,12 @@
 import { request } from '@/services/graphql/base'
 import { TODO_FIELDS } from '@/services/graphql/fragments'
-import { todoSchema, type Todo, type TodoPriority, type TodoSuggestion } from '@/lib/schemas/todo'
-import type { DraftInput } from '@/lib/schemas/todo'
+import {
+  todoSchema,
+  type Todo,
+  type TodoPriority,
+  type TodoSuggestion,
+} from '@ia-task-manager/schemas/todo'
+import type { DraftInput } from '@ia-task-manager/schemas/todo'
 
 export type TodoCreateRequest = {
   title: string

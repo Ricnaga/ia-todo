@@ -1,0 +1,7 @@
+{
+  "extends": "@ia-task-manager/tsconfig/base.json",
+  "compilerOptions": {
+    "lib": ["esnext"]
+  },
+  "include": ["src/**/*.ts", "prisma7.config.ts"]
+}

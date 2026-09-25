@@ -6,7 +6,7 @@ import {
   type AuthUser,
   type AuthAccount,
   type AuthSession,
-} from '@/lib/schemas/auth'
+} from '@ia-task-manager/schemas/auth'
 
 type RequestHeaders = Record<string, string>
 

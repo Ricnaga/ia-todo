@@ -4,7 +4,7 @@ import { Badge, Button, Group, List, Text } from '@mantine/core'
 import { IconDeviceDesktop, IconLogout } from '@tabler/icons-react'
 import { formatDate } from '@/lib/utils/date'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
-import type { AuthSession } from '@/lib/schemas/auth'
+import type { AuthSession } from '@ia-task-manager/schemas/auth'
 import { useMySessionsQuery, useRevokeSessionMutation } from '@/services/auth'
 
 type SessionRow = {

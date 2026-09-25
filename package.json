@@ -6,15 +6,15 @@
     "dev": "pnpm --filter @ia-task-manager/nextjs dev",
     "build": "pnpm --filter @ia-task-manager/nextjs build",
     "start": "pnpm --filter @ia-task-manager/nextjs start",
-    "lint": "pnpm --filter @ia-task-manager/nextjs lint",
-    "lint:fix": "pnpm --filter @ia-task-manager/nextjs lint:fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm --filter @ia-task-manager/nextjs typecheck",
-    "db:generate": "pnpm --filter @ia-task-manager/nextjs db:generate",
-    "db:migrate": "pnpm --filter @ia-task-manager/nextjs db:migrate",
-    "db:deploy": "pnpm --filter @ia-task-manager/nextjs db:deploy",
-    "db:studio": "pnpm --filter @ia-task-manager/nextjs db:studio",
+    "typecheck": "pnpm -r --workspace-concurrency=1 typecheck",
+    "db:generate": "pnpm --filter @ia-task-manager/server db:generate",
+    "db:migrate": "pnpm --filter @ia-task-manager/server db:migrate",
+    "db:deploy": "pnpm --filter @ia-task-manager/server db:deploy",
+    "db:studio": "pnpm --filter @ia-task-manager/server db:studio",
     "prepare": "husky",
     "commit": "cz"
   },
@@ -27,7 +27,13 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.5.0",
     "prettier": "^3.9.6",
-    "prettier-plugin-tailwindcss": "^0.8.1"
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "@eslint/js": "^9",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16",
+    "typescript-eslint": "^8"
   },
   "packageManager": "pnpm@11.17.0"
 }

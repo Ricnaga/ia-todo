@@ -1,6 +1,6 @@
 import { Card, Group, List, Stack, Text, ThemeIcon } from '@mantine/core'
 import { IconCircleCheck } from '@tabler/icons-react'
-import type { DaySummary } from '@/lib/schemas/insights'
+import type { DaySummary } from '@ia-task-manager/schemas/insights'
 import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 
 type CardDaySummaryContentProps = {

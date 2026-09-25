@@ -2,7 +2,7 @@
 
 import { Tabs, Title } from '@mantine/core'
 import { IconFingerprint, IconLink, IconUserCircle, IconWorld } from '@tabler/icons-react'
-import type { AuthUser } from '@/lib/schemas/auth'
+import type { AuthUser } from '@ia-task-manager/schemas/auth'
 import { SectionProfile } from './section-profile/section-profile'
 import { SectionSecurity } from './section-security/section-security'
 import { SectionAccounts } from './section-accounts/section-accounts'

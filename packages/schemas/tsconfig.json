@@ -1,0 +1,4 @@
+{
+  "extends": "@ia-task-manager/tsconfig/base.json",
+  "include": ["src/**/*.ts"]
+}

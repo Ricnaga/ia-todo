@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import type { AuthUser } from '@/lib/schemas/auth'
+import type { AuthUser } from '@ia-task-manager/schemas/auth'
 import { fetchMe, fetchMyAccounts, fetchMySessions } from './auth.request'
 import { authQueryKeys } from './auth.keys'
 

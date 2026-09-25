@@ -3,8 +3,8 @@ out
 build
 node_modules
 .pnpm-store
-apps/nextjs/server/db/generated
-apps/nextjs/prisma/dev.db
+packages/server/src/db/generated
+packages/server/prisma/dev.db
 *.tsbuildinfo
 apps/nextjs/next-env.d.ts
 pnpm-lock.yaml

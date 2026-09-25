@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button, Card, Group, Text, Title } from '@mantine/core'
 import { IconPlus, IconSparkles } from '@tabler/icons-react'
-import type { Todo } from '@/lib/schemas/todo'
+import type { Todo } from '@ia-task-manager/schemas/todo'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { useCreateTodoMutation, useUpdateTodoMutation } from '@/services/todo/todo.mutation'
 import { useTodosQuery } from '@/services/todo/todo.query'

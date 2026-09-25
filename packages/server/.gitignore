@@ -1,0 +1,13 @@
+# packages/server — generated prisma client
+src/db/generated/prisma
+
+# local sqlite database
+prisma/*.db
+prisma/*.db-journal
+
+# env files
+.env*
+!.env.example
+
+# typescript
+*.tsbuildinfo

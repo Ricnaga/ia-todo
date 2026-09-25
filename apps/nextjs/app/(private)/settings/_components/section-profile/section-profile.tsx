@@ -3,7 +3,7 @@
 import { Badge, Button, Card, Divider, Stack, Text, TextInput, Title } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { IconMail } from '@tabler/icons-react'
-import type { AuthUser } from '@/lib/schemas/auth'
+import type { AuthUser } from '@ia-task-manager/schemas/auth'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { useUpdateProfileMutation, useChangeEmailMutation } from '@/services/auth'
 

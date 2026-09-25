@@ -1,4 +1,4 @@
-import type { TodoPriority } from '@/lib/schemas/todo'
+import type { TodoPriority } from '@ia-task-manager/schemas/todo'
 
 export const priorityLabels: Record<TodoPriority, string> = {
   low: 'Baixa',

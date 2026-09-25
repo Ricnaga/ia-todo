@@ -2,7 +2,7 @@
 
 import { Button, Card, PasswordInput, Stack, Title } from '@mantine/core'
 import { useForm, schemaResolver } from '@mantine/form'
-import { changePasswordSchema, type ChangePasswordInput } from '@/lib/schemas/auth'
+import { changePasswordSchema, type ChangePasswordInput } from '@ia-task-manager/schemas/auth'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { useChangePasswordMutation } from '@/services/auth'
 

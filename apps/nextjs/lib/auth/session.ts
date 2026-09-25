@@ -1,8 +1,8 @@
 import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import type { AuthUser } from '@/lib/schemas/auth'
-import { auth } from '@/server/modules/auth/infra/better-auth'
+import type { AuthUser } from '@ia-task-manager/schemas/auth'
+import { auth } from '@ia-task-manager/server/auth'
 
 export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   const cookieStore = await cookies()

@@ -1,6 +1,0 @@
-export { todoController } from './todo'
-export { assistantController } from './assistant'
-export { insightsController } from './insights'
-export { authController, authUseCase } from './auth'
-export { aiService, oauthService } from './infra'
-export type { IOAuthService } from '@/server/shared/oauth/oauth.interface'
