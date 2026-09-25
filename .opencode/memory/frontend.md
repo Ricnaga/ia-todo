@@ -99,15 +99,22 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 
 ## Paradigma loading / erro
 
-- **Arquitetura Next como primária**: `app/(private)/loading.tsx` (skeleton de rota via `LoadingState`) e `app/(private)/error.tsx` ('use client'; props do Next 16 = `error, retry, reset` — usar **`retry()`** no "Tentar novamente", pois refaz fetch; `reset` só re-renderiza sem refetch). Públicas **não** têm loading/error (estáticas).
-- **Todas as queries usam `useSuspenseQuery`** (`services/*/query.ts`); `data` nunca é `undefined` (mas pode ser `null`, ex. `useMeQuery` → `AuthUser | null`). `data: X ?? []`/`isLoading` não existem mais nos consumidores.
-- **Componentes globais** em `components/` (padrão `<nome>/<nome>.tsx`):
-  - `loading-state` → skeleton genérico (reusa `SkeletonStack`), `role="status"`/`aria-busy`
-  - `error-state` → `IconAlertCircle` + título/mensagem + botão "Tentar novamente", `role="alert"`; mensagem amigável por default, `error.message` **só em dev** (Next não sanitiza erros de Client Components), sempre `console.error`
-  - `render-boundary` → `ErrorBoundary` (react-error-boundary) + `Suspense`; usa `fallbackRender` (acesso a `error`/`resetErrorBoundary`); **contrato: component que chama `useSuspenseQuery` deve estar DENTRO do boundary**
-  - `render-query-boundary` → `QueryErrorResetBoundary` + `RenderBoundary` com `onReset={reset}` (reset + retry recarrega a suspense query sem `refetch()`)
-- **Prefetch + hydração no server** (páginas da `(private)` que listam dados): a page (Server Component) cria `new QueryClient()`, roda `queryClient.query({ ... })` com `{ cookie: cookieStore.toString() }` (+ `staleTime: 5_000` igual ao default do client) seguido de `.catch(() => undefined)` (best-effort, semântica do antigo `prefetchQuery`, deprecado no TanStack v5), e renderiza `<HydrationBoundary state={dehydrate(queryClient)}>`. **Motivo**: sem isso o `useSuspenseQuery` roda no SSR sem cookie → requests UNAUTHENTICATED e ruído de erro.
-- **Fetch por canal**: `services/graphql/base.ts` resolve URL absoluta (`window.location.origin` no client; `BETTER_AUTH_URL` no servidor — URL relativa quebra `fetch` do Node no SSR). `request<T>(doc, vars?, headers?)` aceita headers; `fetchMyAccounts`/`fetchMySessions`/`listTodos` aceitam `requestHeaders?` opcional (usado no prefetch SSR, via closure: `queryFn: () => fetchMyAccounts(headers)` — passar o fetcher direto liga o primeiro param ao QueryFunctionContext).
-- **busy de mutation por linha**: `isPending && variables?.accountId === account.id` (nunca só `variables`, que persiste após concluir).
-- `react-error-boundary` é dependência válida (3+ usos, padrão do TanStack); `useSuspenseQuery` força `enabled: true` internamente (não dá para desabilitar) e dispensa `suspense: true` no QueryClient.
+Autoridade do assunto: skill `async-ui-patterns` (`frontend-engineer/`). Não
+duplicar aqui — carregá-la antes de implementar ou revisar qualquer estado
+assíncrono.
+
+Fatos de arquivo (o resto do padrão está no skill):
+
+- Rotas privadas têm `app/(private)/loading.tsx` e `app/(private)/error.tsx`;
+  públicas não têm loading/error (são estáticas). No Next 16 as props de
+  `error.tsx` são `{ error, retry, reset }` — o retry usa **`retry()`**.
+- Leitura de dados usa `useSuspenseQuery` em `services/*/query.ts`; `data`
+  nunca é `undefined`, pode ser `null` (`useMeQuery` → `AuthUser | null`).
+  `data: X ?? []` e `isLoading` não existem nos consumidores.
+- Quatro componentes globais em `components/<nome>/<nome>.tsx`:
+  `loading-state`, `error-state`, `render-boundary`, `render-query-boundary`.
+  Contrato: componente que chama `useSuspenseQuery` fica DENTRO do boundary.
+- Páginas privadas que leem dados no load fazem prefetch + `HydrationBoundary`
+  no Server Component (sem isso o suspense roda no SSR sem cookie →
+  `UNAUTHENTICATED`).
 - Sem ternários/lógica/variáveis no meio do JSX (regra do skill `react-patterns`): derivar fora, extrair subcomponentes com early return.

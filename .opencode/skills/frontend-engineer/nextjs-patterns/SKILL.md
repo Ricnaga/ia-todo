@@ -1,11 +1,13 @@
 ---
 name: nextjs-patterns
-description: Use when working with Next.js, App Router, Server Components, Client Components, data fetching, routing, middleware, metadata, or any Next.js specific patterns. Trigger on keywords like "next", "app router", "server component", "layout", "page.tsx", "loading.tsx", "route.ts", "middleware".
+description: Use when working with Next.js, App Router, Server Components, Client Components, data fetching, routing, middleware, metadata, or any Next.js specific patterns. Trigger on keywords like "next", "app router", "server component", "layout", "page.tsx", "route.ts", "middleware", "generateStaticParams", "generateMetadata". Estados de loading/erro de dados NÃO são escopo deste skill — ver "async-ui-patterns".
 ---
 
 # Next.js Patterns
 
-Referência completa de padrões para Next.js com App Router.
+Referência de padrões do App Router para este projeto. Para estados
+assíncronos de dados (loading, erro, empty, prefetch/hidratação), ver o skill
+`async-ui-patterns` — que é a autoridade do assunto.
 
 ## App Router Structure
 
@@ -180,28 +182,23 @@ export async function generateStaticParams() {
 
 ## Loading e Error States
 
-```tsx
-// loading.tsx - exibido durante Suspense
-export default function Loading() {
-  return <div>Carregando...</div>
-}
+`loading.tsx` e `error.tsx` são arquivos de rota do App Router, mas no
+projeto eles são apenas a **primeira das 3 camadas** de UI assíncrona, e o
+comportamento (skeleton, `role`, mensagens, botão de retry, boundary de query)
+é definido pelo skill `async-ui-patterns` — não repetir aqui.
 
-// error.tsx - error boundary
-;('use client')
-export default function Error({ error, reset }: { error: Error; reset: () => void }) {
-  return (
-    <div>
-      <p>Algo deu errado: {error.message}</p>
-      <button onClick={reset}>Tentar novamente</button>
-    </div>
-  )
-}
-```
+Fato de versão que importa: no **Next 16** as props de `error.tsx` são
+`{ error, retry, reset }`. O botão de retry deve chamar **`retry()`** (re-executa
+o fetch); `reset()` apenas re-renderiza a árvore de suspense **sem** refazer a
+requisição. Usar `reset()` como handler do retry é bug silencioso — a UI
+"tenta de novo" e nada acontece.
+
+Ver `async-ui-patterns` → "Arquitetura — 3 camadas".
 
 ## Tips
 
 - Prefira Server Components — menos JavaScript no client
-- Use `loading.tsx` para UX de carregamento instantâneo
+- Use `loading.tsx` para UX de carregamento instantâneo (convenção completa em `async-ui-patterns`)
 - Mantenha `"use client"` o mais alto possível na árvore
 - Use Server Actions para formulários (não precisa de API route)
 - `revalidatePath` e `revalidateTag` para invalidação de cache

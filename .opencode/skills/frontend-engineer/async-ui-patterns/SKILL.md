@@ -11,6 +11,11 @@ metadata:
 Paradigma único do app para estados assíncronos. Visa: SSR limpo (sem fetch
 sem cookie), transições sem skeleton piscando e erro recuperável com retry.
 
+Este skill é a **autoridade** do assunto. As regras de Next.js que servem de
+porta de entrada estão em `nextjs-patterns`, mas o comportamento de loading /
+erro / empty / prefetch só é definido aqui — não replicar em memory nem em
+outro skill.
+
 ## Arquitetura — 3 camadas (nesta ordem)
 
 1. **Arquivos de rota do Next** (camada primária para o que a rota resolve):
@@ -24,9 +29,17 @@ sem cookie), transições sem skeleton piscando e erro recuperável com retry.
    `RenderQueryBoundary` (para hooks de query) ou `RenderBoundary` (suspense
    sem query). **Regra: todo componente que chama `useSuspenseQuery` fica
    DENTRO do boundary.**
+   - `RenderBoundary` = `ErrorBoundary` (react-error-boundary) + `Suspense`,
+     usando `fallbackRender` (tem acesso a `error` e `resetErrorBoundary`).
+   - `RenderQueryBoundary` = `QueryErrorResetBoundary` + `RenderBoundary` com
+     `onReset={reset}` — assim reset + retry recarrega a suspense query **sem**
+     `refetch()`.
+   - `react-error-boundary` é dependência válida: 3+ usos e é o padrão do
+     TanStack para error boundaries.
 3. **Componentes de UI genéricos** (`components/`): `LoadingState` (skeleton,
-   `role="status"`/`aria-busy`) e `ErrorState` (`role="alert"`, título default
-   "Erro ao carregar", botão "Tentar novamente").
+   reusa `SkeletonStack`, `role="status"`/`aria-busy`) e `ErrorState`
+   (`IconAlertCircle`, `role="alert"`, título default "Erro ao carregar",
+   botão "Tentar novamente").
 
 ## Regras para queries
 
@@ -54,7 +67,8 @@ await queryClient
     queryFn: () => fetchMyAccounts({ cookie: cookieStore.toString() }),
     staleTime: 5_000, // casado com o default do client (providers/index.tsx)
   })
-  .catch(() => undefined) // restaura a semântica best-effort do prefetch
+  .catch(() => undefined) // best-effort: semântica do prefetchQuery, deprecado no TanStack v5
+
 // ...
 return (
   <HydrationBoundary state={dehydrate(queryClient)}>
@@ -68,8 +82,9 @@ Pontos de atenção:
 - **Fetch por canal**: `services/graphql/base.ts` resolve URL absoluta
   (`window.location.origin` no client; `BETTER_AUTH_URL` no servidor) — URL
   relativa quebra o `fetch` do Node no SSR (`ERR_INVALID_URL`).
-- Fetchers de leitura aceitam `requestHeaders?` opcional
-  (`fetchMyAccounts`/`fetchMySessions`/`listTodos`).
+- `request<T>(doc, vars?, headers?)` aceita headers; fetchers de leitura
+  (`fetchMyAccounts`/`fetchMySessions`/`listTodos`) expõem `requestHeaders?`
+  opcional, usado no prefetch SSR.
 - **Sempre embrulhar o fetcher em closure zero-arg**:
   `queryFn: () => fetchMyAccounts(headers)` — passar `fetchMyAccounts` direto
   liga o primeiro parâmetro ao `QueryFunctionContext` do TanStack.
@@ -94,3 +109,13 @@ Pontos de atenção:
   (Next não sanitiza erros de Client Components). Mensagem amigável default.
 - Validação final: `pnpm typecheck`, `pnpm lint`, `pnpm build`, smoke nas
   rotas privadas com cookie autenticado.
+
+## Referências cruzadas
+
+- `nextjs-patterns` — porta de entrada do App Router; `loading.tsx`/`error.tsx`
+  são a camada 1 deste skill.
+- `react-patterns` §4.8 — mutações (`mutate` vs `mutateAsync`, fechar modal só
+  em `onSuccess`); a regra de "sem lógica/ternário no meio do JSX" vale aqui.
+- `frontend-patterns` — `role="status"`/`role="alert"`, foco visível, targets
+  de toque do botão "Tentar novamente".
+- `staff-engineer/code-review-checklist` — avaliar este skill em code review.
