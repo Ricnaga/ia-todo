@@ -24,7 +24,7 @@ Definir padrões de desenvolvimento e revisão de código React, garantindo comp
 | `frontend-engineer` | Consulta antes de implementar ou refatorar componentes/funcionalidades React |
 | `staff-engineer`    | Consulta durante revisões e auditorias de código React                       |
 
-> Enforcement efetivo: `permission.skill` (ver `opencode.json`). A pasta em que a skill vive é **ownership**, não audience.
+> Enforcement efetivo: `permission.skill` no frontmatter de `.opencode/agents/frontend-engineer.md` e `staff-engineer.md` (não existe `opencode.json` neste projeto — o default é permissivo). A pasta em que a skill vive é **ownership**, não audience.
 
 ## 3. Quando consultar
 
@@ -449,7 +449,7 @@ Consolidado (também interleaved nas seções 4 e 5):
 
 ## 9. Referências cruzadas
 
-- **`nextjs-patterns`** — Server vs Client Components, Suspense, `use server` (web).
-- **`react-native-patterns`** — componentes nativos, FlatList, StyleSheet.
+- **`nextjs-patterns`** — Server vs Client Components, `use server`, estrutura de rota (web).
+- **`async-ui-patterns`** — `useSuspenseQuery`, boundaries, loading/error/empty, prefetch + hidratação (o par obrigatório de `useSuspenseQuery` + boundary vive lá, não aqui).
 - **`frontend-patterns`** — consistência visual, UI Kit, semântica, acessibilidade, responsividade.
 - **`staff-engineer/code-review-checklist`** — checklist genérico de revisão (cross-cutting).

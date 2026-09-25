@@ -24,7 +24,7 @@ Definir padrões gerais de construção de interfaces frontend: consistência vi
 | `frontend-engineer` | Consulta durante desenvolvimento e refatoração de interfaces |
 | `staff-engineer`    | Consulta durante auditorias e revisões de UI                 |
 
-> Enforcement efetivo: `permission.skill` (ver `opencode.json`). A pasta em que a skill vive é **ownership**, não audience.
+> Enforcement efetivo: `permission.skill` no frontmatter de `.opencode/agents/frontend-engineer.md` e `staff-engineer.md` (não existe `opencode.json` neste projeto — o default é permissivo). A pasta em que a skill vive é **ownership**, não audience.
 
 ## 3. Quando consultar
 
@@ -131,5 +131,5 @@ Tabela condição → ação. Referência, não regra absoluta:
 
 - **`react-patterns`** — padrões de componentes React (composição, hooks, estado, renderização).
 - **`designer-ux-ui`** — design tokens, design system e decisões visuais (consultar o agent `designer-ux-ui` ao criar telas).
-- **`react-native-patterns`** — padrões específicos de plataforma mobile.
+- **`async-ui-patterns`** — `role="status"`/`role="alert"`, skeletons e botão de retry em estados assíncronos.
 - **`staff-engineer/code-review-checklist`** — checklist genérico de revisão (cross-cutting, inclui a11y).

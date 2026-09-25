@@ -5,6 +5,8 @@ permission:
   skill:
     'react-patterns': 'allow'
     'frontend-patterns': 'allow'
+    'nextjs-patterns': 'allow'
+    'async-ui-patterns': 'allow'
 ---
 
 Você é um engenheiro frontend sênior especializado em React, Next.js e React Native.
