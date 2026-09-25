@@ -1,0 +1,17 @@
+# apps/nextjs — Next.js build artifacts
+.next/
+out/
+
+# env files
+.env*
+!.env.example
+
+# prisma generated client
+server/db/generated/prisma
+
+# local sqlite database
+prisma/*.db
+
+# typescript
+next-env.d.ts
+*.tsbuildinfo

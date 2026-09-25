@@ -5,6 +5,8 @@ alwaysApply: true
 # Memória de contexto — Backend
 
 > Contexto do projeto `ia-task-manager` para o opencode, lado de dados/server. Ver também [`frontend.md`](./frontend.md).
+>
+> **Monorepo pnpm**: o app Next está em `apps/nextjs/` (`@ia-task-manager/nextjs`). Todo o código abaixo (`server/`, `bff/`, `prisma/`, `lib/schemas`) vive sob `apps/nextjs/`. Fase 2: extrair `packages/schemas`, `packages/server`, `packages/bff`.
 
 ## O que é o app
 
@@ -113,6 +115,7 @@ app/api/auth/[...all]/route.ts → toNextJsHandler(auth) — REST do Better Auth
 - `bff/pothos` importa de `bff/adapters` + `lib/` (camada de montagem de schema/resolvers). O server entra no BFF apenas pelo composition root em `bff/context.ts` (via `server/shared/container/`), nunca por import direto nos resolvers/adapters.
 - App Router: route groups `(public)` (não autenticado: `/`, `/login`, `/register`) e `(private)` (autenticado: `/dashboard`, `/tarefas`, `/resumo`, `/busca`, `/settings`); `(private)/layout.tsx` chama `verifySession()`; `proxy.ts` bloqueia rotas protegidas sem cookie `better-auth.session_token` (redirect `/?next=`). Matcher exclui `api|_next/static|_next/image|favicon.ico|.*\..*`.
 - Passo do Prisma: gerar client para `server/db/generated/prisma` (schema.prisma → output).
+- Monorepo: Prisma/schema/seed rodam via `pnpm --filter @ia-task-manager/nextjs db:*` (CWD = `apps/nextjs`); `better-sqlite3` está em `serverExternalPackages` no `next.config.ts`.
 
 ## Convenções backend
 

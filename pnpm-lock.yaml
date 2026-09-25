@@ -7,6 +7,36 @@ settings:
 importers:
 
   .:
+    devDependencies:
+      '@commitlint/cli':
+        specifier: ^21.2.2
+        version: 21.2.2(@types/node@20.19.43)(conventional-commits-parser@7.1.2)(typescript@5.9.3)
+      '@commitlint/config-conventional':
+        specifier: ^21.2.2
+        version: 21.2.2
+      '@commitlint/types':
+        specifier: ^21.2.0
+        version: 21.2.0
+      commitizen:
+        specifier: ^4.3.2
+        version: 4.3.2(@types/node@20.19.43)(typescript@5.9.3)
+      cz-conventional-changelog:
+        specifier: ^3.3.0
+        version: 3.3.0(@types/node@20.19.43)(typescript@5.9.3)
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
+      lint-staged:
+        specifier: ^17.5.0
+        version: 17.5.0
+      prettier:
+        specifier: ^3.9.6
+        version: 3.9.6
+      prettier-plugin-tailwindcss:
+        specifier: ^0.8.1
+        version: 0.8.1(prettier@3.9.6)
+
+  apps/nextjs:
     dependencies:
       '@google/generative-ai':
         specifier: ^0.24.1
@@ -96,15 +126,6 @@ importers:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
     devDependencies:
-      '@commitlint/cli':
-        specifier: ^21.2.2
-        version: 21.2.2(@types/node@20.19.43)(conventional-commits-parser@7.1.2)(typescript@5.9.3)
-      '@commitlint/config-conventional':
-        specifier: ^21.2.2
-        version: 21.2.2
-      '@commitlint/types':
-        specifier: ^21.2.0
-        version: 21.2.0
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.3.3
@@ -117,12 +138,6 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.5(@types/react@19.2.18)
-      commitizen:
-        specifier: ^4.3.2
-        version: 4.3.2(@types/node@20.19.43)(typescript@5.9.3)
-      cz-conventional-changelog:
-        specifier: ^3.3.0
-        version: 3.3.0(@types/node@20.19.43)(typescript@5.9.3)
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -135,18 +150,6 @@ importers:
       eslint-config-prettier:
         specifier: ^10.1.8
         version: 10.1.8(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
-      lint-staged:
-        specifier: ^17.5.0
-        version: 17.5.0
-      prettier:
-        specifier: ^3.9.6
-        version: 3.9.6
-      prettier-plugin-tailwindcss:
-        specifier: ^0.8.1
-        version: 0.8.1(prettier@3.9.6)
       prisma:
         specifier: 7.10.0
         version: 7.10.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(better-sqlite3@12.11.1)(magicast@0.5.4)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)
@@ -5326,7 +5329,7 @@ snapshots:
     dependencies:
       '@types/lodash': 4.17.25
       '@types/react': 19.2.18
-      lodash: 4.17.21
+      lodash: 4.18.1
       react: 19.2.8
 
   '@visx/scale@4.0.1-alpha.0':
@@ -5342,7 +5345,7 @@ snapshots:
       '@visx/scale': 4.0.1-alpha.0
       '@visx/vendor': 4.0.0-alpha.0
       classnames: 2.5.1
-      lodash: 4.17.21
+      lodash: 4.18.1
       react: 19.2.8
 
   '@visx/vendor@4.0.0-alpha.0':

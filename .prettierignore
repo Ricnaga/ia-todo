@@ -1,11 +1,11 @@
-.next
+**/.next
 out
 build
 node_modules
-server/db/generated
-prisma/dev.db
-*.tsbuildinfo
-next-env.d.ts
-pnpm-lock.yaml
 .pnpm-store
+apps/nextjs/server/db/generated
+apps/nextjs/prisma/dev.db
+*.tsbuildinfo
+apps/nextjs/next-env.d.ts
+pnpm-lock.yaml
 .czrc

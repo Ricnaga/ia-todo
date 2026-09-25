@@ -5,6 +5,8 @@ alwaysApply: true
 # Memória de contexto — Frontend
 
 > Contexto do projeto `ia-task-manager` para o opencode, lado de UI/frontend. Ver também [`backend.md`](./backend.md).
+>
+> **Monorepo pnpm**: o app Next está em `apps/nextjs/` (`@ia-task-manager/nextjs`). Todo o código abaixo (`app/`, `components/`, `lib/`, `providers/`, `services/`) vive sob `apps/nextjs/`. Fase 2: extrair `packages/schemas`, `packages/server`, `packages/bff`.
 
 ## O que é o app
 

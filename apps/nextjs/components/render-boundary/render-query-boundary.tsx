@@ -17,7 +17,7 @@ export function RenderQueryBoundary({
 }: RenderQueryBoundaryProps) {
   return (
     <QueryErrorResetBoundary>
-      {({ reset }) => (
+      {({ reset }: { reset: () => void }) => (
         <RenderBoundary fallback={fallback} errorFallback={errorFallback} onReset={reset}>
           {children}
         </RenderBoundary>
