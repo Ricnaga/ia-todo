@@ -6,7 +6,9 @@ alwaysApply: true
 
 > Contexto do projeto `ia-task-manager` para o opencode, lado de dados/server. Ver também [`frontend.md`](./frontend.md).
 >
-> **Monorepo pnpm**: o app Next está em `apps/nextjs/` (`@ia-task-manager/nextjs`). Todo o código abaixo (`server/`, `bff/`, `prisma/`, `lib/schemas`) vive sob `apps/nextjs/`. Fase 2: extrair `packages/schemas`, `packages/server`, `packages/bff`.
+> **Monorepo pnpm + Turborepo**: o app Next está em `apps/nextjs/` (`@ia-task-manager/nextjs`); o núcleo está em `packages/server` (`@ia-task-manager/server`), a porta GraphQL em `packages/bff`, os contratos zod em `packages/schemas` e a base de TS em `packages/tsconfig`.
+>
+> Os packages são **source-only**: publicam TS puro (`main` → `src/index.ts`), sem etapa de build, e o app os compila via `transpilePackages`. Por isso os imports internos dos packages são **relativos** — o alias `@/*` do Next só existe no app. O Prisma Client é gerado em `packages/server/src/db/generated/prisma` (ignorado pelo git).
 
 ## O que é o app
 

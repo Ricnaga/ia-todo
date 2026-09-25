@@ -6,7 +6,9 @@ alwaysApply: true
 
 > Contexto do projeto `ia-task-manager` para o opencode, lado de UI/frontend. Ver também [`backend.md`](./backend.md).
 >
-> **Monorepo pnpm**: o app Next está em `apps/nextjs/` (`@ia-task-manager/nextjs`). Todo o código abaixo (`app/`, `components/`, `lib/`, `providers/`, `services/`) vive sob `apps/nextjs/`. Fase 2: extrair `packages/schemas`, `packages/server`, `packages/bff`.
+> **Monorepo pnpm + Turborepo**: o app Next está em `apps/nextjs/` (`@ia-task-manager/nextjs`) e contém `app/`, `components/`, `lib/`, `providers/`, `services/`. O núcleo e a API saíram para `packages/server` e `packages/bff`; os contratos zod para `packages/schemas`.
+>
+> O app consome os packages por nome (`@ia-task-manager/schemas`, `@ia-task-manager/bff`, `@ia-task-manager/server`) via `transpilePackages` — eles publicam TS puro, sem build. O alias `@/*` do Next é exclusive do app. Lint e format rodam uma única vez na raiz (ESLint com config única); `pnpm typecheck`/`build` passam pelo Turborepo.
 
 ## O que é o app
 

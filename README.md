@@ -75,6 +75,7 @@ packages/
 ```
 
 - **Source-only**: os packages publicam TypeScript puro (`main` → `src/index.ts`), sem etapa de build. O app os compila via `transpilePackages` no `next.config.ts`. Por isso os imports internos dos packages são **relativos** — o alias `@/*` do app não existe fora dele.
+- **Turborepo** orquestra `build`, `typecheck` e `db:*` pelo grafo de dependências, com cache. `lint` e `format` passam uma única vez pela raiz (o ESLint tem uma config só, em `eslint.config.mjs`).
 - A UI consome **GraphQL** via React Query, com operações tipadas no wrapper `services/graphql/base.ts`.
 - Consumidores externos usam o mesmo endpoint GraphQL — uma porta, zero duplicação.
 - Hexagonal no BFF + clean architecture/DDD no back: o BFF define as ports (`adapters/`, uma por bounded context); o server entra como adapter no único composition root (`bff/context.ts`), sem connectors/domain/factories intermediários — retomados só se surgir divergência real de shape (relay, multi-consumidores, subscriptions, 3º domínio).
@@ -121,17 +122,17 @@ Ambos resolvem para `packages/server/prisma/dev.db`.
 
 ## Scripts
 
-| Comando             | Descrição                            |
-| ------------------- | ------------------------------------ |
-| `pnpm dev`          | servidor de desenvolvimento          |
-| `pnpm build`        | build de produção                    |
-| `pnpm start`        | roda o build                         |
-| `pnpm lint`         | ESLint (app + packages)              |
-| `pnpm lint:fix`     | ESLint com correção automática       |
-| `pnpm typecheck`    | TypeScript em todos os workspaces    |
-| `pnpm format`       | formata com Prettier                 |
-| `pnpm format:check` | verificação Prettier                 |
-| `pnpm db:generate`  | gera o Prisma Client                 |
-| `pnpm db:migrate`   | aplica/cria migrations               |
-| `pnpm db:studio`    | Prisma Studio (browser do banco)     |
-| `pnpm commit`       | commit com commitizen (convencional) |
+| Comando             | Descrição                                 |
+| ------------------- | ----------------------------------------- |
+| `pnpm dev`          | servidor de desenvolvimento               |
+| `pnpm build`        | build de produção                         |
+| `pnpm start`        | roda o build                              |
+| `pnpm lint`         | ESLint (app + packages)                   |
+| `pnpm lint:fix`     | ESLint com correção automática            |
+| `pnpm typecheck`    | TypeScript em todos os workspaces (turbo) |
+| `pnpm format`       | formata com Prettier                      |
+| `pnpm format:check` | verificação Prettier                      |
+| `pnpm db:generate`  | gera o Prisma Client                      |
+| `pnpm db:migrate`   | aplica/cria migrations                    |
+| `pnpm db:studio`    | Prisma Studio (browser do banco)          |
+| `pnpm commit`       | commit com commitizen (convencional)      |
