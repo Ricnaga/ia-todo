@@ -8,7 +8,10 @@ import { z } from 'zod'
 import { paths } from '@/lib/constants/router-paths'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { authClient } from '@/services/auth'
-import { OAuthButtons, type SocialProvider } from '../../../_components/oauth-buttons/oauth-buttons'
+import {
+  OAuthButtons,
+  type SocialProvider,
+} from '@/app/(public)/_components/oauth-buttons/oauth-buttons'
 
 type FormLoginProps = {
   callbackURL?: string
