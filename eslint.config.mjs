@@ -39,6 +39,9 @@ export default tseslint.config(
     ignores: [
       '**/node_modules/**',
       '**/.next/**',
+      '**/.nuxt/**',
+      '**/.output/**',
+      '**/.svelte-kit/**',
       '**/out/**',
       '**/dist/**',
       '**/next-env.d.ts',

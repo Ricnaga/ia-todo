@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
+    "dev:nextjs": "turbo run dev --filter=@ia-task-manager/nextjs",
+    "dev:nuxt": "turbo run dev --filter=@ia-task-manager/nuxt",
+    "dev:sveltekit": "turbo run dev --filter=@ia-task-manager/sveltekit",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "eslint",
