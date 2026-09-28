@@ -24,6 +24,7 @@ alwaysApply: true
 
 - **Banco**: Prisma 7 (SQLite via better-sqlite3), schema em `prisma/schema.prisma`, cliente em `server/db/prisma.ts`. Modelos do Better Auth (`User`, `Session`, `Account`, `Verification`) + `Todo.userId` (FK + index)
 - **Auth**: better-auth 1.7.5 (`server/modules/auth/infra/better-auth.ts`), email/password + Google/GitHub (condicionais a credenciais no `.env`) + account linking; `user.changeEmail.enabled` + `updateEmailWithoutVerification` (dev); verificação de email só loga URL no console
+  → `session.cookieCache` ligado (`maxAge: 60`, `strategy: 'compact'`): valida a sessão pelo cookie `session_data` assinado (HMAC) sem ir ao banco, cortando as ~4-5 leituras da tabela `Session` por page load; ao expirar o `maxAge` volta ao banco (1 leitura/min/usuário) e renova o cache. **Não usar `refreshCache`** — é só para setup sem `database` e o Better Auth o desliga com warning. **Trade-off**: sessão revogada no banco continua válida no cookie até `maxAge` (~60s)
 - **API**: GraphQL (graphql-yoga + @pothos/core) + REST do Better Auth (`app/api/auth/[...all]/route.ts`, só fluxos de sessão/cookies)
 - **Cache**: Redis (cache-aside por `userId`), fallback silencioso se Redis indisponível — `server/shared/cache/` + `docker-compose.yml` (redis:7-alpine)
 - **IA**: @google/generative-ai (Gemini), acessado via `server/shared/ai` (port `AiService` na raiz + adapters por provider em `ai/<provider>/`; os use-cases injetam só a abstração)
@@ -45,19 +46,27 @@ server/              → núcleo de negócio (zero dependência de Next), DDD po
 ├── modules/
 │   ├── todos/       → context CORE: Todo aggregate + CRUD + suggestTodo (shaping de todo com IA)
 │   │                → clean architecture: controllers/ (orquestram use-cases), use-cases/ (por operação),
-│   │                → repositories/ (port), infra/ (impl Prisma + CachedTodoRepository)
+│   │                → repositories/ (port), infra/ (impl Prisma + CachedTodoRepository), constants/ (prompt.constants.ts)
 │   │                → TODAS as operações são scoped por userId (ITodoRepository.list/getById/create/update/delete recebem userId)
 │   ├── auth/        → context SUPPORTING: use-cases/auth.use-case.interface.ts (port `IAuthUseCase`: resolveSession/getProfile/
 │   │                → updateProfile/changeEmail/changePassword/listAccounts/unlinkAccount/listSessions/revokeSession/
 │   │                → revokeOtherSessions/getProviders) + use-cases/auth.use-case.ts (AuthUseCase implements IAuthUseCase,
-│   │                → DI auth + oauthService)
+│   │                → DI auth + oauthService + ISessionTokenRepository)
+│   │                → repositório auth/  → port ISessionTokenRepository.findTokenBySessionId(sessionId, userId) (o
+│   │                →   auth.api.revokeSession do better-auth só aceita token; o lookup por id filtra {id, userId})
 │   │                → vínculo de conta (OAuth) NÃO passa pelo GraphQL: o client chama `authClient.linkSocial` (REST `/api/auth/link-social`)
 │   │                → infra/better-auth.ts (instância + export type AuthInstance = typeof auth, usada no DI)
-│   │                → use-case traduz APIError do better-auth → AuthActionFailedError (mensagens pt-BR), ex.: INVALID_PASSWORD→"Senha atual incorreta."
+│   │                → mappers/auth.mapper.ts (mapUser/mapAccount/mapSession: better-auth → DTO de schemas/auth; input derivado
+│   │                →   de AuthInstance['api'] em vez de reescrever o shape; whitelist que NUNCA deixa vazar token/secrets da conta)
+│   │                → constants/error.constants.ts (AUTH_ERROR_MESSAGES por code + GENERIC_ERROR_MESSAGE + SESSION_NOT_FOUND_MESSAGE)
+│   │                → errors/better-auth-error.ts (runAuthAction: async+try/catch; `isAPIError` — type guard `error is APIError`,
+│   │                →   exportado por better-auth/api — dispensa o cast; authErrorMessage fica module-private, sem escape hatch)
 │   ├── assistant/   → context SUPPORTING: nlSearch (busca em linguagem natural). Recebe Todo[] via parâmetro
 │   │                → caixa-preta, consumidora do aggregate de todos (Customer-Supplier), sem port próprio
+│   │                → constants/prompt.constants.ts (NL_SEARCH_SYSTEM_INSTRUCTION); predicados (matchesCriteria/matchesDue) ficam no use-case (regra de negócio)
 │   └── insights/    → context SUPPORTING: summarizeDay (resumo do dia). Recebe Todo[] via parâmetro
 │   │                → filtra '!completed' DENTRO do use-case (regra de negócio no domínio, não no resolver)
+│   │                → constants/prompt.constants.ts (SUMMARIZE_DAY_SYSTEM_INSTRUCTION) + mappers/todo-prompt.mapper.ts (toPromptTodo: Todo → payload do prompt)
 ├── shared/
 │   ├── ai/          → INFRA genérica: ai.service.interface.ts (port AiService, acessível em @/server/shared/ai/ai.service.interface,
 │   │                → use-cases dependem SÓ do port) — adapter por provider em pasta própria com barrel (path público @/server/shared/ai/gemini)
@@ -67,15 +76,16 @@ server/              → núcleo de negócio (zero dependência de Next), DDD po
 │   │                → reconnectStrategy: false, JSON serialization, fallback silencioso) + index.ts singletons (RedisCache via env.REDIS_URL)
 │   ├── oauth/       → INFRA genérica: oauth.interface.ts (AuthProvider = 'google'|'github' + port IOAuthService.getProviders)
 │   │                → + oauth.service.ts (OAuthService via env.GOOGLE_*/GITHUB_*); singleton oauthService no container/infra.ts
-│   └── errors/      → app.errors.ts — fonte ÚNICA de erros de aplicação: AppError base { code (string aberto), message }
+│   └── errors/      → app.errors.ts — fonte ÚNICA das CLASSES de erro de aplicação: AppError base { code (string aberto), message }
 │                    → + erros específicos (TodoNotFoundError, AuthenticationRequiredError, AuthActionFailedError);
-│                    → sem errors.ts por módulo (contração: módulo ≥5 erros próprios pode voltar a ter arquivo local)
+│                    → módulo pode ter errors/ local só para TRADUÇÃO (erro de infra → erro de domínio, ex.: auth/errors/better-auth-error.ts),
+│                    → nunca para declarar classes novas (contração: módulo ≥5 erros próprios pode voltar a ter arquivo local)
 │   └── container/   → composition root: DI manual (sem inversify), resolve controladores; index.ts (agregador) + 1 arquivo por context
-│                    → (todo/assistant/insights/auth) + infra.ts (serviços compartilhados). Todo: CachedTodoRepository(PrismaTodoRepository, cache)
+│                    → (todo/assistant/insights/auth) + infra.ts (serviços compartilhados). Todo: CachedTodoRepository(PrismaTodoRepository, cache);
+│                    → Auth: PrismaSessionTokenRepository(prisma)
 ├── config/          → environment.ts (env com parse zod, UPPERCASE: DATABASE_URL, GEMINI_API_KEY, GEMINI_MODEL, BETTER_AUTH_URL,
 │                    → BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID/SECRET, GITHUB_CLIENT_ID/SECRET, REDIS_URL default redis://localhost:6379)
 ├── db/              → prisma.ts (singleton) + generated/ (Prisma Client gerado)
-└── utils/           → helpers genéricos
 
 bff/                 → camada de apresentação de API (GraphQL) — NÚCLEO HEXAGONAL, espelha os bounded contexts
 ├── adapters/        → ports + adapters por context (a fronteira que o resolver consome)
@@ -85,7 +95,7 @@ bff/                 → camada de apresentação de API (GraphQL) — NÚCLEO H
 │   └── auth/        → auth.port.ts (AuthPort) + auth.adapter.ts (todas os métodos: me/perfil/email/senha/contas/sessões)
 │   fluxo: resolver → ctx.adapters.todo (Port) → adapter → controller (server)
 ├── factories/       → instâncias dos adapters (1 pasta por context, ex.: auth.factory.ts) montadas por `bff/factories/index.ts`
-├── context.ts       → GraphQLContext { adapters: { todo, assistant, insights, auth }, user: AuthUser|null, session: {id,token}|null, headers }
+├── context.ts       → GraphQLContext { adapters: { todo, assistant, insights, auth }, user: AuthUser|null, session: {id}|null, headers }
 │                    → ÚNICO ponto que importa de server/ (composition root do BFF); resolve sessão via authUseCase.resolveSession(headers)
 ├── graphql.ts       → createGraphQLHandler() — Yoga com schema + context + maskedErrors (inclui maskError)
 ├── errors.ts        → erros do layer GraphQL: raiseResolvable + execute (mapeia AppError/ZodError → GraphQLError no resolver)
@@ -126,8 +136,10 @@ app/api/auth/[...all]/route.ts → toNextJsHandler(auth) — REST do Better Auth
 - IA é infra genérica (`server/shared/ai`): use-cases dependem do port `AiService` (raiz), nunca do SDK Gemini; troca de provider = novo adapter em `ai/<provider>/` (com barrel próprio), sem tocar nos contexts
 - Camada de negócio (`server/modules`) isolada de HTTP/GraphQL (ports & adapters); `server/` nunca importa de `app/api` nem de `next/server`
 - Validação de input com zod em todas as fronteiras
-- Erros: `AppError` (code+message pt-BR) nas bordas do domínio, centralizado em `server/shared/errors/app.errors.ts`; use-case de auth traduz APIError do better-auth → `AuthActionFailedError`; Yoga `maskedErrors` expõe só message+code (nunca stack trace)
+- `constants/` e `mappers/` por módulo (`*.constants.ts` / `*.mapper.ts`): use-case orquestra, não declara constante/chave de mapa; mapper é whitelist explícita (nunca `{...row}`), entrada deriva do tipo real da infra (`AuthInstance['api']`) em vez de shape reescrito à mão
+- Erros: `AppError` (code+message pt-BR) nas bordas do domínio, centralizado em `server/shared/errors/app.errors.ts`; use-case de auth traduz APIError do better-auth → `AuthActionFailedError` (guard `isAPIError` de `better-auth/api`, sem cast); Yoga `maskedErrors` expõe só message+code (nunca stack trace)
 - Cache: cache-aside por `userId` (`todos:{userId}`, TTL 300s); invalidação em create/update/delete; cache nunca derruba consulta (fallback silencioso)
-- Nomes reais dos métodos do better-auth `auth.api` (v1.7.5): `getSession`, `updateUser` (sem email; retorna `{status}` → re-buscar via getSession), `changeEmail` (requer `user.changeEmail.enabled`; retorna `{status}`), `changePassword` (`{token,user}` → retornar true), `listUserAccounts` (array direto), `unlinkAccount` (body: `accountId` = `Account.id`), `listSessions` (array direto), `revokeSession` (`{token,user}` → retornar true), `revokeOtherSessions` (`{status}`)
+- Nomes reais dos métodos do better-auth `auth.api` (v1.7.5): `getSession`, `updateUser` (sem email; retorna `{status}` → re-buscar via getSession), `changeEmail` (requer `user.changeEmail.enabled`; retorna `{status}`), `changePassword` (`{token,user}` → retornar true), `listUserAccounts` (array direto), `unlinkAccount` (body: `accountId` = `Account.id`), `listSessions` (array direto), `revokeSession` (**só aceita `{token}`** → o id do input é resolvido em token pelo `ISessionTokenRepository`; o próprio better-auth re-checa o `userId`), `revokeOtherSessions` (`{status}`)
+- **Sessão nunca atravessa a fronteira em token**: o DTO `AuthSession` expõe `{id, isCurrent, expiresAt, ipAddress, userAgent, createdAt, updatedAt}` e `revokeSession` recebe `{sessionId}`. O token é segredo do cookie httpOnly — se precisar sair do servidor, é bug
 - Vínculo OAuth usa o client (`authClient.linkSocial`, rota `/link-social`) — o redirectPlugin do client faz `window.location.href` quando a resposta tem `{url, redirect:true}`; aqui o `linkAccount` GraphQL foi removido (sem uso)
 - Estilo de código segue prettier (single quote, sem semicolon)
