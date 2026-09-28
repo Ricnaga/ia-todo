@@ -31,7 +31,8 @@
     "zustand": "^5.0.15",
     "@ia-task-manager/schemas": "workspace:*",
     "@ia-task-manager/bff": "workspace:*",
-    "@ia-task-manager/server": "workspace:*"
+    "@ia-task-manager/server": "workspace:*",
+    "@ia-task-manager/design-tokens": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
