@@ -6,9 +6,19 @@ alwaysApply: true
 
 > Contexto do projeto `ia-task-manager` para o opencode, lado de UI/frontend. Ver também [`backend.md`](./backend.md).
 >
-> **Monorepo pnpm + Turborepo**: o app Next está em `apps/nextjs/` (`@ia-task-manager/nextjs`) e contém `app/`, `components/`, `lib/`, `providers/`, `services/`. O núcleo e a API saíram para `packages/server` e `packages/bff`; os contratos zod para `packages/schemas`.
+> **Monorepo pnpm + Turborepo com três apps de UI**, mesmos contratos (`@ia-task-manager/schemas`, `@ia-task-manager/bff`, `@ia-task-manager/server`):
 >
-> O app consome os packages por nome (`@ia-task-manager/schemas`, `@ia-task-manager/bff`, `@ia-task-manager/server`) via `transpilePackages` — eles publicam TS puro, sem build. O alias `@/*` do Next é exclusive do app. Lint e format rodam uma única vez na raiz (ESLint com config única); `pnpm typecheck`/`build` passam pelo Turborepo.
+> | App               | Stack                              | UI kit                             | Skills                                  |
+> | ----------------- | ---------------------------------- | ---------------------------------- | --------------------------------------- |
+> | `apps/nextjs/`    | Next.js 16 (App Router) + React 19 | Mantine v9                         | `react-patterns`, `nextjs-patterns`     |
+> | `apps/nuxt/`      | Nuxt 4 + Vue 3                     | `@nuxt/ui` v4                      | `vue-patterns`, `nuxt-patterns`         |
+> | `apps/sveltekit/` | SvelteKit 2 + Svelte 5 (runes)     | `@skeletonlabs/skeleton-svelte` v5 | `svelte-patterns`, `sveltekit-patterns` |
+>
+> `packages/design-tokens` é a fonte única de cor, espaçamento, tipografia, shadow e motion (CSS puro para Tailwind 4), com um adapter por UI kit (`adapters/mantine.css`, `adapters/nuxt-ui.css`, `adapters/skeleton.css`). **Nunca usar cor/espaço literal no app** — sempre o token.
+>
+> **Daqui para baixo, este documento descreve o app Next** (`apps/nextjs/`), o mais maduro: `app/`, `components/`, `lib/`, `providers/`, `services/`. Os apps Nuxt e SvelteKit ainda são scaffolds. O núcleo e a API ficam em `packages/server` e `packages/bff`; os contratos zod em `packages/schemas`.
+>
+> O app consome os packages por nome via `transpilePackages` — eles publicam TS puro, sem build. O alias `@/*` do Next é exclusive do app. Lint e format rodam uma única vez na raiz (ESLint com config única); `pnpm typecheck`/`build` passam pelo Turborepo.
 
 ## O que é o app
 
@@ -24,10 +34,12 @@ Features de IA na UI (via Gemini, structured output validado por zod no server):
 
 - **Next.js 16** (App Router) + React 19 + TypeScript strict
 - **UI**: Mantine (core, dates, form, hooks, notifications) + Tabler Icons + Tailwind 4
-- **Auth**: better-auth client (`services/auth/auth.client.ts` via `createAuthClient`); cookies/sessão via REST do Better Auth (`app/api/auth/[...all]`)
-- **Data fetching**: @tanstack/react-query consumindo **GraphQL** (`/api/graphql`) via wrapper tipado em `services/graphql/base.ts`; + @tanstack/react-table
-- **State**: zustand (client-side)
-- **Formulários/validação**: `@mantine/form` com `schemaResolver` (Standard Schema, embutido no Mantine v9) + schemas zod v4 compartilhados em `lib/schemas` (ex.: `changePasswordSchema`); sem react-hook-form
+- **Auth**: better-auth client (`services/auth/auth.client.ts` via `createAuthClient`); **sessão é estado do servidor, nunca do client** — o token fica em cookie httpOnly e o front guarda só o usuário, revalidando com a query GraphQL `me` (`useMeQuery`, `staleTime: 0` + `refetchOnMount`/`refetchOnWindowFocus`); o client do better-auth é usado **apenas** nos fluxos imperativos (signIn/signUp/signOut/linkSocial)
+- **Data fetching**: @tanstack/react-query consumindo **GraphQL** (`/api/graphql`) via wrapper tipado em `services/graphql/base.ts`
+- **Tabela**: @tanstack/react-table **v9** (`useTable` + `tableFeatures`, não `useReactTable`/`getCoreRowModel`). Features registradas explicitamente em `table-todo-list/todo-table-features.ts`; `sortFns` é um registry (só as chaves registradas são válidas). Cell/header renderizam via `<table.FlexRender />`. Doc local: `node_modules/@tanstack/react-table/skills/`
+- **State**: nenhum state manager global — **server state é react-query**, UI state local é `useState`/`useForm`. Não instalar zustand/redux sem necessidade concreta. `zustand`, `@tanstack/react-query-devtools`, `@mantine/dates` e `@mantine/hooks` seguem declarados no `package.json` por decisão do usuário, mas têm **0 imports** (auditoria de 2026-09 nos 22 client components) — não usar como se fossem APIs disponíveis em código novo
+- **View state (filtro/ordenação) vai na URL**, não em store: `useSearchParams` + `router.replace(..., { scroll: false })`, com a lógica pura em `lib/todo/todo-filters.ts` (valida com zod, ignora param inválido) e o glue em `lib/todo/use-todo-filters.ts`. Padrão confirmado nos docs do Next em `dist/docs/01-app/02-guides/preserving-ui-state.md`
+- **Formulários/validação**: padrão do projeto é `@mantine/form` com `schemaResolver` (Standard Schema, embutido no Mantine v9) + schemas zod v4 compartilhados em `lib/schemas` (ex.: `changePasswordSchema`). **Exceção conhecida:** `tarefas/_components/modal-todo-form` usa `react-hook-form` + `@hookform/resolvers` — as duas libs convivem; ao criar form novo, seguir o `@mantine/form` e não introduzir uma terceira via
 
 ## Páginas
 
@@ -63,8 +75,8 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
   - `services/todo/todo.request.ts` → operações GraphQL cruas (sem react-query): `listTodos`/`getTodo`/`createTodo`/`updateTodo`/`deleteTodo`/`suggestTodo` + `TodoCreateRequest`/`TodoUpdateRequest` + parse via `todoSchema`
   - `services/assistant/assistant.request.ts` → `nlSearch` (parse via `assistantSchema` → `Assistant`)
   - `services/insights/insights.request.ts` → `summarizeDay`
-  - `services/auth/auth.client.ts` → `createAuthClient()` do better-auth (signUp/signIn/signOut/social via REST)
-  - `services/auth/auth.request.ts` → operações GraphQL de conta: `fetchMe` (nullable), `myAccounts`, `mySessions`, `updateProfile`, `changeEmail`, `changePassword`, `unlinkAccount`, `revokeSession`, `revokeOtherSessions`
+  - `services/auth/auth.client.ts` → `createAuthClient()` do better-auth — **só** signIn/signUp/signOut/social/linkSocial; nunca para ler sessão
+  - `services/auth/auth.request.ts` → operações GraphQL de conta: `fetchMe` (nullable, aceita `requestHeaders` para o prefetch SSR), `myAccounts`, `mySessions`, `updateProfile`, `changeEmail`, `changePassword`, `unlinkAccount`, `revokeSession` (**por `sessionId`, nunca por token**), `revokeOtherSessions`
   - `services/todo/todo.keys.ts` → **query key factory** em UPPERCASE com underline (ex.: `todoQueryKeys.all = ['TODO_LIST']`, `todoQueryKeys.detail(id) = ['TODO_DETAIL', id]`); `as const` para manter o literal
   - `services/todo/todo.query.ts` → `useTodosQuery()` (queryKey + queryFn)
   - `services/todo/todo.mutation.ts` → `useCreateTodoMutation`/`useUpdateTodoMutation`/`useDeleteTodoMutation`/`useSuggestTodoMutation` (casts `unknown → TodoCreateRequest/TodoUpdateRequest` e `invalidateQueries(todoQueryKeys.all)` ficam aqui; suggestTodo pertence ao context todos, igual no server)
@@ -77,7 +89,8 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 - Hooks de IA ficam no contexto de negócio (assistant/insights/todos), **não** em uma pasta `ai` — `server/shared/ai` (infra do provider) fica imune
 - Componentes **nunca** chamam `services/graphql/base` direto: usam os hooks de `services/*`
 - Toasts/notificações vêm dos componentes como **callbacks por chamada** (`mutateAsync(vars, { onSuccess, onError })`) — o `onSuccess` do service é exclusivo da invalidação
-- Sessão SSR: `lib/auth/session.ts` → `getCurrentUser()` (lê cookies + `auth.api.getSession` com `new Headers({ cookie })`, React `cache()`) e `verifySession()` (redirect `/login?next=...` se não autenticado); `(private)/layout.tsx` chama `verifySession()`; NavShell usa `authClient.useSession()` no client + logout
+- Sessão SSR: `lib/auth/session.ts` → `getCurrentUser()` (lê cookies + `auth.api.getSession` com `new Headers({ cookie })`, React `cache()`) e `verifySession()` (redirect `/login` se não autenticado); `(private)/layout.tsx` chama `verifySession()` **e** prefetcha `me` num `HydrationBoundary` (mesmo padrão de `tarefas/page.tsx`); NavShell lê `useMeQuery()` e o logout faz `queryClient.clear()` antes do `signOut()`
+- `components/session-guard/session-guard.tsx` → monta em `providers/index.tsx`; assina o `QueryCache` e, em erro com `code === 'UNAUTHENTICATED'` **ou** `me` resolvendo `null`, faz `queryClient.clear()` + `router.replace('/login?next=…')` (guard de loop com `useRef`)
 - OAuth: login e vínculo de conta (Google/GitHub) usam o client do better-auth — `authClient.signIn.social` / `authClient.linkSocial({ provider, callbackURL })`; o redirect para o consent é gerenciado pelo client (redirectPlugin → `window.location.href` interno), sem `window.location` manual nem GraphQL no fluxo
 
 ## Convenções frontend
@@ -91,7 +104,7 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 - Schemas zod **pontuais** (usados só pelo componente/form) são criados co-locados no próprio componente; `lib/schemas/{context}` tem **apenas o espelhamento do contrato BFF/server** (ex.: `changePasswordSchema` espelha o contrato da mutação GraphQL — por isso mora em `lib`, não no componente)
 - Padrão de Card do Mantine: `shadow="sm" padding="lg" withBorder` (aplicado em todos os `<Card>` do app)
 - A UI fala com o server por **dois canais**: dados autenticados via **GraphQL** (`services/graphql/base.ts`, sempre através dos hooks de `services/*`); fluxos de sessão (login/registro/logout/redirecionamentos OAuth) via **REST do Better Auth** (`services/auth/auth.client.ts`)
-- Erros de operação chegam normalizados pela `services/graphql/base.ts` (usa `errors[0].message` do envelope do Yoga; GraphQL expõe só message + extensions.code)
+- Erros de operação chegam normalizados pela `services/graphql/base.ts` como **`GraphQLRequestError`** (`message` + `code` de `extensions.code`, que o Yoga só emite para `AppError`); `UNAUTHENTICATED` é o gatilho do `session-guard`
 - Ícones: `@tabler/icons-react` NÃO tem `IconBrandEmail` — usar `IconMail`
 - Em Server Components, **não** use `component={<C>}` de client (ex.: `<Button component={Link}>`): o componente client não serializa funções vindas de RSC → envolva com `<Link href><Button/></Link>` (erro "Functions cannot be passed directly to Client Components")
 - Estilo de código segue prettier (single quote, sem semicolon)
@@ -116,5 +129,7 @@ Fatos de arquivo (o resto do padrão está no skill):
   Contrato: componente que chama `useSuspenseQuery` fica DENTRO do boundary.
 - Páginas privadas que leem dados no load fazem prefetch + `HydrationBoundary`
   no Server Component (sem isso o suspense roda no SSR sem cookie →
-  `UNAUTHENTICATED`).
+  `UNAUTHENTICATED`). Consumidores de `useMeQuery()` também precisam de
+  `RenderQueryBoundary` quando o dado pode faltar (early return **antes** de
+  outros hooks → extrair subcomponente, senão `rules-of-hooks`).
 - Sem ternários/lógica/variáveis no meio do JSX (regra do skill `react-patterns`): derivar fora, extrair subcomponentes com early return.
