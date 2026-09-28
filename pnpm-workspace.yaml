@@ -12,3 +12,4 @@ allowBuilds:
   workerd: false
   msgpackr-extract: false
   better-sqlite3: true
+  vue-demi: true
