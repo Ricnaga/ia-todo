@@ -1,0 +1,10 @@
+/*
+ * Tokens compartilhados — ver packages/design-tokens.
+ *
+ * `main.css` e carregado depois do CSS do `@nuxt/ui` (o proprio modulo injeta o
+ * tema dele), entao os tokens vem por ultimo na origem e vencem a paleta padrao.
+ */
+@import 'tailwindcss';
+@import '@nuxt/ui';
+@import '@ia-task-manager/design-tokens/index.css';
+@import '@ia-task-manager/design-tokens/adapters/nuxt-ui.css';
