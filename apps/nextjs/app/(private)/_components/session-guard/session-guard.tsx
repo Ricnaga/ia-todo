@@ -18,6 +18,16 @@ function isUnauthenticated(query: Query<unknown, Error>): boolean {
   return error instanceof GraphQLRequestError && error.code === UNAUTHENTICATED_CODE
 }
 
+/**
+ * Par cliente do `verifySession()`: o layout protege a arvore privada no SSR e
+ * este protege depois. Nao e boundary nem bloqueia render -- e uma assinatura do
+ * QueryCache que, quando a sessao morre (erro com `code` UNAUTHENTICATED ou `me`
+ * resolvendo null), limpa o cache e manda para `/login?next=...`.
+ *
+ * Fica em `_components` do route group privado porque e dele: `useMeQuery` so e
+ * lido nas telas autenticadas, entao um guard global cobriria alem do escopo real
+ * e ainda precisaria ser montado aqui.
+ */
 export function SessionGuard() {
   const queryClient = useQueryClient()
   const router = useRouter()
