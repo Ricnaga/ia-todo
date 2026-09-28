@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
-import { AppShell, Avatar, Menu, NavLink, Title } from '@mantine/core'
+import { AppShell, Avatar, Group, Menu, NavLink, Title } from '@mantine/core'
 import {
   IconClipboardList,
   IconHome,
@@ -14,6 +14,7 @@ import {
 } from '@tabler/icons-react'
 import { paths } from '@/lib/constants/router-paths'
 import { authClient, useMeQuery } from '@/services/auth'
+import { ThemeSwitcher } from './theme-switcher/theme-switcher'
 
 const navItems = [
   { href: paths.DASHBOARD, label: 'Dashboard', icon: IconHome },
@@ -54,30 +55,37 @@ export function NavShell({ children }: NavShellProps) {
             <IconSparkles size={22} />
             <Title order={5}>ia-task-manager</Title>
           </div>
-          <Menu position="bottom-end" width={220}>
-            <Menu.Target>
-              <Avatar
-                src={user?.image ?? undefined}
-                alt={user?.name ?? 'Usuário'}
-                radius="xl"
-                size="sm"
-                className="cursor-pointer"
-              />
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Label>{user?.name ?? 'Minha conta'}</Menu.Label>
-              <Menu.Item
-                component={Link}
-                href={paths.SETTINGS}
-                leftSection={<IconSettings size={16} />}
-              >
-                Configurações
-              </Menu.Item>
-              <Menu.Item color="red" leftSection={<IconLogout size={16} />} onClick={handleSignOut}>
-                Sair
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
+          <Group gap={4}>
+            <ThemeSwitcher />
+            <Menu position="bottom-end" width={220}>
+              <Menu.Target>
+                <Avatar
+                  src={user?.image ?? undefined}
+                  alt={user?.name ?? 'Usuário'}
+                  radius="xl"
+                  size="sm"
+                  className="cursor-pointer"
+                />
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>{user?.name ?? 'Minha conta'}</Menu.Label>
+                <Menu.Item
+                  component={Link}
+                  href={paths.SETTINGS}
+                  leftSection={<IconSettings size={16} />}
+                >
+                  Configurações
+                </Menu.Item>
+                <Menu.Item
+                  color="red"
+                  leftSection={<IconLogout size={16} />}
+                  onClick={handleSignOut}
+                >
+                  Sair
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Group>
         </div>
       </AppShell.Header>
       <AppShell.Navbar p="sm">
