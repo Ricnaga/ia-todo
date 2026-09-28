@@ -1,37 +1,24 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SessionGuard } from '@/components/session-guard/session-guard'
 import { mantineTheme } from '@/theme'
+import { ReactQueryProvider } from './react-query'
 
 type ProvidersProps = {
   children: ReactNode
 }
 
 export function Providers({ children }: ProvidersProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 5_000,
-            retry: 1,
-            refetchOnWindowFocus: false,
-          },
-        },
-      }),
-  )
-
   return (
-    <QueryClientProvider client={queryClient}>
+    <ReactQueryProvider>
       <MantineProvider theme={mantineTheme} defaultColorScheme="auto">
         <Notifications position="top-right" />
         <SessionGuard />
         {children}
       </MantineProvider>
-    </QueryClientProvider>
+    </ReactQueryProvider>
   )
 }

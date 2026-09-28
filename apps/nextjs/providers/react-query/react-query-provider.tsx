@@ -1,0 +1,33 @@
+'use client'
+
+import { useState, type ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+type ReactQueryProviderProps = {
+  children: ReactNode
+}
+
+export function ReactQueryProvider({ children }: ReactQueryProviderProps) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5_000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  )
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      {/* O proprio pacote se remove fora de dev (NODE_ENV), entao nao ha condicional
+          aqui: esvaziar o cache em cada render custaria uma Suspense extra. */}
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+    </QueryClientProvider>
+  )
+}
