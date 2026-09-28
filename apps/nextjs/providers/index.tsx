@@ -1,24 +1,26 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { MantineProvider } from '@mantine/core'
-import { Notifications } from '@mantine/notifications'
 import { SessionGuard } from '@/components/session-guard/session-guard'
-import { mantineTheme } from '@/theme'
 import { ReactQueryProvider } from './react-query'
+import { ThemeProvider } from './theme'
 
 type ProvidersProps = {
   children: ReactNode
 }
 
-export function Providers({ children }: ProvidersProps) {
+/**
+ * Composition root: a arvore global de providers do app, nesta ordem.
+ *
+ * O ReactQueryProvider vem por fora do ThemeProvider porque o SessionGuard le
+ * o QueryClient e o cache das queries, e nao a paleta.
+ */ export function Providers({ children }: ProvidersProps) {
   return (
     <ReactQueryProvider>
-      <MantineProvider theme={mantineTheme} defaultColorScheme="auto">
-        <Notifications position="top-right" />
+      <ThemeProvider>
         <SessionGuard />
         {children}
-      </MantineProvider>
+      </ThemeProvider>
     </ReactQueryProvider>
   )
 }
