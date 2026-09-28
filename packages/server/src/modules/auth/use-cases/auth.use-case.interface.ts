@@ -12,7 +12,7 @@ import type { AuthProvider } from '../../../shared/oauth/oauth.interface'
 
 export type AuthSessionContext = {
   user: AuthUser
-  session: { id: string; token: string }
+  session: { id: string }
 }
 
 export interface IAuthUseCase {

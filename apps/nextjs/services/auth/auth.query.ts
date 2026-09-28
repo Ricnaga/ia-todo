@@ -9,6 +9,9 @@ export function useMeQuery() {
   return useSuspenseQuery({
     queryKey: authQueryKeys.me,
     queryFn: () => fetchMe(),
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   })
 }
 

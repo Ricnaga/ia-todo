@@ -18,12 +18,12 @@ export function ListSessions() {
 
   const rows: SessionRow[] = sessions.map((session) => ({
     session,
-    isBusy: revokeSession.isPending && revokeSession.variables?.token === session.token,
+    isBusy: revokeSession.isPending && revokeSession.variables?.sessionId === session.id,
   }))
 
-  function handleRevoke(token: string) {
+  function handleRevoke(sessionId: string) {
     revokeSession.mutate(
-      { token },
+      { sessionId },
       {
         onError: notifyError('Não foi possível encerrar a sessão'),
         onSuccess: () => notifySuccess('Sessão encerrada', 'A sessão foi revogada.'),
@@ -63,8 +63,8 @@ export function ListSessions() {
                 </Text>
               </div>
             </Group>
-            <Badge size="sm" variant="light" color="gray">
-              {session.token.length > 12 ? `${session.token.slice(0, 8)}...` : 'sessão'}
+            <Badge size="sm" variant="light" color={session.isCurrent ? 'blue' : 'gray'}>
+              {session.isCurrent ? 'Esta sessão' : 'Outro dispositivo'}
             </Badge>
             <Button
               size="compact-sm"
@@ -72,7 +72,7 @@ export function ListSessions() {
               color="red"
               leftSection={<IconLogout size={14} />}
               loading={isBusy}
-              onClick={() => handleRevoke(session.token)}
+              onClick={() => handleRevoke(session.id)}
             >
               Encerrar
             </Button>

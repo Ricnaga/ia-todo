@@ -42,7 +42,7 @@ export function useUnlinkAccountMutation() {
 
 export function useRevokeSessionMutation() {
   const queryClient = useQueryClient()
-  return useMutation<boolean, Error, { token: string }>({
+  return useMutation<boolean, Error, { sessionId: string }>({
     mutationFn: (input) => revokeSessionRequest(input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: authQueryKeys.sessions }),
   })

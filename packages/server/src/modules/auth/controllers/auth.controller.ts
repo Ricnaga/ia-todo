@@ -33,7 +33,7 @@ export class AuthController {
     return this.authUseCase.listSessions(headers)
   }
 
-  revokeSession(headers: Headers, input: { token: string }) {
+  revokeSession(headers: Headers, input: { sessionId: string }) {
     return this.authUseCase.revokeSession(headers, input)
   }
 

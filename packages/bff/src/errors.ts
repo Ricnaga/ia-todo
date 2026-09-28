@@ -25,10 +25,11 @@ export async function execute<T>(work: () => Promise<T>): Promise<T> {
   }
 }
 
-function isResolvable(value: unknown): value is { code: string; message: string } {
+function isResolvable(value: unknown): value is { message: string } {
   if (typeof value !== 'object' || value === null) return false
   const record = value as Record<string, unknown>
-  return typeof record.code === 'string' && typeof record.message === 'string'
+  if (typeof record.message !== 'string') return false
+  return typeof readExtension(value, 'code') === 'string'
 }
 
 function readExtension(error: unknown, key: string): unknown {
@@ -42,7 +43,9 @@ function readExtension(error: unknown, key: string): unknown {
 export function maskError(error: unknown, defaultMessage: string): Error {
   const original = readExtension(error, 'originalError')
   if (isResolvable(original)) {
-    return new GraphQLError(original.message, { extensions: { code: original.code } })
+    return new GraphQLError(original.message, {
+      extensions: { code: readExtension(original, 'code') as string },
+    })
   }
 
   const code = readExtension(error, 'code')

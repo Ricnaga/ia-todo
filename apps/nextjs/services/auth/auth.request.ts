@@ -31,7 +31,7 @@ export const AUTH_ACCOUNT_FIELDS = `
 
 export const AUTH_SESSION_FIELDS = `
   id
-  token
+  isCurrent
   expiresAt
   ipAddress
   userAgent
@@ -43,14 +43,18 @@ const toUser = (raw: unknown): AuthUser => authUserSchema.parse(raw)
 const toAccount = (raw: unknown): AuthAccount => authAccountSchema.parse(raw)
 const toSession = (raw: unknown): AuthSession => authSessionSchema.parse(raw)
 
-export async function fetchMe(): Promise<AuthUser | null> {
-  const data = await request<{ me: unknown | null }>(`
+export async function fetchMe(requestHeaders?: RequestHeaders): Promise<AuthUser | null> {
+  const data = await request<{ me: unknown | null }>(
+    `
     query Me {
       me {
         ${AUTH_USER_FIELDS}
       }
     }
-  `)
+  `,
+    undefined,
+    requestHeaders,
+  )
   return data.me ? toUser(data.me) : null
 }
 
@@ -143,7 +147,7 @@ export async function unlinkAccountRequest(input: { accountId: string }): Promis
   return data.unlinkAccount
 }
 
-export async function revokeSessionRequest(input: { token: string }): Promise<boolean> {
+export async function revokeSessionRequest(input: { sessionId: string }): Promise<boolean> {
   const data = await request<{ revokeSession: boolean }>(
     `
       mutation RevokeSession($input: RevokeSessionInput!) {

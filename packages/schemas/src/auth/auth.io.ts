@@ -35,7 +35,7 @@ export type UnlinkAccountInput = z.input<typeof unlinkAccountSchema>
 export type UnlinkAccountOutput = z.infer<typeof unlinkAccountSchema>
 
 export const revokeSessionSchema = z.object({
-  token: z.string().min(1),
+  sessionId: z.string().min(1),
 })
 
 export type RevokeSessionInput = z.input<typeof revokeSessionSchema>

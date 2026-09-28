@@ -51,7 +51,7 @@ builder.mutationFields((t) => ({
   revokeSession: t.withAuth({ loggedIn: true }).fieldWithInput({
     type: 'Boolean',
     input: {
-      token: t.input.string({ required: true }),
+      sessionId: t.input.string({ required: true }),
     },
     resolve: (_root, args, ctx) =>
       execute(() => ctx.adapters.auth.revokeSession(ctx.headers, args.input)),

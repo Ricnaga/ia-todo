@@ -39,6 +39,13 @@ export const auth = betterAuth({
       trustedProviders: ['google', 'github'],
     },
   },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60,
+      strategy: 'compact',
+    },
+  },
 })
 
 export type AuthInstance = typeof auth

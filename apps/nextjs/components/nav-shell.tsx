@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { AppShell, Avatar, Menu, NavLink, Title } from '@mantine/core'
 import {
   IconClipboardList,
@@ -12,7 +13,7 @@ import {
   IconSparkles,
 } from '@tabler/icons-react'
 import { paths } from '@/lib/constants/router-paths'
-import { authClient } from '@/services/auth'
+import { authClient, useMeQuery } from '@/services/auth'
 
 const navItems = [
   { href: paths.DASHBOARD, label: 'Dashboard', icon: IconHome },
@@ -28,10 +29,11 @@ type NavShellProps = {
 export function NavShell({ children }: NavShellProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { data: session } = authClient.useSession()
-  const user = session?.user
+  const queryClient = useQueryClient()
+  const { data: user } = useMeQuery()
 
   async function handleSignOut() {
+    queryClient.clear()
     await authClient.signOut()
     router.push(paths.LOGIN)
     router.refresh()

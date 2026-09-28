@@ -25,7 +25,7 @@ export type AuthAccount = z.infer<typeof authAccountSchema>
 
 export const authSessionSchema = z.object({
   id: z.string(),
-  token: z.string(),
+  isCurrent: z.boolean(),
   expiresAt: z.coerce.date(),
   ipAddress: z.string().nullable(),
   userAgent: z.string().nullable(),

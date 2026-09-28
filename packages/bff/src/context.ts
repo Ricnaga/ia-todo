@@ -1,12 +1,12 @@
 import { adapters } from './adapters'
 import type { Adapters } from './adapters'
-import type { AuthSession, AuthUser } from '@ia-task-manager/schemas/auth'
+import type { AuthUser } from '@ia-task-manager/schemas/auth'
 import { authUseCase } from '@ia-task-manager/server/containers'
 
 export type GraphQLContext = {
   adapters: Adapters
   user: AuthUser | null
-  session: Pick<AuthSession, 'id' | 'token'> | null
+  session: { id: string } | null
   headers: Headers
 }
 

@@ -32,7 +32,7 @@ AuthAccountRef.implement({
 AuthSessionRef.implement({
   fields: (t) => ({
     id: t.exposeString('id'),
-    token: t.exposeString('token'),
+    isCurrent: t.exposeBoolean('isCurrent'),
     expiresAt: t.field({ type: DateTimeScalar, resolve: (session) => session.expiresAt }),
     ipAddress: t.exposeString('ipAddress', { nullable: true }),
     userAgent: t.exposeString('userAgent', { nullable: true }),

@@ -5,11 +5,9 @@ import { useForm } from '@mantine/form'
 import { IconMail } from '@tabler/icons-react'
 import type { AuthUser } from '@ia-task-manager/schemas/auth'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
-import { useUpdateProfileMutation, useChangeEmailMutation } from '@/services/auth'
-
-type SectionProfileProps = {
-  user: AuthUser
-}
+import { useChangeEmailMutation, useMeQuery, useUpdateProfileMutation } from '@/services/auth'
+import { RenderQueryBoundary } from '@/components/render-boundary/render-query-boundary'
+import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 
 type ProfileValues = {
   name: string
@@ -20,7 +18,27 @@ type EmailValues = {
   newEmail: string
 }
 
-export function SectionProfile({ user }: SectionProfileProps) {
+export function SectionProfile() {
+  return (
+    <RenderQueryBoundary>
+      <ProfileForms />
+    </RenderQueryBoundary>
+  )
+}
+
+function ProfileForms() {
+  const { data: user } = useMeQuery()
+
+  if (!user) return <SkeletonStack lines={4} rowHeight={44} />
+
+  return <ProfileEditor user={user} />
+}
+
+type ProfileEditorProps = {
+  user: AuthUser
+}
+
+function ProfileEditor({ user }: ProfileEditorProps) {
   const updateProfile = useUpdateProfileMutation()
   const changeEmail = useChangeEmailMutation()
 
