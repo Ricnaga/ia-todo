@@ -1,0 +1,25 @@
+/*
+ * Tokens compartilhados — ver packages/design-tokens.
+ *
+ * A ordem importa. O Skeleton traz um tema monocromatico completo em
+ * `base/theme.css`, **nao-layered**. Tokens em `@layer theme` (o que o Tailwind
+ * emite) perderiam para ele, porque em CSS regra nao-layered vence regra
+ * layered. Por isso os tokens entram por ultimo e `colors.css` declara as ramps
+ * em `:root` nao-layered.
+ *
+ * Nao se importa `themes/*` do Skeleton: os tokens deste pacote ja definem a
+ * paleta completa, e manter um segundo tema no bundle cria duas fontes de
+ * verdade para a mesma coisa.
+ */
+@import 'tailwindcss';
+
+@import '@skeletonlabs/skeleton';
+@import '@skeletonlabs/skeleton-svelte';
+
+@import '@ia-task-manager/design-tokens/index.css';
+@import '@ia-task-manager/design-tokens/adapters/skeleton.css';
+
+body {
+	background-color: var(--color-bg);
+	color: var(--color-fg);
+}

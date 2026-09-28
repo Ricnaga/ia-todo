@@ -1,9 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
+		<script>
+			// Define o modo antes da pintura para nao piscar a paleta errada.
+			// e a unica copia desta regra no projeto (ver src/lib/color-mode.svelte.ts);
+			// ela precisa rodar aqui porque app.html nao consegue importar modulos.
+			{
+				const stored = localStorage.getItem('color-mode');
+				const mode =
+					stored === 'light' || stored === 'dark'
+						? stored
+						: matchMedia('(prefers-color-scheme: dark)').matches
+							? 'dark'
+							: 'light';
+				document.documentElement.setAttribute('data-mode', mode);
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
