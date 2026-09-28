@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button, Card, Group, Text, Title } from '@mantine/core'
 import { IconPlus, IconSparkles } from '@tabler/icons-react'
 import type { Todo } from '@ia-task-manager/schemas/todo'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { useCreateTodoMutation, useUpdateTodoMutation } from '@/services/todo/todo.mutation'
 import { useTodosQuery } from '@/services/todo/todo.query'
+import { FilterTodoList } from '../filter-todo-list/filter-todo-list'
 import { ModalTodoForm, type TodoFormInput } from '../modal-todo-form/modal-todo-form'
 import { ModalAiSuggest } from '../modal-ai-suggest/modal-ai-suggest'
 import { TableTodoList } from '../table-todo-list/table-todo-list'
@@ -50,6 +51,10 @@ export function ContentTodoManager() {
 
   const pendingCount = todos.filter((t) => !t.completed).length
 
+  const handleEdit = useCallback((todo: Todo) => {
+    setFormModal({ mode: 'edit', todo })
+  }, [])
+
   return (
     <div className="flex flex-col gap-4">
       <Group justify="space-between">
@@ -76,8 +81,10 @@ export function ContentTodoManager() {
         </Group>
       </Group>
 
+      <FilterTodoList />
+
       <Card withBorder shadow="sm" padding="lg" pos="relative">
-        <TableTodoList todos={todos} onEdit={(todo) => setFormModal({ mode: 'edit', todo })} />
+        <TableTodoList todos={todos} onEdit={handleEdit} />
       </Card>
 
       {formModal && (
