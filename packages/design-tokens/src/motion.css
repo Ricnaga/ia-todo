@@ -1,0 +1,29 @@
+/*
+ * Design Tokens — Motion
+ * ---------------------------------------------------------------------------
+ * `static`
+ * --------
+ * Sem `static`, o Tailwind so emite a variavel se alguma utility a usou. Num
+ * design system o contrato nao pode depender de qual utility o app por acaso
+ * gerou: os adapters referenciam `--radius-sm`, `--shadow-md`, `--text-lg` de
+ * CSS plano, e o scanner do Tailwind nao ve essas referencias. Sem `static`,
+ * `--mantine-shadow-md: var(--shadow-md)` resolveria para vazio em qualquer
+ * tela que ainda nao tivesse `shadow-md` como classe. `static` emite sempre.
+ * Curvas e duracoes.alimentam as utilities `ease-*` e as transicoes base.
+ *
+ * Nao ha animacoes nomeadas aqui: no Tailwind v4 elas viveriam em `--animate-*`,
+ * que e namespace do usuario, e nenhum dos tres apps tem animacao compartilhada
+ * ainda. Este arquivo existe para que a categoria tenha um lugar quando tiver.
+ */
+
+@theme static {
+  /* Curvas */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-entrance: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Duracao */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}

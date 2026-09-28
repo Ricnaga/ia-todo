@@ -1,0 +1,28 @@
+{
+  "name": "@ia-task-manager/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tokens de design compartilhados (cor, espaco, tipografia, shadow, motion) em CSS puro para Tailwind v4.",
+  "type": "module",
+  "exports": {
+    "./index.css": "./src/index.css",
+    "./colors.css": "./src/colors.css",
+    "./spacing.css": "./src/spacing.css",
+    "./radius.css": "./src/radius.css",
+    "./typography.css": "./src/typography.css",
+    "./shadow.css": "./src/shadow.css",
+    "./motion.css": "./src/motion.css",
+    "./semantic.css": "./src/semantic.css",
+    "./modes.css": "./src/modes.css",
+    "./adapters/mantine.css": "./src/adapters/mantine.css",
+    "./adapters/nuxt-ui.css": "./src/adapters/nuxt-ui.css",
+    "./adapters/skeleton.css": "./src/adapters/skeleton.css"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "tailwindcss": "^4"
+  }
+}

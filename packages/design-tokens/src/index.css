@@ -1,0 +1,28 @@
+/*
+ * Design Tokens — entry point
+ * ---------------------------------------------------------------------------
+ * Importar DEPOIS da biblioteca de componentes do app, para que os tokens
+ * venham por ultimo na origem e ganhem das paletas proprias dela.
+ *
+ *   Skeleton : apos `@skeletonlabs/skeleton` (sem `themes/*`)
+ *   Nuxt UI  : apos `@nuxt/ui`
+ *   Mantine  : apos `@mantine/core/styles.css`
+ *
+ * Os arquivos sao organizedos por categoria do design system, e a ordem entre
+ * eles nao importa: nenhum depende de outro. A resolucao de custom properties
+ * acontece no computed value, nao na ordem de declaracao.
+ */
+
+/* Modo: define COMO light/dark e resolvido. Nao define valor. */
+@import './modes.css';
+
+/* Primitivas por categoria. */
+@import './colors.css';
+@import './spacing.css';
+@import './radius.css';
+@import './typography.css';
+@import './shadow.css';
+@import './motion.css';
+
+/* Camada semantica: o que os componentes consomem. */
+@import './semantic.css';

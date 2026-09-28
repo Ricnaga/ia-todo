@@ -1,0 +1,51 @@
+/*
+ * Design Tokens — Adapter: Nuxt UI
+ * ---------------------------------------------------------------------------
+ * Importar DEPOIS de `@nuxt/ui`.
+ *
+ * Cores de marca nao precisam de mapeamento aqui. O plugin de cores do Nuxt UI
+ * emite `--ui-color-<nome>-<shade>: var(--color-<nome>-<shade>, <fallback>)`:
+ * ele le a rampa deste pacote primeiro e so usa o fallback do Tailwind se a
+ * variavel nao existir. Como `colors.css` define `--color-primary-500` e
+ * companhia, o Nuxt UI adota a rampa compartilhada sozinho.
+ *
+ * O que sobra para este arquivo sao as variaveis de superficie, texto, borda e
+ * raio, que o Nuxt UI le mas nao deriva da rampa.
+ *
+ * `--ui-primary` e afins sao deliberadamente NAO sobrescritos: o plugin os
+ * resolve em tempo de execucao a partir de `--ui-color-primary-{500,400}`,
+ * escolhendo 400 no dark. Reimplementar isso aqui duplicaria a logica e
+ * brigaria com o `<style>` que o plugin injeta no <head>.
+ */
+
+:root {
+  /* ==========================================================================
+   * Superficies
+   * ========================================================================== */
+  --ui-bg: var(--ds-bg);
+  --ui-bg-muted: var(--ds-surface-sunken);
+  --ui-bg-elevated: var(--ds-surface-raised);
+  --ui-bg-accented: var(--ds-surface-hover);
+
+  /* ==========================================================================
+   * Texto
+   * ========================================================================== */
+  --ui-text: var(--ds-fg);
+  --ui-text-muted: var(--ds-fg-muted);
+  --ui-text-dimmed: var(--ds-fg-subtle);
+  --ui-text-toned: var(--ds-fg-muted);
+  --ui-text-highlighted: var(--ds-fg);
+  --ui-text-inverted: var(--ds-fg-on-accent);
+
+  /* ==========================================================================
+   * Bordas
+   * ========================================================================== */
+  --ui-border: var(--ds-border);
+  --ui-border-muted: var(--ds-border);
+  --ui-border-accented: var(--ds-border-strong);
+
+  /* ==========================================================================
+   * Raio — o Nuxt UI deriva toda a escala `--radius-*` de `--ui-radius`.
+   * ========================================================================== */
+  --ui-radius: var(--radius-md);
+}

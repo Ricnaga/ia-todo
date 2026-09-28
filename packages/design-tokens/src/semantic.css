@@ -1,0 +1,201 @@
+/*
+ * Design Tokens — Semantic
+ * ---------------------------------------------------------------------------
+ * Tokens semanticos: a camada que o produto consome. Nenhum componente deve
+ * consumir `--color-primary-600`; deve consumir `--color-accent` / `--color-bg`
+ * / `--color-fg`. Essa indirecao existe para que light e dark sejam um unico
+ * par de valores, e nao duas paletas para manter em sincronia.
+ *
+ * Este arquivo so tem cor. As outras categorias do design system (spacing,
+ * radius, typography, shadow, motion) nao tem versao light/dark: elas vivem nos
+ * arquivos proprios e sao as mesmas nos dois modos. Cor e a unica dimensao em
+ * que o modo precisa de duas copias — e por isso que este arquivo e o unico que
+ * carrega dados dos dois lados.
+ *
+ * Como funciona o par light/dark
+ * ------------------------------
+ * 1. Cada token semantico declara dois valores crus: `--ds-x-light` e
+ *    `--ds-x-dark`. Sao dados, nao tokens — nenhuma utility e gerada para eles.
+ * 2. `--ds-x` resolve os dois com `light-dark()`, que escolhe o lado a partir
+ *    do `color-scheme` definido em modes.css.
+ * 3. `--color-x` expoe `--ds-x` ao Tailwind via `@theme`, gerando as utilities
+ *    (`bg-bg`, `text-muted`, `border-line`, ...).
+ *
+ * Consequencia: trocar de modo nao reescreve nada. `light-dark()` faz o papel
+ * que um bloco `.dark { ... }` duplicado faria, sem duplicar a paleta e sem
+ * custar um unico seletor por token.
+ *
+ * `static`
+ * --------
+ * Sem `static`, o Tailwind so emite a variavel se alguma utility a usou. Num
+ * design system o contrato nao pode depender de qual utility o app por acaso
+ * gerou: os adapters referenciam `--radius-sm`, `--shadow-md`, `--text-lg` de
+ * CSS plano, e o scanner do Tailwind nao ve essas referencias. Sem `static`,
+ * `--mantine-shadow-md: var(--shadow-md)` resolveria para vazio em qualquer
+ * tela que ainda nao tivesse `shadow-md` como classe. `static` emite sempre.
+ */
+
+@theme static {
+  /* ==========================================================================
+   * Superficies
+   * ========================================================================== */
+  --color-bg: var(--ds-bg);
+  --color-surface: var(--ds-surface);
+  --color-elevated: var(--ds-surface-raised);
+  --color-sunken: var(--ds-surface-sunken);
+  --color-hover: var(--ds-surface-hover);
+  --color-active: var(--ds-surface-active);
+  --color-overlay: var(--ds-overlay);
+
+  /* ==========================================================================
+   * Texto
+   * ========================================================================== */
+  --color-fg: var(--ds-fg);
+  --color-muted: var(--ds-fg-muted);
+  --color-subtle: var(--ds-fg-subtle);
+  --color-on-accent: var(--ds-fg-on-accent);
+
+  /* ==========================================================================
+   * Bordas e foco
+   * ========================================================================== */
+  --color-line: var(--ds-border);
+  --color-line-strong: var(--ds-border-strong);
+  --color-ring: var(--ds-ring);
+
+  /* ==========================================================================
+   * Marca
+   * ========================================================================== */
+  --color-accent: var(--ds-accent);
+  --color-accent-hover: var(--ds-accent-hover);
+  --color-accent-soft: var(--ds-accent-soft);
+  --color-accent-fg: var(--ds-accent-fg);
+
+  /* ==========================================================================
+   * Estados
+   * ========================================================================== */
+  --color-success: var(--ds-success);
+  --color-success-soft: var(--ds-success-soft);
+  --color-warning: var(--ds-warning);
+  --color-warning-soft: var(--ds-warning-soft);
+  --color-error: var(--ds-error);
+  --color-error-soft: var(--ds-error-soft);
+  --color-info: var(--ds-info);
+  --color-info-soft: var(--ds-info-soft);
+}
+
+:root {
+  /* ==========================================================================
+   * Dados: lado light
+   * ========================================================================== */
+  --ds-bg-light: oklch(0.977 0.005 265);
+  --ds-surface-light: oklch(1 0 0);
+  --ds-surface-raised-light: oklch(1 0 0);
+  --ds-surface-sunken-light: oklch(0.962 0.006 265);
+  --ds-surface-hover-light: oklch(0.949 0.007 265);
+  --ds-surface-active-light: oklch(0.928 0.008 265);
+  --ds-overlay-light: oklch(0.204 0.007 265 / 0.5);
+
+  --ds-fg-light: oklch(0.204 0.007 265);
+  --ds-fg-muted-light: oklch(0.446 0.012 265);
+  --ds-fg-subtle-light: oklch(0.548 0.012 265);
+  --ds-fg-on-accent-light: oklch(1 0 0);
+
+  --ds-border-light: oklch(0.896 0.006 265);
+  --ds-border-strong-light: oklch(0.645 0.008 265);
+  --ds-ring-light: var(--color-primary-500);
+
+  --ds-accent-light: var(--color-primary-600);
+  --ds-accent-hover-light: var(--color-primary-700);
+  --ds-accent-soft-light: var(--color-primary-50);
+  --ds-accent-fg-light: var(--color-primary-700);
+
+  --ds-success-light: var(--color-success-600);
+  --ds-success-soft-light: var(--color-success-50);
+  --ds-warning-light: var(--color-warning-700);
+  --ds-warning-soft-light: var(--color-warning-50);
+  --ds-error-light: var(--color-error-600);
+  --ds-error-soft-light: var(--color-error-50);
+  --ds-info-light: var(--color-info-600);
+  --ds-info-soft-light: var(--color-info-50);
+
+  /* ==========================================================================
+   * Dados: lado dark
+   * --------------------------------------------------------------------------
+   * Em dark o acento clareia (a rampa 600 sobre fundo escuro nao atinge
+   * contraste) e as superficies clareiam em degraus para separar camadas sem
+   * depender de sombra — sombra virtually nao aparece em fundo escuro.
+   *
+   * O acento dark vai ate primary-400, e nao primary-500, porque o tom tem de
+   * servir as duas leituras ao mesmo tempo: atingir 4.5:1 sobre o fundo E
+   * receber texto escuro com 4.5:1. Em 500 o texto branco da 4.47:1 e o texto
+   * quase-preto da 4.44:1 — os dois reprovam. Em 400 com texto quase-preto sao
+   * 7.31:1 nas duas direcoes.
+   *
+   * `fg-subtle` e `border-strong` foram calculados por bisseccao para ficarem
+   * acima de 4.5:1 e de 3:1 (WCAG 1.4.11) contra o fundo do respectivo modo.
+   * ========================================================================== */
+  --ds-bg-dark: var(--color-surface-950);
+  --ds-surface-dark: oklch(0.196 0.006 265);
+  --ds-surface-raised-dark: oklch(0.243 0.007 265);
+  --ds-surface-sunken-dark: oklch(0.121 0.005 265);
+  --ds-surface-hover-dark: oklch(0.271 0.008 265);
+  --ds-surface-active-dark: oklch(0.316 0.009 265);
+  --ds-overlay-dark: oklch(0 0 0 / 0.6);
+
+  --ds-fg-dark: oklch(0.973 0.003 265);
+  --ds-fg-muted-dark: oklch(0.708 0.01 265);
+  --ds-fg-subtle-dark: oklch(0.578 0.012 265);
+  --ds-fg-on-accent-dark: oklch(0.144 0.005 265);
+
+  --ds-border-dark: oklch(0.316 0.009 265);
+  --ds-border-strong-dark: oklch(0.482 0.006 265);
+  --ds-ring-dark: var(--color-primary-400);
+
+  --ds-accent-dark: var(--color-primary-400);
+  --ds-accent-hover-dark: var(--color-primary-300);
+  --ds-accent-soft-dark: var(--color-primary-950);
+  --ds-accent-fg-dark: var(--color-primary-300);
+
+  --ds-success-dark: var(--color-success-400);
+  --ds-success-soft-dark: var(--color-success-950);
+  --ds-warning-dark: var(--color-warning-400);
+  --ds-warning-soft-dark: var(--color-warning-950);
+  --ds-error-dark: var(--color-error-400);
+  --ds-error-soft-dark: var(--color-error-950);
+  --ds-info-dark: var(--color-info-400);
+  --ds-info-soft-dark: var(--color-info-950);
+
+  /* ==========================================================================
+   * Resolucao: cada token semantico escolhe o lado via `color-scheme`
+   * ========================================================================== */
+  --ds-bg: light-dark(var(--ds-bg-light), var(--ds-bg-dark));
+  --ds-surface: light-dark(var(--ds-surface-light), var(--ds-surface-dark));
+  --ds-surface-raised: light-dark(var(--ds-surface-raised-light), var(--ds-surface-raised-dark));
+  --ds-surface-sunken: light-dark(var(--ds-surface-sunken-light), var(--ds-surface-sunken-dark));
+  --ds-surface-hover: light-dark(var(--ds-surface-hover-light), var(--ds-surface-hover-dark));
+  --ds-surface-active: light-dark(var(--ds-surface-active-light), var(--ds-surface-active-dark));
+  --ds-overlay: light-dark(var(--ds-overlay-light), var(--ds-overlay-dark));
+
+  --ds-fg: light-dark(var(--ds-fg-light), var(--ds-fg-dark));
+  --ds-fg-muted: light-dark(var(--ds-fg-muted-light), var(--ds-fg-muted-dark));
+  --ds-fg-subtle: light-dark(var(--ds-fg-subtle-light), var(--ds-fg-subtle-dark));
+  --ds-fg-on-accent: light-dark(var(--ds-fg-on-accent-light), var(--ds-fg-on-accent-dark));
+
+  --ds-border: light-dark(var(--ds-border-light), var(--ds-border-dark));
+  --ds-border-strong: light-dark(var(--ds-border-strong-light), var(--ds-border-strong-dark));
+  --ds-ring: light-dark(var(--ds-ring-light), var(--ds-ring-dark));
+
+  --ds-accent: light-dark(var(--ds-accent-light), var(--ds-accent-dark));
+  --ds-accent-hover: light-dark(var(--ds-accent-hover-light), var(--ds-accent-hover-dark));
+  --ds-accent-soft: light-dark(var(--ds-accent-soft-light), var(--ds-accent-soft-dark));
+  --ds-accent-fg: light-dark(var(--ds-accent-fg-light), var(--ds-accent-fg-dark));
+
+  --ds-success: light-dark(var(--ds-success-light), var(--ds-success-dark));
+  --ds-success-soft: light-dark(var(--ds-success-soft-light), var(--ds-success-soft-dark));
+  --ds-warning: light-dark(var(--ds-warning-light), var(--ds-warning-dark));
+  --ds-warning-soft: light-dark(var(--ds-warning-soft-light), var(--ds-warning-soft-dark));
+  --ds-error: light-dark(var(--ds-error-light), var(--ds-error-dark));
+  --ds-error-soft: light-dark(var(--ds-error-soft-light), var(--ds-error-soft-dark));
+  --ds-info: light-dark(var(--ds-info-light), var(--ds-info-dark));
+  --ds-info-soft: light-dark(var(--ds-info-soft-light), var(--ds-info-soft-dark));
+}

@@ -1,0 +1,66 @@
+/*
+ * Design Tokens — Typography
+ * ---------------------------------------------------------------------------
+ * `static`
+ * --------
+ * Sem `static`, o Tailwind so emite a variavel se alguma utility a usou. Num
+ * design system o contrato nao pode depender de qual utility o app por acaso
+ * gerou: os adapters referenciam `--radius-sm`, `--shadow-md`, `--text-lg` de
+ * CSS plano, e o scanner do Tailwind nao ve essas referencias. Sem `static`,
+ * `--mantine-shadow-md: var(--shadow-md)` resolveria para vazio em qualquer
+ * tela que ainda nao tivesse `shadow-md` como classe. `static` emite sempre.
+ * Familia, escala de tamanho, ritmo de linha, tracking e peso.
+ *
+ * Indirecionamento das familias
+ * -----------------------------
+ * `--font-sans` aponta para `--ds-font-sans` em vez de receber o valor direto.
+ * Isso permite que um app troque a familia redeclarando so `--ds-font-sans` em
+ * um `:root` sem `@theme`, e ainda assim a utility `font-sans` e o
+ * `--mantine-font-family` leem a mesma fonte.
+ *
+ * O fallback precisa de nome proprio (`--ds-font-fallback-sans`) porque uma
+ * custom property nao pode se referenciar: `--ds-font-sans: var(--font-x),
+ * var(--ds-font-sans)` seria um ciclo e resolveria para o valor invalido
+ * garantido. Ver apps/nextjs/app/globals.css para o exemplo de override.
+ */
+
+@theme static {
+  /* Familia */
+  --ds-font-fallback-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ds-font-fallback-mono:
+    ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
+  --ds-font-sans: var(--ds-font-fallback-sans);
+  --ds-font-mono: var(--ds-font-fallback-mono);
+
+  --font-sans: var(--ds-font-sans);
+  --font-mono: var(--ds-font-mono);
+
+  /* Tamanho */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Ritmo de linha */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Tracking */
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.02em;
+
+  /* Peso */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}

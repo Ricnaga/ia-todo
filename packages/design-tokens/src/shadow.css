@@ -1,0 +1,40 @@
+/*
+ * Design Tokens — Shadow
+ * ---------------------------------------------------------------------------
+ * `static`
+ * --------
+ * Sem `static`, o Tailwind so emite a variavel se alguma utility a usou. Num
+ * design system o contrato nao pode depender de qual utility o app por acaso
+ * gerou: os adapters referenciam `--radius-sm`, `--shadow-md`, `--text-lg` de
+ * CSS plano, e o scanner do Tailwind nao ve essas referencias. Sem `static`,
+ * `--mantine-shadow-md: var(--shadow-md)` resolveria para vazio em qualquer
+ * tela que ainda nao tivesse `shadow-md` como classe. `static` emite sempre.
+ * Elevacao, em duas pecas:
+ *
+ *   `--color-shadow*`  a cor da sombra, que carrega o alfa do modo
+ *   `--shadow-*`       a escala de deslocamento/desfoque, sem cor
+ *
+ * A separacao existe porque a cor muda com o modo e o deslocamento nao. Os
+ * tokens de cor ficam em `:root` nu porque sao dados resolvidos por
+ * `light-dark()`; a escala fica em `@theme` porque gera `shadow-xs` ..
+ * `shadow-2xl`.
+ *
+ * Em dark a separacao entre camadas vem da luminosidade das superficies
+ * (ver semantic.css), nao de sombras mais fortes. A escala e a mesma para os
+ * dois modos, com o alfa fazendo o trabalho.
+ */
+
+:root {
+  --color-shadow-light: oklch(0 0 0 / 0.14);
+  --color-shadow-dark: oklch(0 0 0 / 0.5);
+  --color-shadow: light-dark(var(--color-shadow-light), var(--color-shadow-dark));
+}
+
+@theme static {
+  --shadow-xs: 0 1px 2px 0 var(--color-shadow);
+  --shadow-sm: 0 1px 3px 0 var(--color-shadow), 0 1px 2px -1px var(--color-shadow);
+  --shadow-md: 0 4px 8px -2px var(--color-shadow), 0 2px 4px -2px var(--color-shadow);
+  --shadow-lg: 0 12px 20px -4px var(--color-shadow), 0 4px 8px -4px var(--color-shadow);
+  --shadow-xl: 0 20px 32px -8px var(--color-shadow), 0 8px 12px -6px var(--color-shadow);
+  --shadow-2xl: 0 32px 48px -12px var(--color-shadow);
+}

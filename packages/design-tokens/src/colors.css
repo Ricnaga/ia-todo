@@ -1,0 +1,161 @@
+/*
+ * Design Tokens — Colors
+ * ---------------------------------------------------------------------------
+ * `static`
+ * --------
+ * Sem `static`, o Tailwind so emite a variavel se alguma utility a usou. Num
+ * design system o contrato nao pode depender de qual utility o app por acaso
+ * gerou: os adapters referenciam `--radius-sm`, `--shadow-md`, `--text-lg` de
+ * CSS plano, e o scanner do Tailwind nao ve essas referencias. Sem `static`,
+ * `--mantine-shadow-md: var(--shadow-md)` resolveria para vazio em qualquer
+ * tela que ainda nao tivesse `shadow-md` como classe. `static` emite sempre.
+ * Ramps de cor. Sao os unicos tokens deste pacote declarados FORA de `@theme`.
+ *
+ * Por que este arquivo e o unico nao-layered
+ * -----------------------------------------
+ * O Tailwind v4 emite o resultado de `@theme` dentro de `@layer theme`. Em CSS,
+ * uma regra NAO-layered vence uma regra layered em conflito de especificidade.
+ * O `base/theme.css` do Skeleton e o tema do Nuxt UI sao NAO-layered e declaram
+ * exatamente estes nomes (`--color-primary-500`, ...). Se as ramps vivessem em
+ * `@theme`, elas seriam silenciosamente ignoradas pelos dois.
+ *
+ * Entao: as ramps ficam em `:root` nu e vencem por ordem de origem, desde que o
+ * app importe os tokens depois da biblioteca de componentes. As escalas dos
+ * outros arquivos usam nomes que ninguem mais declara, entao podem ir em
+ * `@theme` e virar utilities normalmente.
+ *
+ * Consequencia de projeto: ramps NAO viram utilities. Componentes consomem os
+ * tokens semanticos de semantic.css (`bg-bg`, `text-fg`, `bg-accent`); as ramps
+ * existem para as bibliotecas de componentes, que as leem por nome. Deixar
+ * `bg-primary-600` disponivel convidaria o time a pular a camada semantica.
+ */
+
+:root {
+  /* ==========================================================================
+   * Ramps
+   * --------------------------------------------------------------------------
+   * Escala de 11 tons (50 -> 950) em OKLCH. `contrast-light`/`contrast-dark`
+   * sao os tons de texto legiveis sobre superficies daquela cor e espelham a
+   * propria rampa.
+   * ========================================================================== */
+
+  /* primary */
+  --color-primary-50: oklch(0.971 0.017 275);
+  --color-primary-100: oklch(0.936 0.036 275);
+  --color-primary-200: oklch(0.885 0.062 275);
+  --color-primary-300: oklch(0.808 0.108 275);
+  --color-primary-400: oklch(0.704 0.152 275);
+  --color-primary-500: oklch(0.585 0.208 275);
+  --color-primary-600: oklch(0.511 0.219 275);
+  --color-primary-700: oklch(0.457 0.203 275);
+  --color-primary-800: oklch(0.398 0.164 275);
+  --color-primary-900: oklch(0.359 0.125 275);
+  --color-primary-950: oklch(0.282 0.086 275);
+  --color-primary-contrast-light: var(--color-primary-50);
+  --color-primary-contrast-dark: var(--color-primary-950);
+
+  /* secondary */
+  --color-secondary-50: oklch(0.977 0.005 265);
+  --color-secondary-100: oklch(0.949 0.009 265);
+  --color-secondary-200: oklch(0.896 0.015 265);
+  --color-secondary-300: oklch(0.821 0.024 265);
+  --color-secondary-400: oklch(0.704 0.032 265);
+  --color-secondary-500: oklch(0.554 0.038 265);
+  --color-secondary-600: oklch(0.463 0.042 265);
+  --color-secondary-700: oklch(0.396 0.042 265);
+  --color-secondary-800: oklch(0.323 0.037 265);
+  --color-secondary-900: oklch(0.268 0.03 265);
+  --color-secondary-950: oklch(0.207 0.021 265);
+  --color-secondary-contrast-light: var(--color-secondary-50);
+  --color-secondary-contrast-dark: var(--color-secondary-950);
+
+  /* tertiary */
+  --color-tertiary-50: oklch(0.977 0.015 195);
+  --color-tertiary-100: oklch(0.949 0.028 195);
+  --color-tertiary-200: oklch(0.896 0.045 195);
+  --color-tertiary-300: oklch(0.821 0.066 195);
+  --color-tertiary-400: oklch(0.704 0.085 195);
+  --color-tertiary-500: oklch(0.554 0.1 195);
+  --color-tertiary-600: oklch(0.463 0.104 195);
+  --color-tertiary-700: oklch(0.396 0.098 195);
+  --color-tertiary-800: oklch(0.323 0.083 195);
+  --color-tertiary-900: oklch(0.268 0.064 195);
+  --color-tertiary-950: oklch(0.207 0.046 195);
+  --color-tertiary-contrast-light: var(--color-tertiary-50);
+  --color-tertiary-contrast-dark: var(--color-tertiary-950);
+
+  /* success */
+  --color-success-50: oklch(0.977 0.021 152);
+  --color-success-100: oklch(0.949 0.04 152);
+  --color-success-200: oklch(0.896 0.067 152);
+  --color-success-300: oklch(0.821 0.105 152);
+  --color-success-400: oklch(0.712 0.148 152);
+  --color-success-500: oklch(0.596 0.163 152);
+  --color-success-600: oklch(0.512 0.155 152);
+  --color-success-700: oklch(0.443 0.135 152);
+  --color-success-800: oklch(0.376 0.104 152);
+  --color-success-900: oklch(0.323 0.075 152);
+  --color-success-950: oklch(0.247 0.053 152);
+  --color-success-contrast-light: var(--color-success-50);
+  --color-success-contrast-dark: var(--color-success-950);
+
+  /* warning */
+  --color-warning-50: oklch(0.987 0.025 75);
+  --color-warning-100: oklch(0.972 0.055 75);
+  --color-warning-200: oklch(0.944 0.098 75);
+  --color-warning-300: oklch(0.905 0.148 75);
+  --color-warning-400: oklch(0.828 0.166 75);
+  --color-warning-500: oklch(0.769 0.17 75);
+  --color-warning-600: oklch(0.666 0.155 75);
+  --color-warning-700: oklch(0.555 0.135 75);
+  --color-warning-800: oklch(0.473 0.107 75);
+  --color-warning-900: oklch(0.414 0.079 75);
+  --color-warning-950: oklch(0.279 0.058 75);
+  --color-warning-contrast-light: var(--color-warning-50);
+  --color-warning-contrast-dark: var(--color-warning-950);
+
+  /* error */
+  --color-error-50: oklch(0.971 0.013 27);
+  --color-error-100: oklch(0.936 0.032 27);
+  --color-error-200: oklch(0.885 0.06 27);
+  --color-error-300: oklch(0.808 0.105 27);
+  --color-error-400: oklch(0.704 0.158 27);
+  --color-error-500: oklch(0.577 0.221 27);
+  --color-error-600: oklch(0.505 0.211 27);
+  --color-error-700: oklch(0.444 0.179 27);
+  --color-error-800: oklch(0.396 0.141 27);
+  --color-error-900: oklch(0.348 0.104 27);
+  --color-error-950: oklch(0.258 0.071 27);
+  --color-error-contrast-light: var(--color-error-50);
+  --color-error-contrast-dark: var(--color-error-950);
+
+  /* info */
+  --color-info-50: oklch(0.977 0.017 235);
+  --color-info-100: oklch(0.949 0.036 235);
+  --color-info-200: oklch(0.896 0.066 235);
+  --color-info-300: oklch(0.821 0.109 235);
+  --color-info-400: oklch(0.712 0.153 235);
+  --color-info-500: oklch(0.596 0.169 235);
+  --color-info-600: oklch(0.512 0.161 235);
+  --color-info-700: oklch(0.443 0.14 235);
+  --color-info-800: oklch(0.376 0.109 235);
+  --color-info-900: oklch(0.323 0.08 235);
+  --color-info-950: oklch(0.247 0.056 235);
+  --color-info-contrast-light: var(--color-info-50);
+  --color-info-contrast-dark: var(--color-info-950);
+
+  /* surface */
+  --color-surface-50: oklch(0.991 0.002 265);
+  --color-surface-100: oklch(0.973 0.003 265);
+  --color-surface-200: oklch(0.936 0.004 265);
+  --color-surface-300: oklch(0.884 0.005 265);
+  --color-surface-400: oklch(0.708 0.006 265);
+  --color-surface-500: oklch(0.556 0.007 265);
+  --color-surface-600: oklch(0.446 0.007 265);
+  --color-surface-700: oklch(0.371 0.006 265);
+  --color-surface-800: oklch(0.279 0.005 265);
+  --color-surface-900: oklch(0.204 0.004 265);
+  --color-surface-950: oklch(0.144 0.003 265);
+  --color-surface-contrast-light: var(--color-surface-50);
+  --color-surface-contrast-dark: var(--color-surface-950);
+}

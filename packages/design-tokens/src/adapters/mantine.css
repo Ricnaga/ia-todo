@@ -1,0 +1,88 @@
+/*
+ * Design Tokens — Adapter: Mantine
+ * ---------------------------------------------------------------------------
+ * Importar DEPOIS de `@mantine/core/styles.css`.
+ *
+ * O Mantine injeta as cores da `primaryShade` via inline style em <html>, que
+ * vence qualquer regra de stylesheet. Por isso a rampa de marca NAO e
+ * sobrescrita aqui: ela e passada por `createTheme({ colors: { primary: [...] } })`
+ * com `var()`, que o Mantine 9 suporta nativamente (ver `rgba()`/`darken()`, que
+ * tem branches para `var(`). O resto — neutros, radius, tipografia, sombra — vem
+ * por aqui.
+ *
+ * Este arquivo nao repete light e dark: `--ds-*` ja resolve os dois lados via
+ * `light-dark()` (ver semantic.css). Os seletores de modo sao declarados porque
+ * o Mantine usa `:root[data-mantine-color-scheme='light'|'dark']`, que tem
+ * especificidade maior que um `:root` solto.
+ */
+
+:root,
+:root[data-mantine-color-scheme='light'],
+:root[data-mantine-color-scheme='dark'] {
+  /* ==========================================================================
+   * Superficies e texto
+   * ========================================================================== */
+  --mantine-color-body: var(--ds-bg);
+  --mantine-color-text: var(--ds-fg);
+  --mantine-color-bright: var(--ds-fg);
+  --mantine-color-default: var(--ds-surface);
+  --mantine-color-default-hover: var(--ds-surface-hover);
+  --mantine-color-default-color: var(--ds-fg);
+  --mantine-color-default-border: var(--ds-border);
+  --mantine-color-dimmed: var(--ds-fg-subtle);
+  --mantine-color-placeholder: var(--ds-fg-subtle);
+  --mantine-color-disabled: var(--ds-surface-active);
+  --mantine-color-disabled-color: var(--ds-fg-subtle);
+  --mantine-color-disabled-border: var(--ds-border);
+  --mantine-color-anchor: var(--ds-accent);
+
+  /* ==========================================================================
+   * Estados
+   * --------------------------------------------------------------------------
+   * `--mantine-color-<cor>` e a cor de preenchimento (botao, badge). Os
+   * `--mantine-color-<cor>-text` sao as variantes de texto dessa mesma cor, que
+   * o Mantine usa quando o componente renderiza texto colorido em vez de
+   * fundo — Alert, Badge `variant="light"`. Apontar os dois para a camada
+   * semantica mantem os componentes de status do Mantine na paleta do projeto.
+   * ========================================================================== */
+  --mantine-color-error: var(--ds-error);
+  --mantine-color-success: var(--ds-success);
+  --mantine-color-red-text: var(--ds-error);
+  --mantine-color-green-text: var(--ds-success);
+  --mantine-color-blue-text: var(--ds-info);
+  --mantine-color-orange-text: var(--ds-warning);
+  --mantine-color-gray-text: var(--ds-fg-muted);
+  --mantine-color-dark-text: var(--ds-fg);
+
+  /* ==========================================================================
+   * Radius
+   * ========================================================================== */
+  --mantine-radius-default: var(--radius-md);
+  --mantine-radius-xs: var(--radius-xs);
+  --mantine-radius-sm: var(--radius-sm);
+  --mantine-radius-md: var(--radius-md);
+  --mantine-radius-lg: var(--radius-lg);
+  --mantine-radius-xl: var(--radius-xl);
+
+  /* ==========================================================================
+   * Tipografia
+   * ========================================================================== */
+  --mantine-font-family: var(--font-sans);
+  --mantine-font-family-headings: var(--font-sans);
+  --mantine-font-family-monospace: var(--font-mono);
+  --mantine-font-size-xs: var(--text-xs);
+  --mantine-font-size-sm: var(--text-sm);
+  --mantine-font-size-md: var(--text-base);
+  --mantine-font-size-lg: var(--text-lg);
+  --mantine-font-size-xl: var(--text-xl);
+  --mantine-line-height: var(--leading-normal);
+
+  /* ==========================================================================
+   * Sombra
+   * ========================================================================== */
+  --mantine-shadow-xs: var(--shadow-xs);
+  --mantine-shadow-sm: var(--shadow-sm);
+  --mantine-shadow-md: var(--shadow-md);
+  --mantine-shadow-lg: var(--shadow-lg);
+  --mantine-shadow-xl: var(--shadow-xl);
+}
