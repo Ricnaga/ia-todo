@@ -3,12 +3,12 @@
 import { Button, Group, Text } from '@mantine/core'
 import { IconSparkles } from '@tabler/icons-react'
 import { notifyError } from '@/lib/utils/notifications'
-import { useSummarizeDayMutation } from '@/services/insights/insights.mutation'
+import { useDaySummaryQuery } from '@/services/insights/insights.query'
 import { EmptyState } from './empty-state/empty-state'
 import { CardDaySummaryContent } from './card-day-summary-content/card-day-summary-content'
 
 export function CardDaySummary() {
-  const { data: summary, isPending, isError, mutate } = useSummarizeDayMutation()
+  const { data: summary, isPending, isError, refetch } = useDaySummaryQuery()
 
   return (
     <div className="flex flex-col gap-4">
@@ -16,9 +16,9 @@ export function CardDaySummary() {
         <Button
           leftSection={<IconSparkles size={18} />}
           loading={isPending}
-          onClick={() => mutate(undefined, { onError: notifyError('Não consegui gerar o resumo') })}
+          onClick={() => refetch().catch(notifyError('Não consegui gerar o resumo'))}
         >
-          Gerar resumo
+          {summary ? 'Gerar novo resumo' : 'Gerar resumo'}
         </Button>
       </Group>
 

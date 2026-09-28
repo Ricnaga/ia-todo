@@ -9,11 +9,15 @@ import type { TodoCreateRequest, TodoUpdateRequest } from './todo.request'
 import type { Todo } from '@ia-task-manager/schemas/todo'
 import type { TodoSuggestion } from '@ia-task-manager/schemas/todo'
 import type { CreateTodoFormInput } from '@ia-task-manager/schemas/todo'
+import { insightsQueryKeys } from '@/services/insights/insights.keys'
 import { todoQueryKeys } from './todo.keys'
 
 function useInvalidateTodos() {
   const queryClient = useQueryClient()
-  return () => queryClient.invalidateQueries({ queryKey: todoQueryKeys.all })
+  return () => {
+    queryClient.invalidateQueries({ queryKey: todoQueryKeys.all })
+    queryClient.invalidateQueries({ queryKey: insightsQueryKeys.daySummary })
+  }
 }
 
 export type TodoDraft = CreateTodoFormInput | TodoSuggestion
