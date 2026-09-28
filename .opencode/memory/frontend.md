@@ -34,10 +34,11 @@ Features de IA na UI (via Gemini, structured output validado por zod no server):
 
 - **Next.js 16** (App Router) + React 19 + TypeScript strict
 - **UI**: Mantine (core, dates, form, hooks, notifications) + Tabler Icons + Tailwind 4
+- **Tema**: o Mantine é o dono da preferência (persiste em `mantine-color-scheme-value`, escreve `data-mantine-color-scheme` lido pelo `modes.css`, e o `ColorSchemeScript` do `app/layout.tsx` lê a mesma chave antes da pintura) — **não criar store para o modo**; `components/theme-switcher/theme-switcher.tsx` expõe as 3 opções (`auto`/`light`/`dark`) via `setColorScheme`, e o ícone do gatilho é CSS (`dark:hidden`/`hidden dark:inline`) para não dar hydration mismatch. Os defaults de notificação (`position`, `autoClose`, `limit`) vivem no `createTheme` via `Notifications.extend`, não em props no JSX
 - **Auth**: better-auth client (`services/auth/auth.client.ts` via `createAuthClient`); **sessão é estado do servidor, nunca do client** — o token fica em cookie httpOnly e o front guarda só o usuário, revalidando com a query GraphQL `me` (`useMeQuery`, `staleTime: 0` + `refetchOnMount`/`refetchOnWindowFocus`); o client do better-auth é usado **apenas** nos fluxos imperativos (signIn/signUp/signOut/linkSocial)
 - **Data fetching**: @tanstack/react-query consumindo **GraphQL** (`/api/graphql`) via wrapper tipado em `services/graphql/base.ts`
 - **Tabela**: @tanstack/react-table **v9** (`useTable` + `tableFeatures`, não `useReactTable`/`getCoreRowModel`). Features registradas explicitamente em `table-todo-list/todo-table-features.ts`; `sortFns` é um registry (só as chaves registradas são válidas). Cell/header renderizam via `<table.FlexRender />`. Doc local: `node_modules/@tanstack/react-table/skills/`
-- **State**: nenhum state manager global — **server state é react-query**, UI state local é `useState`/`useForm`. Não instalar zustand/redux sem necessidade concreta. `zustand`, `@tanstack/react-query-devtools`, `@mantine/dates` e `@mantine/hooks` seguem declarados no `package.json` por decisão do usuário, mas têm **0 imports** (auditoria de 2026-09 nos 22 client components) — não usar como se fossem APIs disponíveis em código novo
+- **State**: nenhum state manager global — **server state é react-query**, UI state local é `useState`/`useForm`. Não instalar zustand/redux sem necessidade concreta. `zustand`, `@mantine/dates` e `@mantine/hooks` seguem declarados no `package.json` por decisão do usuário, mas têm **0 imports** (auditoria de 2026-09) — não usar como se fossem APIs disponíveis em código novo. `@tanstack/react-query-devtools` deixou a lista: é importado pelo `providers/react-query`
 - **View state (filtro/ordenação) vai na URL**, não em store: `useSearchParams` + `router.replace(..., { scroll: false })`, com a lógica pura em `lib/todo/todo-filters.ts` (valida com zod, ignora param inválido) e o glue em `lib/todo/use-todo-filters.ts`. Padrão confirmado nos docs do Next em `dist/docs/01-app/02-guides/preserving-ui-state.md`
 - **Formulários/validação**: padrão do projeto é `@mantine/form` com `schemaResolver` (Standard Schema, embutido no Mantine v9) + schemas zod v4 compartilhados em `lib/schemas` (ex.: `changePasswordSchema`). **Exceção conhecida:** `tarefas/_components/modal-todo-form` usa `react-hook-form` + `@hookform/resolvers` — as duas libs convivem; ao criar form novo, seguir o `@mantine/form` e não introduzir uma terceira via
 
@@ -62,7 +63,9 @@ Route groups: `(public)` = não autenticado; `(private)` = autenticado (verifica
 app/                   → páginas (Server Components/Client por necessidade)
   <rota>/_components/  → componentes usados só naquela page (e seus subcomponents)
 components/            → apenas componentes compartilhados entre várias pages (nav-shell)
-providers/             → provedores globais (QueryClient, Mantine)
+providers/             → composition root: index.tsx só compõe (ReactQueryProvider > ThemeProvider > children)
+  react-query/         → ReactQueryProvider (QueryClient via useState + ReactQueryDevtools) e seu barrel
+  theme/               → ThemeProvider (MantineProvider + AppNotifications), mantine-theme.ts (createTheme) e seu barrel
 services/              → vertical de dados do front por contexto: *.request.ts (operações cruas) + hooks query/mutation + query keys
 services/graphql/      → cliente GraphQL da UI (graphql-request) + base request<T> + fragments
 ```
@@ -90,7 +93,7 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 - Componentes **nunca** chamam `services/graphql/base` direto: usam os hooks de `services/*`
 - Toasts/notificações vêm dos componentes como **callbacks por chamada** (`mutateAsync(vars, { onSuccess, onError })`) — o `onSuccess` do service é exclusivo da invalidação
 - Sessão SSR: `lib/auth/session.ts` → `getCurrentUser()` (lê cookies + `auth.api.getSession` com `new Headers({ cookie })`, React `cache()`) e `verifySession()` (redirect `/login` se não autenticado); `(private)/layout.tsx` chama `verifySession()` **e** prefetcha `me` num `HydrationBoundary` (mesmo padrão de `tarefas/page.tsx`); NavShell lê `useMeQuery()` e o logout faz `queryClient.clear()` antes do `signOut()`
-- `components/session-guard/session-guard.tsx` → monta em `providers/index.tsx`; assina o `QueryCache` e, em erro com `code === 'UNAUTHENTICATED'` **ou** `me` resolvendo `null`, faz `queryClient.clear()` + `router.replace('/login?next=…')` (guard de loop com `useRef`)
+- `app/(private)/_components/session-guard/session-guard.tsx` → monta no `(private)/layout.tsx`, junto do `verifySession()`; assina o `QueryCache` e, em erro com `code === 'UNAUTHENTICATED'` **ou** `me` resolvendo `null`, faz `queryClient.clear()` + `router.replace('/login?next=…')` (guard de loop com `useRef`). Mora no route group privado porque `useMeQuery` só é lido em tela autenticada — global cobriria além do escopo real
 - OAuth: login e vínculo de conta (Google/GitHub) usam o client do better-auth — `authClient.signIn.social` / `authClient.linkSocial({ provider, callbackURL })`; o redirect para o consent é gerenciado pelo client (redirectPlugin → `window.location.href` interno), sem `window.location` manual nem GraphQL no fluxo
 
 ## Convenções frontend
