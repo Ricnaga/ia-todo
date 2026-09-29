@@ -5,6 +5,7 @@ import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import { Providers } from '@/providers'
+import { env } from '@/lib/config/environment'
 import './globals.css'
 
 const geistSans = Geist({
@@ -18,6 +19,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  // Sem isto, qualquer URL relativa de metadata vira warning e o
+  // Open Graph sai com host `localhost`.
+  metadataBase: new URL(env.APP_ORIGIN),
   title: 'ia-task-manager',
   description:
     'Gerenciador de tarefas com assistência de IA: sugestões, resumo diário e busca em linguagem natural.',
