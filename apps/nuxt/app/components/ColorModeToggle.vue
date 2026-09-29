@@ -7,12 +7,22 @@
  * `modes.css` escuta. O provider e a UI nao reescrevem `data-mode`, entao nao
  * ha duas fontes de verdade para divergirem.
  *
+ * Na v4 o composable expoe `preference` (o que foi escolhido, `light`, `dark`
+ * ou `system`) e `value` (ja resolvido), sem metodo `toggle`. Alternar e
+ * escrever em `preference`: e o plugin do cliente que observa esse campo para
+ * reaplicar a classe, e resolver por `value` evita o caso de `preference`
+ * estar em `system` e o clique não mudar nada.
+ *
  * O icone e escolhido por CSS (`dark:hidden` / `hidden dark:inline`) em vez de
  * JS: `colorMode.unknown` e `true` no servidor, e decidir o icone no cliente
  * produziria hydration mismatch. Como o `dark` do Tailwind le a mesma classe
  * que o `color-mode` escreve, CSS e JS nunca discordam.
  */
 const colorMode = useColorMode()
+
+const alternar = () => {
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+}
 </script>
 
 <template>
@@ -21,7 +31,7 @@ const colorMode = useColorMode()
     variant="ghost"
     aria-label="Alternar tema"
     title="Alternar tema"
-    @click="colorMode.toggle()"
+    @click="alternar"
   >
     <span aria-hidden="true" class="dark:hidden">☀</span>
     <span aria-hidden="true" class="hidden dark:inline">☾</span>
