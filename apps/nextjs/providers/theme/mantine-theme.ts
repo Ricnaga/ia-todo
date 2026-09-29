@@ -1,5 +1,4 @@
 import { createTheme, type MantineColorsTuple } from '@mantine/core'
-import { Notifications } from '@mantine/notifications'
 
 /**
  * Mantine expoe 10 tons por cor; a rampa compartilhada tem 11 (50 -> 950).
@@ -45,20 +44,4 @@ export const mantineTheme = createTheme({
   primaryShade: { light: 6, dark: 4 },
   colors,
   defaultRadius: 'md',
-  components: {
-    /**
-     * A politica de notificacao fica no tema, e nao em props no JSX: o
-     * `AppNotifications` renderiza <Notifications /> sem argumentar nada, e
-     * qualquer tela nova que monte um container proprio herda o mesmo
-     * comportamento. O Mantine so aplica os defaults aqui se o componente for
-     * oextended (extend) -- por isso o Notifications, e nao uma prop solta.
-     */
-    Notifications: Notifications.extend({
-      defaultProps: {
-        position: 'top-right',
-        autoClose: 4_000,
-        limit: 5,
-      },
-    }),
-  },
 })
