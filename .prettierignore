@@ -1,11 +1,13 @@
 **/.next
-out
-build
+**/.nuxt
+**/.output
+**/.svelte-kit
+**/.data
+**/.nitro
+**/out
+**/build
 node_modules
 .pnpm-store
-# scaffolds novos: fora do prettier até o tooling (.vue/.svelte) ser configurado
-apps/nuxt
-apps/sveltekit
 packages/server/src/db/generated
 packages/server/prisma/dev.db
 *.tsbuildinfo

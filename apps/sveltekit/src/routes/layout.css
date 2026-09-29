@@ -20,6 +20,6 @@
 @import '@ia-task-manager/design-tokens/adapters/skeleton.css';
 
 body {
-	background-color: var(--color-bg);
-	color: var(--color-fg);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
 }
