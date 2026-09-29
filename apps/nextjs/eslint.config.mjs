@@ -27,4 +27,17 @@ export default tseslint.config(
     },
   },
   prettier,
+  {
+    // Este bloco nao declara `files` de proposito: ele tem que alcancar todas as
+    // entradas acima que instalam o parser do typescript-eslint, inclusive as
+    // que vem de `eslint-config-next/typescript`.
+    //
+    // O editor carrega o config da raiz e o deste app no mesmo processo e
+    // registra o diretorio de cada um como candidata. Sem `tsconfigRootDir`
+    // explicito, o typescript-eslint se recusa a escolher entre elas e o parse
+    // do primeiro arquivo estoura.
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
+    },
+  },
 )

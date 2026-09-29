@@ -24,17 +24,21 @@ export default tseslint.config(
       parserOptions: {
         parser: tseslint.parser,
         projectService: true,
-        // `projectService` sem `tsconfigRootDir` deixa o typescript-eslint
-        // adivinhar a raiz pelo stack de chamada: ele procura um frame cujo
-        // arquivo se chame `eslint.config.mjs` e usa o diretorio dele. Num
-        // processo que avalia a config da raiz e a deste app ao mesmo tempo --
-        // o que o editor faz num monorepo -- sobram duas candidatas e o parse
-        // seguinte lanca "multiple candidate TSConfigRootDirs".
-        // `import.meta.dirname` tambem tira o `process.cwd()` de dentro do
-        // lint, que e a mesma armadilha que o `@nuxt/eslint-config` tem.
-        tsconfigRootDir: import.meta.dirname,
         extraFileExtensions: ['.svelte'],
       },
+    },
+  },
+  {
+    // Este bloco nao declara `files` de proposito: `tseslint.configs.recommended`
+    // acima tambem instala o parser sem `tsconfigRootDir`, entao um bloco so
+    // para `.svelte` deixaria os `.ts` do app estourando.
+    //
+    // O editor carrega o config da raiz e o deste app no mesmo processo e
+    // registra o diretorio de cada um como candidata. Sem `tsconfigRootDir`
+    // explicito, o typescript-eslint se recusa a escolher entre elas e o parse
+    // do primeiro arquivo estoura.
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
     },
   },
 )

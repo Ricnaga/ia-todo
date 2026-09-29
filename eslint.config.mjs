@@ -25,4 +25,14 @@ export default tseslint.config(
     },
   },
   prettier,
+  {
+    // O editor carrega o config da raiz e o de cada app no mesmo processo e
+    // registra o diretorio de cada um como candidata. Sem `tsconfigRootDir`
+    // explicito, o typescript-eslint se recusa a escolher entre elas e o parse
+    // do primeiro arquivo estoura. Este e o diretorio deste arquivo, que e a
+    // raiz do monorepo, e nao o `process.cwd()` de quem rodou o lint.
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
+    },
+  },
 )
