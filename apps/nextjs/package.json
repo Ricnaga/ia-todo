@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
@@ -35,12 +37,18 @@
     "@ia-task-manager/design-tokens": "workspace:*"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.4",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8"
   }
 }
