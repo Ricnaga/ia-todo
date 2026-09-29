@@ -2,8 +2,9 @@
 /**
  * Alterna light/dark.
  *
- * `useColorMode` vem do `@nuxtjs/color-mode` (instalado como dependencia do
- * `@nuxt/ui`) e escreve a classe `dark` no <html>, que e um dos seletores que o
+ * `useColorMode` vem do `@nuxtjs/color-mode`, declarado direto no
+ * `nuxt.config.ts` em vez de herdado pelo `@nuxt/ui`, e escreve a classe `dark`
+ * no <html>, que e um dos seletores que o
  * `modes.css` escuta. O provider e a UI nao reescrevem `data-mode`, entao nao
  * ha duas fontes de verdade para divergirem.
  *

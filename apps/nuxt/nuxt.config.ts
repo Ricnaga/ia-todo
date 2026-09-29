@@ -3,6 +3,6 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   devServer: { port: 3001 },
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@nuxtjs/color-mode'],
   css: ['~/assets/css/main.css'],
 })
