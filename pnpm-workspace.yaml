@@ -13,3 +13,12 @@ allowBuilds:
   msgpackr-extract: false
   better-sqlite3: true
   vue-demi: true
+
+# `graphql-request@7.4.0` declara `graphql: 14 - 16` como peer e nao importa
+# nada de `graphql` em runtime: o unico uso e o tipo. O repo roda `graphql@17`,
+# que e o que o `graphql-yoga@5` e o Pothos do BFF pedem, entao o range do peer
+# e que esta atras.
+packageExtensions:
+  graphql-request@7.4.0:
+    peerDependencies:
+      graphql: 14 - 17
