@@ -1,2 +1,4 @@
-# Gate de push. O que roda esta no script "gate" do package.json.
+# Gate de push: o repo inteiro, nao so o que foi staged. O typecheck
+# ja roda a cada commit, pelo lint-staged. O que sobra aqui e o drift de
+# ferramenta, que o lint por arquivo nao enxerga.
 pnpm gate
