@@ -12,6 +12,7 @@ const lintIn = (pkg) => (files) => [
 ]
 
 const config = {
+  '*': () => 'pnpm typecheck',
   './*.{js,mjs,ts}': lint,
   'packages/*/**/*.{js,jsx,ts,tsx,mjs,cjs}': lint,
   'apps/nextjs/**/*.{js,jsx,ts,tsx,mts,cts}': lintIn('@ia-task-manager/nextjs'),
