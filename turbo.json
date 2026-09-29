@@ -1,9 +1,21 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
-  "globalDependencies": ["tsconfig.json", ".prettierignore", "eslint.config.mjs"],
+  "globalDependencies": [
+    "tsconfig.json",
+    ".prettierignore",
+    "eslint.config.mjs",
+    "apps/*/eslint.config.mjs",
+    "gate.json"
+  ],
   "globalEnv": ["NODE_ENV"],
   "tasks": {
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "cache": false
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
