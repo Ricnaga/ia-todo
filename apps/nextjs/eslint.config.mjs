@@ -1,4 +1,5 @@
 import js from '@eslint/js'
+import tanstackQuery from '@tanstack/eslint-plugin-query'
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import prettier from 'eslint-config-prettier'
@@ -15,9 +16,11 @@ export default tseslint.config(
       tseslint.configs.recommended,
       nextCoreWebVitals,
       nextTypescript,
+      tanstackQuery.configs['flat/recommended'],
     ],
     rules: {
       '@next/next/no-html-link-for-pages': 'off',
+      '@tanstack/query/exhaustive-deps': 'off',
     },
   },
   prettier,
