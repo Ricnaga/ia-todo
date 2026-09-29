@@ -5,7 +5,7 @@ import type { Assistant, Criteria } from '@ia-task-manager/schemas/assistant'
 import { priorityColors, priorityLabels } from '@/lib/constants/todo.constants'
 import { paths } from '@/lib/constants/router-paths'
 import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
-import { EmptyState } from '../empty-state/empty-state'
+import { EmptyState } from '@/components/empty-state/empty-state'
 
 const statusLabels: Record<Criteria['status'], string> = {
   any: 'qualquer',

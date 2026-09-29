@@ -3,7 +3,7 @@
 import { Suspense, type ReactNode } from 'react'
 import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { ErrorState } from '@/components/error-state/error-state'
-import { LoadingState } from '@/components/loading-state/loading-state'
+import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 
 export type RenderBoundaryProps = {
   children: ReactNode
@@ -24,7 +24,7 @@ function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 
 export function RenderBoundary({
   children,
-  fallback = <LoadingState />,
+  fallback = <SkeletonStack />,
   errorFallback = DefaultErrorFallback,
   onReset,
 }: RenderBoundaryProps) {

@@ -3,6 +3,7 @@
 import { Badge, Button, Card, Divider, Stack, Text, TextInput, Title } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { IconMail } from '@tabler/icons-react'
+import { z } from 'zod'
 import type { AuthUser } from '@ia-task-manager/schemas/auth'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
 import { useChangeEmailMutation, useMeQuery, useUpdateProfileMutation } from '@/services/auth'
@@ -53,7 +54,10 @@ function ProfileEditor({ user }: ProfileEditorProps) {
   const emailForm = useForm<EmailValues>({
     initialValues: { newEmail: '' },
     validate: {
-      newEmail: (value) => (/^\S+@\S+\.\S+$/.test(value) ? null : 'E-mail inválido'),
+      // `z.email()` e o mesmo do schema de auth, e nao uma regex nova: a regex
+      // antiga aceitava e-mails que o contrato rejeita e rejeitava outros que
+      // ele aceita, e nenhuma das duas avisava.
+      newEmail: (value) => (z.email().safeParse(value).success ? null : 'E-mail inválido'),
     },
   })
 

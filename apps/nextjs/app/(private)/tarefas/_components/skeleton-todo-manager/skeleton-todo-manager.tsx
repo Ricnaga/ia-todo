@@ -1,5 +1,5 @@
 import { Skeleton } from '@mantine/core'
-import { LoadingState } from '@/components/loading-state/loading-state'
+import { SkeletonStack } from '@/components/skeleton-stack/skeleton-stack'
 
 export function SkeletonTodoManager() {
   return (
@@ -14,7 +14,7 @@ export function SkeletonTodoManager() {
           <Skeleton height={36} width={130} />
         </div>
       </div>
-      <LoadingState lines={8} rowHeight={36} />
+      <SkeletonStack lines={8} rowHeight={36} />
     </div>
   )
 }

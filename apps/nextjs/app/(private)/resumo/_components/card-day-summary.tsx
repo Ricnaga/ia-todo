@@ -4,7 +4,7 @@ import { Button, Group, Text } from '@mantine/core'
 import { IconSparkles } from '@tabler/icons-react'
 import { notifyError } from '@/lib/utils/notifications'
 import { useDaySummaryQuery } from '@/services/insights/insights.query'
-import { EmptyState } from './empty-state/empty-state'
+import { EmptyState } from '@/components/empty-state/empty-state'
 import { CardDaySummaryContent } from './card-day-summary-content/card-day-summary-content'
 
 export function CardDaySummary() {
