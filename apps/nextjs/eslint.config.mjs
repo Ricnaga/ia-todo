@@ -20,7 +20,10 @@ export default tseslint.config(
     ],
     rules: {
       '@next/next/no-html-link-for-pages': 'off',
-      '@tanstack/query/exhaustive-deps': 'off',
+      '@tanstack/query/exhaustive-deps': [
+        'error',
+        { allowlist: { variables: ['requestHeaders'], types: [] } },
+      ],
     },
   },
   prettier,
