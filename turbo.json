@@ -5,8 +5,7 @@
     "tsconfig.json",
     ".prettierignore",
     "eslint.config.mjs",
-    "apps/*/eslint.config.mjs",
-    "gate.json"
+    "apps/*/eslint.config.mjs"
   ],
   "globalEnv": ["NODE_ENV"],
   "tasks": {

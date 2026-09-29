@@ -1,5 +1,2 @@
-# Gate de push. A lista de tasks vive em gate.json para nao duplicar aqui.
-for task in $(node -p "require('./gate.json').tasks.join(' ')")
-do
-  pnpm "$task" || exit 1
-done
+# Gate de push. O que roda esta no script "gate" do package.json.
+pnpm gate

@@ -106,7 +106,7 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 - `@nuxt/eslint-config` fica em `~1.16.0` pela mesma razão: a `1.17.0` exige `eslint-plugin-unicorn@73`, que pede ESLint `>=10.4`
 - Só o app Next tem `@tanstack/eslint-plugin-query` (`flat/recommended`); a `exhaustive-deps` roda **ligada**, com o `requestHeaders` na `allowlist` da própria regra. O prefetch de Server Component usa o cookie de propósito fora da chave, e a chave precisa casar com a query do cliente para o `HydrationBoundary` funcionar. A exceção é por **nome de variável**, então uma dependência de verdade faltando continua sendo acusada
 - **Prettier é único, na raiz**, com `prettier-plugin-svelte` só em `overrides` de `*.svelte` — carregado no topo, ele faz o Prettier varrer diretórios com ponto e formatar arquivos que não são do projeto
-- **Gates**: `pnpm lint`, `pnpm format:check` e `pnpm typecheck`; `gate.json` é a lista de tarefas e o `pre-push` percorre todas. Não há suíte de testes no monorepo
+- **Gates**: `pnpm gate` = `pnpm lint && pnpm format:check && pnpm typecheck`, e é o `pre-push` que o chama. O `pre-commit` é o lint-staged, que já traz o `pnpm typecheck` junto. Não há suíte de testes no monorepo
 - **Commit**: conventional commits via commitlint; o `pre-commit` é o lint-staged, que chama o eslint de dentro de cada app com `pnpm --filter <pacote> exec eslint --fix` e o prettier da raiz num comando só
 
 ## Convenções frontend
