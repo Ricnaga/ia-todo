@@ -228,9 +228,18 @@ importers:
 
   apps/sveltekit:
     dependencies:
+      '@ia-task-manager/bff':
+        specifier: workspace:*
+        version: link:../../packages/bff
       '@ia-task-manager/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@ia-task-manager/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
+      '@ia-task-manager/server':
+        specifier: workspace:*
+        version: link:../../packages/server
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.5
