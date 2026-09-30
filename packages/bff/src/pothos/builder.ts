@@ -31,7 +31,11 @@ export const builder = new SchemaBuilder<{
   withInput: {
     typeOptions: {
       name: ({ parentTypeName, fieldName }) => {
-        const capitalized = `${fieldName[0].toUpperCase()}${fieldName.slice(1)}`
+        // `charAt` e nao `fieldName[0]`: com `noUncheckedIndexedAccess` ligado
+        // (o tsconfig gerado pelo Nuxt liga) o indexamento devolve
+        // `string | undefined` e o typecheck do app passa a acusar o BFF, que
+        // tem o proprio tsconfig sem a flag.
+        const capitalized = `${fieldName.charAt(0).toUpperCase()}${fieldName.slice(1)}`
         if (parentTypeName === 'Query' || parentTypeName === 'Mutation') {
           return `${capitalized}Input`
         }
