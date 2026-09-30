@@ -16,7 +16,7 @@ alwaysApply: true
 >
 > `packages/design-tokens` é a fonte única de cor, espaçamento, tipografia, shadow e motion (CSS puro para Tailwind 4), com um adapter por UI kit (`adapters/mantine.css`, `adapters/nuxt-ui.css`, `adapters/skeleton.css`). **Nunca usar cor/espaço literal no app** — sempre o token.
 >
-> **Daqui para baixo, este documento descreve o app Next** (`apps/nextjs/`), o mais maduro: `app/`, `components/`, `lib/`, `providers/`, `services/`. Os apps Nuxt e SvelteKit ainda são scaffolds. O núcleo e a API ficam em `packages/server` e `packages/bff`; os contratos zod em `packages/schemas`.
+> **Daqui para baixo, este documento descreve o app Next** (`apps/nextjs/`), o mais maduro: `app/`, `components/`, `lib/`, `providers/`, `services/`. Os apps Nuxt e SvelteKit têm só o playground do GraphQL montado (ver [Playground](#playground-do-graphql-os-3-fronts-montam-o-yoga-in-process)); **a camada de `services/` e o data fetching deles ainda não existem** — a definição foi fechada mas não implementada. O núcleo e a API ficam em `packages/server` e `packages/bff`; os contratos zod em `packages/schemas`.
 >
 > O app consome os packages por nome via `transpilePackages` — eles publicam TS puro, sem build. O alias `@/*` do Next é exclusive do app. Lint e format passam pelo Turborepo, com uma config flat por app e Prettier único na raiz (ver [Tooling](#tooling-e-gates)).
 
@@ -39,7 +39,7 @@ Features de IA na UI (via Gemini, structured output validado por zod no server):
 - **Auth**: better-auth client (`services/auth/auth.client.ts` via `createAuthClient`); **sessão é estado do servidor, nunca do client** — o token fica em cookie httpOnly e o front guarda só o usuário, revalidando com a query GraphQL `me` (`useMeQuery`, `staleTime: 0` + `refetchOnMount`/`refetchOnWindowFocus`); o client do better-auth é usado **apenas** nos fluxos imperativos (signIn/signUp/signOut/linkSocial)
 - **Data fetching**: @tanstack/react-query consumindo **GraphQL** (`/api/graphql`) via wrapper tipado em `services/graphql/base.ts`
 - **Tabela**: @tanstack/react-table **v9** (`useTable` + `tableFeatures`, não `useReactTable`/`getCoreRowModel`). Features registradas explicitamente em `table-todo-list/todo-table-features.ts`; `sortFns` é um registry (só as chaves registradas são válidas). Cell/header renderizam via `<table.FlexRender />`. Doc local: `node_modules/@tanstack/react-table/skills/`
-- **State**: nenhum state manager global — **server state é react-query**, UI state local é `useState`/`useForm`. Não instalar zustand/redux sem necessidade concreta. `zustand`, `@mantine/dates` e `@mantine/hooks` seguem declarados no `package.json` por decisão do usuário, mas têm **0 imports** (auditoria de 2026-09) — não usar como se fossem APIs disponíveis em código novo. `@tanstack/react-query-devtools` deixou a lista: é importado pelo `providers/react-query`
+- **State**: nenhum state manager global — **server state é react-query**, UI state local é `useState`/`useForm`. Não instalar zustand/redux/pinia sem necessidade concreta. **zustand e `@mantine/dates` foram removidos** (0 imports, auditoria de 2026-09) e `@mantine/hooks` segue declarado com 0 imports — não usar como se fossem APIs disponíveis em código novo. `@tanstack/react-query-devtools` deixou a lista: é importado pelo `providers/react-query`
 - **View state (filtro/ordenação) vai na URL**, não em store: `useSearchParams` + `router.replace(..., { scroll: false })`, com a lógica pura em `lib/todo/todo-filters.ts` (valida com zod, ignora param inválido) e o glue em `lib/todo/use-todo-filters.ts`. Padrão confirmado nos docs do Next em `dist/docs/01-app/02-guides/preserving-ui-state.md`
 - **Formulários/validação**: padrão do projeto é `@mantine/form` com `schemaResolver` (Standard Schema, embutido no Mantine v9) + schemas zod v4 compartilhados em `lib/schemas` (ex.: `changePasswordSchema`). **Exceção conhecida:** `tarefas/_components/modal-todo-form` usa `react-hook-form` + `@hookform/resolvers` — as duas libs convivem; ao criar form novo, seguir o `@mantine/form` e não introduzir uma terceira via
 
@@ -73,7 +73,31 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 
 ## Data layer (`services/`)
 
-> **Pausado por decisão do usuário**: a evolução da auth e das tarefas fica para depois que a arquitetura do BFF estiver definida. Quando voltar, começar por aqui.
+> **Pausado por decisão do usuário**: a evolução da auth e das tarefas fica para depois. Para o app Next, começar por aqui. Para Nuxt e SvelteKit, o desenho está fechado e fica no item "Pendências do data layer Nuxt/SvelteKit" do fim da seção de Tooling.
+
+### Pendências do data layer Nuxt/SvelteKit (decidido, não implementado)
+
+Contrato comum aos dois (paridade com o Next, `services/<contexto>/` com
+imports explícitos — sem auto-import):
+
+- **Nuxt**: `useAsyncData`/`useFetch` **nativo** (sem @tanstack/vue-query),
+  POST em `/api/graphql`. O `useFetch` troca `$fetch` por `useRequestFetch()`
+  sozinho quando a URL é relativa (`fetch.js:108`), então o cookie de sessão
+  chega no SSR sem header manual.
+- **SvelteKit**: **load functions nativas** (sem @tanstack/svelte-query).
+  `+page.server.ts` para leitura autenticada, `+page.ts` para client-only.
+  O `client.ts` dos services **recebe o `fetch` do load como parâmetro** — é ele
+  que herda cookie/authorization no SSR.
+- **Invalidação é match EXATO nos dois frameworks** (Nuxt `asyncData.js:303`
+  → `keys.includes(key)`; SvelteKit `client.js:2384` → `url.href === href`).
+  Não há prefix-matching como no React Query, então a query-key factory precisa
+  enumerar explicitamente o que toda escrita renova (ex.: `writeTargets:
+['TODO:LIST']` → `refreshNuxtData(...)` / `invalidate(...)`).
+- **Nunca** cachear `/api/graphql` na borda (`routeRules`/`defineCachedEventHandler`
+  do Nitro, `cache-control` público no SvelteKit): é por-usuário e o
+  `createContext` lê o cookie. O único cache válido é o Redis por `userId`
+  (`packages/server/shared/cache`), que os 3 apps compartilham.
+- `invalidateAll()` do SvelteKit só funciona no browser e re-roda tudo — evitar.
 
 - Um arquivo por responsabilidade, por contexto:
   - `services/graphql/base.ts` → `GraphQLClient` singleton + `request<T>` (normaliza `ClientError` → `errors[0].message`)
@@ -108,6 +132,50 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 - **Prettier é único, na raiz**, com `prettier-plugin-svelte` só em `overrides` de `*.svelte` — carregado no topo, ele faz o Prettier varrer diretórios com ponto e formatar arquivos que não são do projeto
 - **Gates**: `pnpm gate` = `pnpm lint && pnpm format:check`, e é o `pre-push` que o chama. O `pre-commit` é o lint-staged, que já traz o `pnpm typecheck` junto, então o gate cobre só o que o lint por arquivo não vê: drift de prettier ou de regra/config, que só aparece depois de subir ferramenta ou mexer em config. Não há suíte de testes no monorepo
 - **Commit**: conventional commits via commitlint; o `pre-commit` é o lint-staged, que chama o eslint de dentro de cada app com `pnpm --filter <pacote> exec eslint --fix` e o prettier da raiz num comando só
+
+## Playground do GraphQL (os 3 fronts montam o Yoga in-process)
+
+Os três apps sobem o **mesmo** Yoga de `@ia-task-manager/bff` — nenhum chamada o
+BFF pela rede, nenhum servidor de playground separado. `createGraphQLHandler()` é
+um fetch handler `(Request) => Response`, `graphqlEndpoint` é `/api/graphql` nos
+três, e o `GET` serve o GraphiQL (o Yoga o habilita fora de produção). Smoke test
+de que o schema Pothos montou: `POST { todos { id } }` sem sessão devolve
+`UNAUTHENTICATED` (o `builder.ts` marca `queryType` com o scope `loggedIn`).
+
+| App    | Monta em                     | Serve em                            | Adaptador do Yoga                                                                                                  |
+| ------ | ---------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Next   | `services/graphql/server.ts` | `app/api/graphql/route.ts`          | `createServerGraphQLClient()` (`inProcessFetch`), registrado em `instrumentation.ts`                               |
+| Nuxt   | `server/utils/graphql.ts`    | `server/api/graphql.ts`             | `defineEventHandler` + `toWebRequest`/`sendWebResponse` (NÃO `fromWebHandler`: o 2º param dele é o `NodeResponse`) |
+| Svelte | `src/lib/server/graphql.ts`  | `src/routes/api/graphql/+server.ts` | `RequestHandler` que desempacota `event.request`; exporta `GET`/`POST` (equivalente ao `toNextJsHandler`)          |
+
+Pegadinhas de bundler (cada front já resolveu a sua):
+
+- **Nuxt/Nitro**: o treeshake do rollup do Nitro descarta import de efeito
+  (`import './modules'`), então o schema saía vazio. Resolvido com
+  `nitro.rollupConfig.treeshake.moduleSideEffects` devolvendo `true` para
+  `@ia-task-manager/bff`. `sideEffects: true` no package.json do BFF **não**
+  basta — o Nitro sobrescreve essa config. Os packages source-only precisam de
+  `build.transpile`; o `better-sqlite3`/Prisma ficam em `nitro.externals.external`.
+- **SvelteKit/Vite**: `ssr.noExternal` + `optimizeDeps.exclude` para os 3
+  packages; `server.fs.allow: ['..', '../..']` porque o pnpm não escreve
+  `workspaces` e o Vite não acha a raiz do monorepo sozinho.
+- **Vite não carrega `.env` no `process.env`** (só o Nitro faz, e só com prefixo
+  `VITE_` no client). O `vite.config.ts` faz `Object.assign(process.env,
+loadEnv('development', import.meta.dirname, ''))`, senão o
+  `environment.ts` (que valida com zod e lança) estoura no SSR.
+- **`adapter-auto` não é runtime Node**: `vite dev` funciona, mas para build de
+  produção precisa do `@sveltejs/adapter-node`.
+- O HTML do GraphiQL vem de `unpkg.com` — o endpoint responde sem internet, a
+  UI não.
+- `DATABASE_URL` e `BETTER_AUTH_URL` são **por app**: o primeiro é relativo ao
+  cwd de cada app, e o segundo tem que ser a porta do app que está rodando
+  (`environment.ts` só usa `3000` como fallback). Cookie ignora porta, então com
+  o mesmo `BETTER_AUTH_SECRET` e o mesmo SQLite a sessão é compartilhada entre os
+  três em dev.
+
+**Extensões do VS Code**: uma lista só, em `.vscode/extensions.json` na raiz
+(ESLint, Prettier, Tailwind, Volar, Svelte, Prisma, pnpm) — não há mais
+`.vscode` por app.
 
 ## Convenções frontend
 

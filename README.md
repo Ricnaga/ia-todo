@@ -24,13 +24,23 @@ IA aplicada ao ciclo de vida da tarefa — 3 features:
 ## Arquitetura — monorepo pnpm, núcleo único, porta GraphQL, DDD por bounded contexts
 
 ```
-apps/nextjs/      → app Next.js (único front por enquanto)
+apps/nextjs/      → app Next.js (único front com telas por enquanto)
 ├── app/           → App Router: (private)/, (public)/, api/
 │   ├── api/graphql/route.ts   → GET/POST delega a createGraphQLHandler() do @ia-task-manager/bff
 │   └── api/auth/[...all]/route.ts → handler do better-auth
 ├── components/    → componentes UI compartilhados
 ├── lib/           → auth/ (session) + constants/ (UI tokens, router paths) + utils/
 └── services/      → cliente GraphQL da UI (graphql-request) + operações tipadas
+
+apps/nuxt/        → app Nuxt 4 (só o playground do GraphQL por enquanto)
+└── server/
+    ├── utils/graphql.ts  → singleton yoga = createGraphQLHandler()
+    └── api/graphql.ts    → defineEventHandler + toWebRequest/sendWebResponse
+
+apps/sveltekit/   → app SvelteKit 2 (só o playground do GraphQL por enquanto)
+└── src/
+    ├── lib/server/graphql.ts              → singleton yoga = createGraphQLHandler()
+    └── routes/api/graphql/+server.ts      → RequestHandler que desempacota event.request (GET/POST)
 
 packages/
 ├── tsconfig/      → base de TypeScript compartilhada (source-only, sem build)
@@ -74,7 +84,7 @@ packages/
         └── schema.ts    → importa scalars + modules (side-effect) e exporta o schema
 ```
 
-- **Source-only**: os packages publicam TypeScript puro (`main` → `src/index.ts`), sem etapa de build. O app os compila via `transpilePackages` no `next.config.ts`. Por isso os imports internos dos packages são **relativos** — o alias `@/*` do app não existe fora dele.
+- **Source-only**: os packages publicam TypeScript puro (`main` → `src/index.ts`), sem etapa de build. Cada app os compila no seu bundler — `transpilePackages` (Next), `build.transpile` (Nuxt) e `ssr.noExternal` + `optimizeDeps.exclude` (SvelteKit) — e por isso os imports internos dos packages são **relativos**: o alias `@/*` do Next não existe fora dele.
 - **Turborepo** orquestra `build`, `typecheck` e `db:*` pelo grafo de dependências, com cache. `lint` e `format` passam uma única vez pela raiz (o ESLint tem uma config só, em `eslint.config.mjs`).
 - A UI consome **GraphQL** via React Query, com operações tipadas no wrapper `services/graphql/base.ts`.
 - Consumidores externos usam o mesmo endpoint GraphQL — uma porta, zero duplicação.
@@ -101,38 +111,54 @@ Abra [http://localhost:3000](http://localhost:3000).
 
 GraphQL (GraphiQL): [http://localhost:3000/api/graphql](http://localhost:3000/api/graphql) — endpoint único (UI + clientes externos); o GraphiQL abre no browser.
 
+Os três fronts montam o **mesmo** Yoga de `@ia-task-manager/bff` in-process, cada um na sua porta — não há BFF separado nem chamada por rede:
+
+| App       | Script               | GraphiQL                                                        |
+| --------- | -------------------- | --------------------------------------------------------------- |
+| Next.js   | `pnpm dev:nextjs`    | [localhost:3000/api/graphql](http://localhost:3000/api/graphql) |
+| Nuxt      | `pnpm dev:nuxt`      | [localhost:3001/api/graphql](http://localhost:3001/api/graphql) |
+| SvelteKit | `pnpm dev:sveltekit` | [localhost:5173/api/graphql](http://localhost:5173/api/graphql) |
+
+Para rodar os outros dois, copie o `.env.example` do app e ajuste `BETTER_AUTH_URL` para a porta dele — o `BETTER_AUTH_SECRET` pode ser o mesmo, e o cookie não distingue porta, então os três compartilham a sessão em dev.
+
 ## Variáveis de ambiente
 
-| Variável         | Obrigatória | Descrição                        |
-| ---------------- | ----------- | -------------------------------- |
-| `DATABASE_URL`   | sim         | URL do SQLite (ver abaixo)       |
-| `GEMINI_API_KEY` | não (IA)    | Chave do Google AI Studio        |
-| `GEMINI_MODEL`   | não         | Modelo padrão `gemini-2.5-flash` |
+| Variável             | Obrigatória | Descrição                                        |
+| -------------------- | ----------- | ------------------------------------------------ |
+| `DATABASE_URL`       | sim         | URL do SQLite (ver abaixo)                       |
+| `BETTER_AUTH_SECRET` | não (dev)   | Assina o cookie de sessão; em prod é obrigatório |
+| `BETTER_AUTH_URL`    | não (dev)   | URL do app; padrão `http://localhost:3000`       |
+| `GEMINI_API_KEY`     | não (IA)    | Chave do Google AI Studio                        |
+| `GEMINI_MODEL`       | não         | Modelo padrão `gemini-2.5-flash`                 |
 
 `GEMINI_API_KEY` é opcional: o app roda com CRUD; os recursos de IA precisam da chave.
 
 O `DATABASE_URL` é relativo ao **cwd** de cada processo, então o mesmo arquivo aparece com caminhos diferentes:
 
-| Onde          | Valor                                      | cwd               |
-| ------------- | ------------------------------------------ | ----------------- |
-| runtime (app) | `file:../../packages/server/prisma/dev.db` | `apps/nextjs`     |
-| Prisma CLI    | `file:./prisma/dev.db`                     | `packages/server` |
+| Onde          | Valor                                      | cwd                                          |
+| ------------- | ------------------------------------------ | -------------------------------------------- |
+| runtime (app) | `file:../../packages/server/prisma/dev.db` | `apps/nextjs`, `apps/nuxt`, `apps/sveltekit` |
+| Prisma CLI    | `file:./prisma/dev.db`                     | `packages/server`                            |
 
 Ambos resolvem para `packages/server/prisma/dev.db`.
 
 ## Scripts
 
-| Comando             | Descrição                                 |
-| ------------------- | ----------------------------------------- |
-| `pnpm dev`          | servidor de desenvolvimento               |
-| `pnpm build`        | build de produção                         |
-| `pnpm start`        | roda o build                              |
-| `pnpm lint`         | ESLint (app + packages)                   |
-| `pnpm lint:fix`     | ESLint com correção automática            |
-| `pnpm typecheck`    | TypeScript em todos os workspaces (turbo) |
-| `pnpm format`       | formata com Prettier                      |
-| `pnpm format:check` | verificação Prettier                      |
-| `pnpm db:generate`  | gera o Prisma Client                      |
-| `pnpm db:migrate`   | aplica/cria migrations                    |
-| `pnpm db:studio`    | Prisma Studio (browser do banco)          |
-| `pnpm commit`       | commit com commitizen (convencional)      |
+| Comando              | Descrição                                 |
+| -------------------- | ----------------------------------------- |
+| `pnpm dev`           | servidor de desenvolvimento               |
+| `pnpm dev:nextjs`    | só o app Next (`:3000`)                   |
+| `pnpm dev:nuxt`      | só o app Nuxt (`:3001`)                   |
+| `pnpm dev:sveltekit` | só o app SvelteKit (`:5173`)              |
+| `pnpm build`         | build de produção                         |
+| `pnpm start`         | roda o build                              |
+| `pnpm lint`          | ESLint (app + packages)                   |
+| `pnpm lint:fix`      | ESLint com correção automática            |
+| `pnpm typecheck`     | TypeScript em todos os workspaces (turbo) |
+| `pnpm gate`          | lint + `prettier --check` (é o pre-push)  |
+| `pnpm format`        | formata com Prettier                      |
+| `pnpm format:check`  | verificação Prettier                      |
+| `pnpm db:generate`   | gera o Prisma Client                      |
+| `pnpm db:migrate`    | aplica/cria migrations                    |
+| `pnpm db:studio`     | Prisma Studio (browser do banco)          |
+| `pnpm commit`        | commit com commitizen (convencional)      |
