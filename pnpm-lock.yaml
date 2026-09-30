@@ -179,9 +179,18 @@ importers:
 
   apps/nuxt:
     dependencies:
+      '@ia-task-manager/bff':
+        specifier: workspace:*
+        version: link:../../packages/bff
       '@ia-task-manager/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@ia-task-manager/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
+      '@ia-task-manager/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@nuxt/ui':
         specifier: ^4.11.2
         version: 4.11.2(5b690a075ecdc07dcf268c78e01aa71f)

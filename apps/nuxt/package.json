@@ -14,7 +14,10 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@ia-task-manager/bff": "workspace:*",
     "@ia-task-manager/design-tokens": "workspace:*",
+    "@ia-task-manager/schemas": "workspace:*",
+    "@ia-task-manager/server": "workspace:*",
     "@nuxt/ui": "^4.11.2",
     "@nuxtjs/color-mode": "^4.0.1",
     "nuxt": "^4.5.2",
