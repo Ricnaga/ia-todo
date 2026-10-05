@@ -1,105 +1,57 @@
 import { request } from '@/services/graphql/base'
-import { TODO_FIELDS } from '@/services/graphql/fragments'
+import type { RequestHeaders } from '@/services/graphql/graphql.types'
+import type { TodoCreateRequest, TodoUpdateRequest } from './todo.types'
+import {
+  CreateTodoDocument,
+  DeleteTodoDocument,
+  GetTodoDocument,
+  ListTodosDocument,
+  SuggestTodoDocument,
+  UpdateTodoDocument,
+} from '@ia-task-manager/bff/graphql'
 import {
   todoSchema,
+  todoSuggestionSchema,
   type Todo,
-  type TodoPriority,
   type TodoSuggestion,
 } from '@ia-task-manager/schemas/todo'
 import type { DraftInput } from '@ia-task-manager/schemas/todo'
 
-export type TodoCreateRequest = {
-  title: string
-  description?: string | null
-  priority?: TodoPriority | null
-  dueDate?: string | null
-}
-
-export type TodoUpdateRequest = Partial<TodoCreateRequest> & { completed?: boolean }
-
-const toTodo = (raw: unknown): Todo => todoSchema.parse(raw)
-
-export async function listTodos(requestHeaders?: Record<string, string>): Promise<Todo[]> {
-  const data = await request<{ todos: unknown[] }>(
-    `
-      query ListTodos {
-        todos {
-          ${TODO_FIELDS}
-        }
-      }
-    `,
-    undefined,
-    requestHeaders,
-  )
-  return data.todos.map(toTodo)
+/**
+ * Os documentos vem prontos do codegen e o Zod continua conferindo a forma.
+ *
+ * Sao camadas distintas e nenhuma sobra: o codegen garante que o documento
+ * compila e que o tipo do fio bate com o schema (campo renomeado no Pothos
+ * quebra o build aqui), e o Zod garante que o que chegou em runtime e o que o
+ * dominio espera -- inclusive a conversao de `createdAt`/`dueDate`, que no wire
+ * sao string e no `Todo` sao `Date`. Por isso o retorno e `Todo[]` e nao o tipo
+ * gerado: `todoSchema.parse` e quem faz a ponte entre os dois.
+ */
+export async function listTodos(headers?: RequestHeaders): Promise<Todo[]> {
+  const data = await request({ document: ListTodosDocument, headers })
+  return data.todos.map((todo) => todoSchema.parse(todo))
 }
 
 export async function getTodo(id: string): Promise<Todo> {
-  const data = await request<{ todo: unknown }>(
-    `
-      query GetTodo($id: String!) {
-        todo(id: $id) {
-          ${TODO_FIELDS}
-        }
-      }
-    `,
-    { id },
-  )
-  return toTodo(data.todo)
+  const data = await request({ document: GetTodoDocument, variables: { id } })
+  return todoSchema.parse(data.todo)
 }
 
 export async function createTodo(input: TodoCreateRequest): Promise<Todo> {
-  const data = await request<{ createTodo: unknown }>(
-    `
-      mutation CreateTodo($input: CreateTodoInput!) {
-        createTodo(input: $input) {
-          ${TODO_FIELDS}
-        }
-      }
-    `,
-    { input },
-  )
-  return toTodo(data.createTodo)
+  const data = await request({ document: CreateTodoDocument, variables: { input } })
+  return todoSchema.parse(data.createTodo)
 }
 
 export async function updateTodo(id: string, input: TodoUpdateRequest): Promise<Todo> {
-  const data = await request<{ updateTodo: unknown }>(
-    `
-      mutation UpdateTodo($id: String!, $input: UpdateTodoInput!) {
-        updateTodo(id: $id, input: $input) {
-          ${TODO_FIELDS}
-        }
-      }
-    `,
-    { id, input },
-  )
-  return toTodo(data.updateTodo)
+  const data = await request({ document: UpdateTodoDocument, variables: { id, input } })
+  return todoSchema.parse(data.updateTodo)
 }
 
 export async function deleteTodo(id: string): Promise<void> {
-  await request<{ deleteTodo: boolean }>(
-    `
-      mutation DeleteTodo($id: String!) {
-        deleteTodo(id: $id)
-      }
-    `,
-    { id },
-  )
+  await request({ document: DeleteTodoDocument, variables: { id } })
 }
 
 export async function suggestTodo(draft: DraftInput): Promise<TodoSuggestion> {
-  const data = await request<{ suggestTodo: TodoSuggestion }>(
-    `
-      mutation SuggestTodo($draft: DraftInput!) {
-        suggestTodo(draft: $draft) {
-          title
-          description
-          priority
-          subtasks
-        }
-      }
-    `,
-    { draft },
-  )
-  return data.suggestTodo
+  const data = await request({ document: SuggestTodoDocument, variables: { draft } })
+  return todoSuggestionSchema.parse(data.suggestTodo)
 }

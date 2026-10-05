@@ -5,7 +5,7 @@ import {
   suggestTodo as suggestTodoRequest,
   updateTodo as updateTodoRequest,
 } from './todo.request'
-import type { TodoCreateRequest, TodoUpdateRequest } from './todo.request'
+import type { TodoCreateRequest, TodoUpdateRequest } from './todo.types'
 import type { Todo } from '@ia-task-manager/schemas/todo'
 import type { TodoSuggestion } from '@ia-task-manager/schemas/todo'
 import type { CreateTodoFormInput } from '@ia-task-manager/schemas/todo'

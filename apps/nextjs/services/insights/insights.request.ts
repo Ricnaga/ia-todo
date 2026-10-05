@@ -1,17 +1,8 @@
 import { request } from '@/services/graphql/base'
-import type { DaySummary } from '@ia-task-manager/schemas/insights'
+import { SummarizeDayDocument } from '@ia-task-manager/bff/graphql'
+import { daySummarySchema, type DaySummary } from '@ia-task-manager/schemas/insights'
 
 export async function summarizeDay(): Promise<DaySummary> {
-  const data = await request<{ summarizeDay: DaySummary }>(
-    `
-      mutation SummarizeDay {
-        summarizeDay {
-          summary
-          focus
-          suggestedOrder
-        }
-      }
-    `,
-  )
-  return data.summarizeDay
+  const data = await request({ document: SummarizeDayDocument })
+  return daySummarySchema.parse(data.summarizeDay)
 }

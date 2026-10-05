@@ -1,4 +1,23 @@
 import { request } from '@/services/graphql/base'
+import type { RequestHeaders } from '@/services/graphql/graphql.types'
+import {
+  ChangeEmailDocument,
+  ChangePasswordDocument,
+  MeDocument,
+  MyAccountsDocument,
+  MySessionsDocument,
+  RevokeOtherSessionsDocument,
+  RevokeSessionDocument,
+  UnlinkAccountDocument,
+  UpdateProfileDocument,
+} from '@ia-task-manager/bff/graphql'
+import type {
+  ChangeEmailRequest,
+  ChangePasswordRequest,
+  RevokeSessionRequest,
+  UnlinkAccountRequest,
+  UpdateProfileRequest,
+} from './auth.types'
 import {
   authUserSchema,
   authAccountSchema,
@@ -8,162 +27,47 @@ import {
   type AuthSession,
 } from '@ia-task-manager/schemas/auth'
 
-type RequestHeaders = Record<string, string>
-
-export const AUTH_USER_FIELDS = `
-  id
-  name
-  email
-  emailVerified
-  image
-  createdAt
-  updatedAt
-`
-
-export const AUTH_ACCOUNT_FIELDS = `
-  id
-  providerId
-  accountId
-  userId
-  createdAt
-  updatedAt
-`
-
-export const AUTH_SESSION_FIELDS = `
-  id
-  isCurrent
-  expiresAt
-  ipAddress
-  userAgent
-  createdAt
-  updatedAt
-`
-
-const toUser = (raw: unknown): AuthUser => authUserSchema.parse(raw)
-const toAccount = (raw: unknown): AuthAccount => authAccountSchema.parse(raw)
-const toSession = (raw: unknown): AuthSession => authSessionSchema.parse(raw)
-
-export async function fetchMe(requestHeaders?: RequestHeaders): Promise<AuthUser | null> {
-  const data = await request<{ me: unknown | null }>(
-    `
-    query Me {
-      me {
-        ${AUTH_USER_FIELDS}
-      }
-    }
-  `,
-    undefined,
-    requestHeaders,
-  )
-  return data.me ? toUser(data.me) : null
+export async function fetchMe(headers?: RequestHeaders): Promise<AuthUser | null> {
+  const data = await request({ document: MeDocument, headers })
+  return data.me ? authUserSchema.parse(data.me) : null
 }
 
-export async function fetchMyAccounts(requestHeaders?: RequestHeaders): Promise<AuthAccount[]> {
-  const data = await request<{ myAccounts: unknown[] }>(
-    `
-    query MyAccounts {
-      myAccounts {
-        ${AUTH_ACCOUNT_FIELDS}
-      }
-    }
-  `,
-    undefined,
-    requestHeaders,
-  )
-  return data.myAccounts.map(toAccount)
+export async function fetchMyAccounts(headers?: RequestHeaders): Promise<AuthAccount[]> {
+  const data = await request({ document: MyAccountsDocument, headers })
+  return data.myAccounts.map((account) => authAccountSchema.parse(account))
 }
 
-export async function fetchMySessions(requestHeaders?: RequestHeaders): Promise<AuthSession[]> {
-  const data = await request<{ mySessions: unknown[] }>(
-    `
-    query MySessions {
-      mySessions {
-        ${AUTH_SESSION_FIELDS}
-      }
-    }
-  `,
-    undefined,
-    requestHeaders,
-  )
-  return data.mySessions.map(toSession)
+export async function fetchMySessions(headers?: RequestHeaders): Promise<AuthSession[]> {
+  const data = await request({ document: MySessionsDocument, headers })
+  return data.mySessions.map((session) => authSessionSchema.parse(session))
 }
 
-export async function updateProfileRequest(input: {
-  name?: string
-  image?: string | null
-}): Promise<AuthUser> {
-  const data = await request<{ updateProfile: unknown }>(
-    `
-      mutation UpdateProfile($input: UpdateProfileInput!) {
-        updateProfile(input: $input) {
-          ${AUTH_USER_FIELDS}
-        }
-      }
-    `,
-    { input },
-  )
-  return toUser(data.updateProfile)
+export async function updateProfileRequest(input: UpdateProfileRequest): Promise<AuthUser> {
+  const data = await request({ document: UpdateProfileDocument, variables: { input } })
+  return authUserSchema.parse(data.updateProfile)
 }
 
-export async function changeEmailRequest(input: {
-  newEmail: string
-  callbackURL?: string
-}): Promise<boolean> {
-  const data = await request<{ changeEmail: boolean }>(
-    `
-      mutation ChangeEmail($input: ChangeEmailInput!) {
-        changeEmail(input: $input)
-      }
-    `,
-    { input },
-  )
+export async function changeEmailRequest(input: ChangeEmailRequest): Promise<boolean> {
+  const data = await request({ document: ChangeEmailDocument, variables: { input } })
   return data.changeEmail
 }
 
-export async function changePasswordRequest(input: {
-  currentPassword: string
-  newPassword: string
-}): Promise<boolean> {
-  const data = await request<{ changePassword: boolean }>(
-    `
-      mutation ChangePassword($input: ChangePasswordInput!) {
-        changePassword(input: $input)
-      }
-    `,
-    { input },
-  )
+export async function changePasswordRequest(input: ChangePasswordRequest): Promise<boolean> {
+  const data = await request({ document: ChangePasswordDocument, variables: { input } })
   return data.changePassword
 }
 
-export async function unlinkAccountRequest(input: { accountId: string }): Promise<boolean> {
-  const data = await request<{ unlinkAccount: boolean }>(
-    `
-      mutation UnlinkAccount($input: UnlinkAccountInput!) {
-        unlinkAccount(input: $input)
-      }
-    `,
-    { input },
-  )
+export async function unlinkAccountRequest(input: UnlinkAccountRequest): Promise<boolean> {
+  const data = await request({ document: UnlinkAccountDocument, variables: { input } })
   return data.unlinkAccount
 }
 
-export async function revokeSessionRequest(input: { sessionId: string }): Promise<boolean> {
-  const data = await request<{ revokeSession: boolean }>(
-    `
-      mutation RevokeSession($input: RevokeSessionInput!) {
-        revokeSession(input: $input)
-      }
-    `,
-    { input },
-  )
+export async function revokeSessionRequest(input: RevokeSessionRequest): Promise<boolean> {
+  const data = await request({ document: RevokeSessionDocument, variables: { input } })
   return data.revokeSession
 }
 
 export async function revokeOtherSessionsRequest(): Promise<boolean> {
-  const data = await request<{ revokeOtherSessions: boolean }>(`
-    mutation RevokeOtherSessions {
-      revokeOtherSessions
-    }
-  `)
+  const data = await request({ document: RevokeOtherSessionsDocument })
   return data.revokeOtherSessions
 }
