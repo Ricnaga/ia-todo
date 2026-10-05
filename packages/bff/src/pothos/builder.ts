@@ -11,6 +11,19 @@ export const builder = new SchemaBuilder<{
   Context: GraphQLContext
   AuthScopes: { loggedIn: boolean }
   AuthContexts: { loggedIn: LoggedInContext }
+  // Habilita `defaultFieldNullability` no objeto de opcoes. O Pothos le esse
+  // parametro do par de tipos para decidir se a opcao existe; sem ele, o
+  // `SchemaBuilderOptions` tipa o campo como `never` e a opcao -- que o runtime
+  // ate aceitaria -- e recusada pelo compilador.
+  //
+  // Com `false`, a nulabilidade de cada campo e inferida do tipo do TS
+  // (`objectRef<Todo>` vem de `z.infer`) em vez de ser nullable por padrao. O
+  // SDL dizia `id: String` para um campo que o dominio garante como `z.string()`,
+  // o que deixava o contrato GraphQL mais frouxo que o Zod e fazia o codegen do
+  // cliente gerar `id: string | null` -- a tipagem forte so aparecia depois do
+  // parse. `description` e `dueDate`, que sao `string | null` no dominio,
+  // continuam declarados com `nullable: true` explicito nos `.ref.ts`.
+  DefaultFieldNullability: false
   Scalars: {
     DateTime: {
       Input: Date
@@ -18,6 +31,7 @@ export const builder = new SchemaBuilder<{
     }
   }
 }>({
+  defaultFieldNullability: false,
   plugins: [ScopeAuthPlugin, WithInputPlugin],
   scopeAuth: {
     authScopes: (ctx) => ({
