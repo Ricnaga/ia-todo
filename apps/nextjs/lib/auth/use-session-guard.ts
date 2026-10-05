@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useQueryClient, type Query } from '@tanstack/react-query'
 import { paths } from '@/lib/constants/router-paths'
-import { GraphQLRequestError, UNAUTHENTICATED_CODE } from '@/services/graphql/base'
+import { GraphQLRequestError, UNAUTHENTICATED_CODE } from '@ia-task-manager/bff/graphql'
 import { authQueryKeys } from '@/services/auth/auth.keys'
 
 const ME_KEY = authQueryKeys.me[0]

@@ -1,22 +1,10 @@
-import { firstGraphQLError } from '@ia-task-manager/bff/graphql'
+import { firstGraphQLError, GraphQLRequestError } from '@ia-task-manager/bff/graphql'
 import { print } from 'graphql'
 import type { RequestOptions } from './graphql.types'
-
-export const UNAUTHENTICATED_CODE = 'UNAUTHENTICATED'
 
 type GraphQLResponse<TData> = {
   data?: TData
   errors?: unknown
-}
-
-export class GraphQLRequestError extends Error {
-  readonly code: string | undefined
-
-  constructor(message: string, code?: string) {
-    super(message)
-    this.name = 'GraphQLRequestError'
-    this.code = code
-  }
 }
 
 export async function request<TResult, TVariables>({

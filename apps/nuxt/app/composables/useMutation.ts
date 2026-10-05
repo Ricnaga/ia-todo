@@ -1,5 +1,5 @@
 import { ref, type Ref } from 'vue'
-import { GraphQLRequestError } from '~/services/graphql/base'
+import { GraphQLRequestError } from '@ia-task-manager/bff/graphql'
 
 export type MutateOptions<TResult> = {
   onSuccess?: (data: TResult) => void | Promise<void>
@@ -24,6 +24,7 @@ export function useMutation<TInput, TResult>(
 ): UseMutationReturn<TInput, TResult> {
   const isPending = ref<boolean>(false)
   const error = ref<GraphQLRequestError | null>(null)
+
   const data = ref<TResult | null>(null) as Ref<TResult | null>
 
   async function mutateAsync(

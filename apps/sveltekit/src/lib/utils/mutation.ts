@@ -1,4 +1,4 @@
-import { GraphQLRequestError } from '$lib/services/graphql/base'
+import { GraphQLRequestError } from '@ia-task-manager/bff/graphql'
 
 export type MutateOptions<TResult> = {
   onSuccess?: (data: TResult) => void | Promise<void>
