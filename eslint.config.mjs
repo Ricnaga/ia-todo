@@ -15,6 +15,12 @@ export default tseslint.config(
       '**/dist/**',
       '**/next-env.d.ts',
       'packages/server/src/db/generated/**',
+      // Saida do codegen GraphQL. E reescrito inteiro a cada `pnpm codegen` e
+      // ja vem com `/* eslint-disable */` do proprio preset; lintar isso aqui so
+      // produzia "unused eslint-disable directive" nos arquivos que ja saem
+      // limpos. O que gerado precisa e de typecheck, e o `tsc` cobre -- inclusive
+      // os `unknown` internos que o preset usa para montar os tipos.
+      'packages/bff/src/graphql/generated/**',
     ],
   },
   {

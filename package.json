@@ -14,7 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "turbo run typecheck",
-    "gate": "pnpm lint && pnpm format:check",
+    "gate": "pnpm lint && pnpm format:check && pnpm --filter @ia-task-manager/bff codegen && pnpm --filter @ia-task-manager/bff codegen:check",
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
     "db:deploy": "turbo run db:deploy",

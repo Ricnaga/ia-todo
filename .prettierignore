@@ -9,6 +9,8 @@
 node_modules
 .pnpm-store
 packages/server/src/db/generated
+packages/bff/src/graphql/generated
+packages/bff/schema.graphql
 packages/server/prisma/dev.db
 *.tsbuildinfo
 apps/nextjs/next-env.d.ts
