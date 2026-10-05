@@ -1,6 +1,6 @@
+import { firstGraphQLError } from '@ia-task-manager/bff/graphql'
 import { ClientError, GraphQLClient } from 'graphql-request'
-
-type RequestHeaders = Record<string, string>
+import type { RequestOptions } from './graphql.types'
 
 export const UNAUTHENTICATED_CODE = 'UNAUTHENTICATED'
 
@@ -15,16 +15,12 @@ export class GraphQLRequestError extends Error {
 }
 
 function toRequestError(error: ClientError): GraphQLRequestError {
-  const graphQLError = error.response.errors?.[0]
-  const code = graphQLError?.extensions?.code
-  return new GraphQLRequestError(
-    graphQLError?.message ?? error.message,
-    typeof code === 'string' ? code : undefined,
-  )
+  const payload = firstGraphQLError(error.response)
+  return new GraphQLRequestError(payload?.message ?? error.message, payload?.extensions?.code)
 }
 
 /**
- * Este arquivo e compartilhado: `session-guard.tsx` importa o contrato de erro
+ * Este arquivo e compartilhado: `use-session-guard.ts` importa o contrato de erro
  * dele e roda no browser. Por isso ele nao importa o BFF nem le `process.env` --
  * o schema, o better-auth e o Yoga sao de servidor, e o env de servidor nao
  * existe no bundle do cliente.
@@ -41,7 +37,7 @@ function toRequestError(error: ClientError): GraphQLRequestError {
  *
  * Os dois passam pelo mesmo `graphql-request`, entao Status, `ClientError` e a
  * conversao para `GraphQLRequestError` sao identicos nos dois caminhos. E o
- * que o `session-guard` usa para mandar o usuario para o login.
+ * que o `use-session-guard` usa para mandar o usuario para o login.
  */
 let browserClient: GraphQLClient | undefined
 
@@ -88,13 +84,35 @@ function getClient(): GraphQLClient {
   return browserClient
 }
 
-export async function request<T>(
-  document: string,
-  variables?: Record<string, unknown>,
-  requestHeaders?: RequestHeaders,
-): Promise<T> {
+/**
+ * Envia um documento GraphQL e devolve o `data` ja tipado.
+ *
+ * `document` e um `Document<TResult, TVariables>` gerado pelo codegen, e nao uma
+ * string: os dois genéricos sao inferidos do documento, entao a chamada fica
+ * `request({ document: ListTodosDocument })` -- sem `<T>` explicito, sem `as` e
+ * sem o `Record<never, never>` que antes proibia passar variaveis. Os argumentos
+ * vem em `RequestOptions`, nomeados.
+ *
+ * O `object` que vai como segundo parametro de tipo do `graphql-request` e
+ * deliberado, e nao uma folga. O cliente decide entre `variables` obrigatorio e
+ * opcional com um condicional (`V extends Record<any, never> ? ... : ...`), e
+ * esse condicional nao resolve quando `V` e um generico nosso -- nenhuma das
+ * formas de passar `TVariables` diretamente compila. Fixando `V = object`, o
+ * cliente enxerga um tipo concreto. A precisao nao se perde: `variables` ja foi
+ * conferido contra o `TVariables` do documento na assinatura desta funcao, e e
+ * aqui que a semantica de "variaveis batem com a operacao" ja esta garantida.
+ * Para o transporte, sao so um objeto.
+ *
+ * O proprio `graphql-request` imprime o documento (o `analyzeDocument` dele
+ * importa `print` do `graphql`), entao este app nao chama `print`.
+ */
+export async function request<TResult, TVariables extends object>({
+  document,
+  variables,
+  headers,
+}: RequestOptions<TResult, TVariables>): Promise<TResult> {
   try {
-    return await getClient().request<T>(document, variables, requestHeaders)
+    return await getClient().request<TResult, object>(document, variables, headers)
   } catch (error) {
     if (error instanceof ClientError) {
       throw toRequestError(error)
