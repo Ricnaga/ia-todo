@@ -21,7 +21,8 @@
  * O fallback precisa de nome proprio (`--ds-font-fallback-sans`) porque uma
  * custom property nao pode se referenciar: `--ds-font-sans: var(--font-x),
  * var(--ds-font-sans)` seria um ciclo e resolveria para o valor invalido
- * garantido. Ver apps/nextjs/app/globals.css para o exemplo de override.
+ * garantido. Os tres apps sobrescrevem a familia em `apps/nextjs/app/globals.css`,
+ * `apps/nuxt/app/assets/css/main.css` e `apps/sveltekit/src/routes/layout.css`.
  */
 
 @theme static {

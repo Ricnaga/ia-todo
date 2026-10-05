@@ -171,6 +171,39 @@ Se voce adicionar uma ramp nova, mapeie o nome tambem no `app/app.config.ts` do
 Nuxt — sem o mapeamento o Nuxt UI emite `var(--color-<nome>-<ton>, )` com
 fallback vazio.
 
+## Alterando a fonte
+
+A familia do projeto nao mora neste pacote: cada app declara a sua e sobrescreve
+apenas `--ds-font-sans`. O override precisa ser um `:root` **sem** `@theme` e sem
+`@layer`, porque o valor padrao do token esta no `@layer theme` e regra no-layered
+vence regra layered.
+
+1. Defina a variavel `--font-hanken-grotesk` no app, e sobrescreva o token:
+   ```css
+   :root {
+     --ds-font-sans: var(--font-hanken-grotesk), var(--ds-font-fallback-sans);
+   }
+   ```
+2. Onde a webfont chega e responsabilidade do app, e cada um usa o mecanismo
+   idiomatico do framework:
+   - **Next** — `next/font/google` gera `--font-hanken-grotesk` em
+     `app/layout.tsx`, com preload e fallback de metricas ajustadas.
+   - **Nuxt** — `@nuxt/fonts` resolve a familia a partir do CSS. Ele descarta
+     arquivos sem a string `font-family:` no codigo, entao
+     `processCSSVariables: true` em `nuxt.config.ts` e obrigatorio aqui: sem ele
+     a familia, que so existe dentro de uma custom property, nunca e resolvida.
+   - **SvelteKit** — `@fontsource-variable/hanken-grotesk`, com o
+     `font-family: 'Hanken Grotesk Variable'` apontado em
+     `--font-hanken-grotesk`.
+
+O gotcha: `var(--font-hanken-grotesk)` com a variavel **nao definida** nao faz
+cascade para o proximo item da lista — a declaracao inteira fica invalida e
+`font-family` herda. Por isso o nome da variavel precisa existir em todos os apps,
+mesmo quando a webfont vem de um pacote com outro nome de familia.
+
+Hanken Grotesk nao tem companheira mono, entao `--ds-font-mono` fica no fallback
+de sistema -- de proposito, para o mono ser igual nos tres apps.
+
 ## Estilos de codigo
 
 O CSS nao tem lint dedicated, entao comentarios explicam o _porqueda_ de cada
