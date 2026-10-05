@@ -1,16 +1,3 @@
-/*
- * Tokens compartilhados — ver packages/design-tokens.
- *
- * A ordem importa. O Skeleton traz um tema monocromatico completo em
- * `base/theme.css`, **nao-layered**. Tokens em `@layer theme` (o que o Tailwind
- * emite) perderiam para ele, porque em CSS regra nao-layered vence regra
- * layered. Por isso os tokens entram por ultimo e `colors.css` declara as ramps
- * em `:root` nao-layered.
- *
- * Nao se importa `themes/*` do Skeleton: os tokens deste pacote ja definem a
- * paleta completa, e manter um segundo tema no bundle cria duas fontes de
- * verdade para a mesma coisa.
- */
 @import 'tailwindcss';
 
 @import '@skeletonlabs/skeleton';
@@ -22,18 +9,6 @@
 @import '@fontsource-variable/hanken-grotesk';
 
 :root {
-  /*
-   * Override de app: a fonte do projeto entra na frente do fallback do token.
-   * Este `:root` e propositalmente NAO/@theme e nao esta dentro de `@layer` --
-   * declaracoes sem camada vencem o `@layer theme` onde `--ds-font-sans` tem seu
-   * valor padrao. Sem `--ds-font-mono` porque Hanken Grotesk nao tem
-   * companheira mono e o fallback de sistema ja e o default do token.
-   *
-   * `--font-hanken-grotesk` existe para o nome da variavel ser o mesmo nos
-   * tres apps: aqui ela aponta para a familia que o Fontsource declara, no Next
-   * ela e gerada pelo `next/font`. Assim a linha do `--ds-font-sans` fica
-   * identica no monorepo, que e o que o design-tokens precisa garantir.
-   */
   --font-hanken-grotesk: 'Hanken Grotesk Variable';
   --ds-font-sans: var(--font-hanken-grotesk), var(--ds-font-fallback-sans);
 }

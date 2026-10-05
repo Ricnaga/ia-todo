@@ -54,9 +54,6 @@ function ProfileEditor({ user }: ProfileEditorProps) {
   const emailForm = useForm<EmailValues>({
     initialValues: { newEmail: '' },
     validate: {
-      // `z.email()` e o mesmo do schema de auth, e nao uma regex nova: a regex
-      // antiga aceitava e-mails que o contrato rejeita e rejeitava outros que
-      // ele aceita, e nenhuma das duas avisava.
       newEmail: (value) => (z.email().safeParse(value).success ? null : 'E-mail inválido'),
     },
   })

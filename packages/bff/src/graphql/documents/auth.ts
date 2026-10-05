@@ -1,14 +1,6 @@
 import { graphql } from '../generated/gql'
 
-/**
- * Operacoes de `auth`.
- *
- * As seis mutations que devolvem so `Boolean` nao usam fragment: o valor
- * primitivo ja e o contrato. As tres queries usam fragment porque devolvem
- * entidades.
- */
-
-export const MeSource = graphql(/* GraphQL */ `
+export const MeSource = graphql(`
   query Me {
     me {
       ...AuthUserFields
@@ -16,7 +8,7 @@ export const MeSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const MyAccountsSource = graphql(/* GraphQL */ `
+export const MyAccountsSource = graphql(`
   query MyAccounts {
     myAccounts {
       ...AuthAccountFields
@@ -24,7 +16,7 @@ export const MyAccountsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const MySessionsSource = graphql(/* GraphQL */ `
+export const MySessionsSource = graphql(`
   query MySessions {
     mySessions {
       ...AuthSessionFields
@@ -32,7 +24,7 @@ export const MySessionsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const UpdateProfileSource = graphql(/* GraphQL */ `
+export const UpdateProfileSource = graphql(`
   mutation UpdateProfile($input: UpdateProfileInput!) {
     updateProfile(input: $input) {
       ...AuthUserFields
@@ -40,31 +32,31 @@ export const UpdateProfileSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const ChangeEmailSource = graphql(/* GraphQL */ `
+export const ChangeEmailSource = graphql(`
   mutation ChangeEmail($input: ChangeEmailInput!) {
     changeEmail(input: $input)
   }
 `)
 
-export const ChangePasswordSource = graphql(/* GraphQL */ `
+export const ChangePasswordSource = graphql(`
   mutation ChangePassword($input: ChangePasswordInput!) {
     changePassword(input: $input)
   }
 `)
 
-export const UnlinkAccountSource = graphql(/* GraphQL */ `
+export const UnlinkAccountSource = graphql(`
   mutation UnlinkAccount($input: UnlinkAccountInput!) {
     unlinkAccount(input: $input)
   }
 `)
 
-export const RevokeSessionSource = graphql(/* GraphQL */ `
+export const RevokeSessionSource = graphql(`
   mutation RevokeSession($input: RevokeSessionInput!) {
     revokeSession(input: $input)
   }
 `)
 
-export const RevokeOtherSessionsSource = graphql(/* GraphQL */ `
+export const RevokeOtherSessionsSource = graphql(`
   mutation RevokeOtherSessions {
     revokeOtherSessions
   }

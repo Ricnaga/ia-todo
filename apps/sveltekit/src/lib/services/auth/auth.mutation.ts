@@ -17,10 +17,6 @@ import type {
   UpdateProfileRequest,
 } from './auth.types'
 
-/**
- * A invalidacao e por dependencia exata e a mutation nao sabe quais tags a rota
- * declarou — quem chama passa o que a rota usou em `depends()`.
- */
 async function invalidateKeys(keys: readonly string[]): Promise<void> {
   await Promise.all(keys.map((key) => invalidate(key)))
 }

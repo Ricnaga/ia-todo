@@ -29,14 +29,6 @@ export default tseslint.config(
     },
   },
   {
-    // Este bloco nao declara `files` de proposito: `tseslint.configs.recommended`
-    // acima tambem instala o parser sem `tsconfigRootDir`, entao um bloco so
-    // para `.svelte` deixaria os `.ts` do app estourando.
-    //
-    // O editor carrega o config da raiz e o deste app no mesmo processo e
-    // registra o diretorio de cada um como candidata. Sem `tsconfigRootDir`
-    // explicito, o typescript-eslint se recusa a escolher entre elas e o parse
-    // do primeiro arquivo estoura.
     languageOptions: {
       parserOptions: { tsconfigRootDir: import.meta.dirname },
     },

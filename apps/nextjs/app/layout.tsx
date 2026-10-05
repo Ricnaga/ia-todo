@@ -13,14 +13,7 @@ const hankenGrotesk = Hanken_Grotesk({
   subsets: ['latin'],
 })
 
-// Hanken Grotesk e uma fonte de texto, sem companheira mono. Sem `--ds-font-mono`
-// o token cai no fallback de sistema (ver packages/design-tokens/src/typography.css),
-// que e o mesmo nos tres apps -- manter uma webfont mono so aqui faria os blocos
-// de codigo ficarem com fonte diferente em cada front.
-
 export const metadata: Metadata = {
-  // Sem isto, qualquer URL relativa de metadata vira warning e o
-  // Open Graph sai com host `localhost`.
   metadataBase: new URL(env.APP_ORIGIN),
   title: 'ia-task-manager',
   description:

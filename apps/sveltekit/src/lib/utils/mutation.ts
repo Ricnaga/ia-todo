@@ -18,11 +18,6 @@ export type Mutation<TInput, TResult> = {
   readonly data: TResult | null
 }
 
-/**
- * O `onSuccess` do service e exclusivo da invalidacao de cache. Toast, redirect
- * e qualquer reacao de tela entram pelo `onSuccess`/`onError` da chamada
- * (`mutateAsync(input, { onSuccess })`), para o component decidir por si.
- */
 export function createMutation<TInput, TResult>(
   options: CreateMutationOptions<TInput, TResult>,
 ): Mutation<TInput, TResult> {

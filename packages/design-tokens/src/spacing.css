@@ -1,22 +1,3 @@
-/*
- * Design Tokens — Spacing
- * ---------------------------------------------------------------------------
- * `static`
- * --------
- * Sem `static`, o Tailwind so emite a variavel se alguma utility a usou. Num
- * design system o contrato nao pode depender de qual utility o app por acaso
- * gerou: os adapters referenciam `--radius-sm`, `--shadow-md`, `--text-lg` de
- * CSS plano, e o scanner do Tailwind nao ve essas referencias. Sem `static`,
- * `--mantine-shadow-md: var(--shadow-md)` resolveria para vazio em qualquer
- * tela que ainda nao tivesse `shadow-md` como classe. `static` emite sempre.
- * Uma unica base de 4px. O Tailwind v4 deriva toda a escala de espacamento
- * (`p-1` .. `p-96`, `gap-*`, `inset-*`) multiplicando `--spacing`, entao mudar
- * este valor reescala o espacamento do app inteiro de uma vez.
- *
- * A escala nao e enumerated aqui de proposito: `--spacing` e o parametro, e o
- * Tailwind faz o resto.
- */
-
 @theme static {
   --spacing: 0.25rem;
 }

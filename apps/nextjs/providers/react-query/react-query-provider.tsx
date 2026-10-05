@@ -25,8 +25,6 @@ export function ReactQueryProvider({ children }: ReactQueryProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {/* O proprio pacote se remove fora de dev (NODE_ENV), entao nao ha condicional
-          aqui: esvaziar o cache em cada render custaria uma Suspense extra. */}
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
     </QueryClientProvider>
   )

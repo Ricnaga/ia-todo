@@ -27,13 +27,6 @@ import {
   type AuthUser,
 } from '@ia-task-manager/schemas/auth'
 
-/**
- * O `me` e a unica resposta nullable do app: sem sessao o BFF devolve `null` em
- * vez de erro, e o guard de sessao depende disso. Por isso o `fetchMe` checa o
- * `null` explicitamente em vez de deixar o zod decidir -- `authUserSchema.parse`
- * rejeitaria `null` com "expected object, received null", que seria a mensagem
- * errada para o caso que mais importa aqui.
- */
 export async function fetchMe(headers?: RequestHeaders): Promise<AuthUser | null> {
   const data = await request({ document: MeDocument, headers })
   return data.me ? authUserSchema.parse(data.me) : null

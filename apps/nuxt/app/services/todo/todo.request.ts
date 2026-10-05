@@ -17,14 +17,6 @@ import {
   type TodoSuggestion,
 } from '@ia-task-manager/schemas/todo'
 
-/**
- * Os dois genericos do `request` sao inferidos do documento gerado, entao o
- * `TResult` vem da operacao e o `TVariables` das variaveis dela -- sem `<T>`
- * escrito a mao. O tipo gerado descreve o *wire* (`createdAt` e `string`,
- * `priority` e a union do enum), e o zod continua normalizando para os tipos de
- * dominio (`Date`, `TodoPriority`). Os dois nao se substituem: o codegen segura
- * o contrato do schema, o zod valida o que veio de fato.
- */
 export async function listTodos(headers?: RequestHeaders): Promise<Todo[]> {
   const data = await request({ document: ListTodosDocument, headers })
   return data.todos.map((todo) => todoSchema.parse(todo))

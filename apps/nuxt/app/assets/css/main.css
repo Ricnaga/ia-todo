@@ -1,26 +1,8 @@
-/*
- * Tokens compartilhados — ver packages/design-tokens.
- *
- * `main.css` e carregado depois do CSS do `@nuxt/ui` (o proprio modulo injeta o
- * tema dele), entao os tokens vem por ultimo na origem e vencem a paleta padrao.
- */
 @import 'tailwindcss';
 @import '@nuxt/ui';
 @import '@ia-task-manager/design-tokens/index.css';
 @import '@ia-task-manager/design-tokens/adapters/nuxt-ui.css';
 
 :root {
-  /*
-   * Override de app: a fonte do projeto entra na frente do fallback do token.
-   * Este `:root` e propositalmente NAO/@theme e nao esta dentro de `@layer` --
-   * declaracoes sem camada vencem o `@layer theme` onde `--ds-font-sans` tem seu
-   * valor padrao. Sem `--ds-font-mono` porque Hanken Grotesk nao tem
-   * companheira mono e o fallback de sistema ja e o default do token.
-   *
-   * A familia fica aqui dentro de uma custom property, e nao em um
-   * `font-family:` direto, porque e assim que o contrato de tokens funciona
-   * (--ds-font-sans -> --font-sans -> adapter do framework). O `@nuxt/fonts`
-   * so enxerga isso com `processCSSVariables: true` -- ver nuxt.config.ts.
-   */
   --ds-font-sans: 'Hanken Grotesk', var(--ds-font-fallback-sans);
 }

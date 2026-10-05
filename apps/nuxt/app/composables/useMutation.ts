@@ -19,19 +19,11 @@ export type UseMutationReturn<TInput, TResult> = {
   data: Ref<TResult | null>
 }
 
-/**
- * O `onSuccess` do service e exclusivo da invalidacao de cache. Toast, redirect
- * e qualquer reacao de tela entram pelo `onSuccess`/`onError` da chamada
- * (`mutateAsync(input, { onSuccess })`), para o component decidir por si e o
- * service nao saber nada de UI.
- */
 export function useMutation<TInput, TResult>(
   options: UseMutationOptions<TInput, TResult>,
 ): UseMutationReturn<TInput, TResult> {
   const isPending = ref<boolean>(false)
   const error = ref<GraphQLRequestError | null>(null)
-  // `ref` aplica `UnwrapRef` no generic, o que produz um `Ref` diferente de
-  // `Ref<TResult | null>`; o cast mantem o tipo publico do helper estavel.
   const data = ref<TResult | null>(null) as Ref<TResult | null>
 
   async function mutateAsync(

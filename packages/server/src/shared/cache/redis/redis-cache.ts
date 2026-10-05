@@ -48,7 +48,7 @@ export class RedisCache implements ICache {
     try {
       await (await this.connectLazily()).set(key, JSON.stringify(value), { EX: ttlSeconds })
     } catch {
-      // cache indisponível não deve derrubar a consulta
+      void 0
     }
   }
 
@@ -56,7 +56,7 @@ export class RedisCache implements ICache {
     try {
       await (await this.connectLazily()).del(key)
     } catch {
-      // cache indisponível não deve derrubar a mutação
+      void 0
     }
   }
 }

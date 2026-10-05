@@ -29,9 +29,6 @@ type NavShellProps = {
 }
 
 export function NavShell({ children }: NavShellProps) {
-  // Reage a sessao morrendo depois que o SSR ja aprovou. Fica aqui porque este
-  // e o unico componente client da arvore privada, e porque o `handleSignOut`
-  // abaixo ja aplica a mesma politica a mao.
   useSessionGuard()
 
   const pathname = usePathname()

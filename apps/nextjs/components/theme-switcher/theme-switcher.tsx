@@ -9,22 +9,6 @@ const THEME_OPTIONS = [
   { value: 'dark', label: 'Escuro', icon: IconMoon },
 ] as const
 
-/**
- * Escolhe o tema: sistema, claro ou escuro.
- *
- * O Mantine e o dono da preferencia -- persiste em `mantine-color-scheme-value`,
- * escreve `data-mantine-color-scheme` (que o `modes.css` dos design-tokens
- * escuta) e e lido pelo `ColorSchemeScript` antes da primeira pintura. Por isso
- * aqui nao ha store: uma segunda chave seria uma segunda fonte de verdade para
- * a mesma coisa.
- *
- * O icone do gatilho e escolhido por CSS (`dark:hidden` / `hidden dark:inline`)
- * e mostra o modo **efetivo**, nao o selecionado -- com "Sistema" ativo e o SO em
- * dark, aparece a lua. Mostrar o selecionado exigiria ler estado no client no
- * servidor, que e hydration mismatch: `useComputedColorScheme` devolve
- * `undefined` no SSR. O checkmark do item ativo le `colorScheme` direto porque o
- * `Menu.Dropdown` so monta na primeira abertura, sempre pos-hidratacao.
- */
 export function ThemeSwitcher() {
   const { colorScheme, setColorScheme } = useMantineColorScheme()
 

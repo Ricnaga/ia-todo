@@ -1,21 +1,8 @@
-/*
- * Tokens compartilhados — ver packages/design-tokens.
- *
- * `globals.css` e importado depois de `@mantine/core/styles.css` em app/layout.tsx,
- * entao os tokens vem por ultimo na origem e vencem a paleta padrao do Mantine.
- */
 @import 'tailwindcss';
 @import '@ia-task-manager/design-tokens/index.css';
 @import '@ia-task-manager/design-tokens/adapters/mantine.css';
 
 :root {
-  /*
-   * Override de app: a fonte do projeto entra na frente do fallback do token.
-   * Este `:root` e propositalmente NAO/@theme e nao esta dentro de `@layer` --
-   * declacoes sem camada vencem o `@layer theme` onde `--ds-font-sans` tem seu
-   * valor padrao. Sem `--ds-font-mono` aqui porque Hanken Grotesk nao tem
-   * companheira mono e o fallback de sistema ja e o default do token.
-   */
   --ds-font-sans: var(--font-hanken-grotesk), var(--ds-font-fallback-sans);
 }
 

@@ -1,14 +1,6 @@
 import { graphql } from '../generated/gql'
 
-/**
- * Operacoes de `todo`.
- *
- * `todos` nao aceita filtro no GraphQL -- o filtro e client-side, em
- * `todo-filters.ts`. `suggestTodo` pertence a `todo` (e nao a `assistant`),
- * porque o retorno e um `TodoSuggestion`.
- */
-
-export const ListTodosSource = graphql(/* GraphQL */ `
+export const ListTodosSource = graphql(`
   query ListTodos {
     todos {
       ...TodoFields
@@ -16,7 +8,7 @@ export const ListTodosSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const GetTodoSource = graphql(/* GraphQL */ `
+export const GetTodoSource = graphql(`
   query GetTodo($id: String!) {
     todo(id: $id) {
       ...TodoFields
@@ -24,7 +16,7 @@ export const GetTodoSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const CreateTodoSource = graphql(/* GraphQL */ `
+export const CreateTodoSource = graphql(`
   mutation CreateTodo($input: CreateTodoInput!) {
     createTodo(input: $input) {
       ...TodoFields
@@ -32,7 +24,7 @@ export const CreateTodoSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const UpdateTodoSource = graphql(/* GraphQL */ `
+export const UpdateTodoSource = graphql(`
   mutation UpdateTodo($id: String!, $input: UpdateTodoInput!) {
     updateTodo(id: $id, input: $input) {
       ...TodoFields
@@ -40,13 +32,13 @@ export const UpdateTodoSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const DeleteTodoSource = graphql(/* GraphQL */ `
+export const DeleteTodoSource = graphql(`
   mutation DeleteTodo($id: String!) {
     deleteTodo(id: $id)
   }
 `)
 
-export const SuggestTodoSource = graphql(/* GraphQL */ `
+export const SuggestTodoSource = graphql(`
   mutation SuggestTodo($draft: DraftInput!) {
     suggestTodo(draft: $draft) {
       ...TodoSuggestionFields

@@ -17,16 +17,6 @@ import {
 } from '@ia-task-manager/schemas/todo'
 import type { DraftInput } from '@ia-task-manager/schemas/todo'
 
-/**
- * Os documentos vem prontos do codegen e o Zod continua conferindo a forma.
- *
- * Sao camadas distintas e nenhuma sobra: o codegen garante que o documento
- * compila e que o tipo do fio bate com o schema (campo renomeado no Pothos
- * quebra o build aqui), e o Zod garante que o que chegou em runtime e o que o
- * dominio espera -- inclusive a conversao de `createdAt`/`dueDate`, que no wire
- * sao string e no `Todo` sao `Date`. Por isso o retorno e `Todo[]` e nao o tipo
- * gerado: `todoSchema.parse` e quem faz a ponte entre os dois.
- */
 export async function listTodos(headers?: RequestHeaders): Promise<Todo[]> {
   const data = await request({ document: ListTodosDocument, headers })
   return data.todos.map((todo) => todoSchema.parse(todo))

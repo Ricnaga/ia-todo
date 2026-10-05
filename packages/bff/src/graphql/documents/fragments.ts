@@ -1,25 +1,6 @@
 import { graphql } from '../generated/gql'
 
-/**
- * Contrato GraphQL de cada tipo do BFF, em um lugar so para os tres apps.
- *
- * Antes desta migracao cada app tinha uma copia byte-identica deste arquivo e
- * cada documento terminava com `${TODO_FIELDS}` para carregar a definicao. O
- * codegen monta a definicao do fragmento no proprio documento gerado, entao a
- * interpolacao manual saiu: o risco classico de `Unknown fragment` em runtime
- * -- usar o spread e esquecer de anexar a definicao -- deixa de ser possivel,
- * porque nao ha mais nada para esquecer.
- *
- * A ordem dos campos espelha `packages/bff/src/pothos/modules/<ctx>/<ctx>.ref.ts`.
- * Mudar o schema e mudar aqui -- e o `pnpm codegen` transforma qualquer campo
- * apagado em erro de build, porque o documento gerado deixa de compilar.
- *
- * Este arquivo e entrada do codegen, nao codigo de app: os apps importam os
- * documentos ja gerados de `../generated/graphql`, nunca daqui. E por isso que
- * ele nao entra no bundle do cliente.
- */
-
-export const TodoFieldsSource = graphql(/* GraphQL */ `
+export const TodoFieldsSource = graphql(`
   fragment TodoFields on Todo {
     id
     title
@@ -37,7 +18,7 @@ export const TodoFieldsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const TodoSuggestionFieldsSource = graphql(/* GraphQL */ `
+export const TodoSuggestionFieldsSource = graphql(`
   fragment TodoSuggestionFields on TodoSuggestion {
     title
     description
@@ -46,7 +27,7 @@ export const TodoSuggestionFieldsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const CriteriaFieldsSource = graphql(/* GraphQL */ `
+export const CriteriaFieldsSource = graphql(`
   fragment CriteriaFields on Criteria {
     query
     keywords
@@ -56,7 +37,7 @@ export const CriteriaFieldsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const DaySummaryFieldsSource = graphql(/* GraphQL */ `
+export const DaySummaryFieldsSource = graphql(`
   fragment DaySummaryFields on DaySummary {
     summary
     focus
@@ -64,7 +45,7 @@ export const DaySummaryFieldsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const AuthUserFieldsSource = graphql(/* GraphQL */ `
+export const AuthUserFieldsSource = graphql(`
   fragment AuthUserFields on AuthUser {
     id
     name
@@ -76,7 +57,7 @@ export const AuthUserFieldsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const AuthAccountFieldsSource = graphql(/* GraphQL */ `
+export const AuthAccountFieldsSource = graphql(`
   fragment AuthAccountFields on AuthAccount {
     id
     providerId
@@ -87,7 +68,7 @@ export const AuthAccountFieldsSource = graphql(/* GraphQL */ `
   }
 `)
 
-export const AuthSessionFieldsSource = graphql(/* GraphQL */ `
+export const AuthSessionFieldsSource = graphql(`
   fragment AuthSessionFields on AuthSession {
     id
     isCurrent

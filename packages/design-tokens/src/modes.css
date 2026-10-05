@@ -1,35 +1,3 @@
-/*
- * Design Tokens — Color modes
- * ---------------------------------------------------------------------------
- * Define COMO o modo (light/dark) e resolvido. Nao define nenhum valor de token.
- *
- * O modo ativo e resolvido por um seletor unico, em tres faixas, do mais
- * fraco ao mais forte:
- *
- *   1. `:root`                                    -> light (padrao)
- *   2. `@media (prefers-color-scheme: dark)`      -> dark, so se o app nao fixou
- *   3. atributo/classe explicito                   -> dark
- *
- * Cada app usa o toggle da sua propria biblioteca e por isso cada adapter
- * escuta o atributo nativo dela. Os tres seletores abaixo sao equivalentes e
- * nao precisam estar sincronizados a mao:
- *
- *   `[data-mode]`                  -> canonico, para apps sem mecanismo nativo
- *                                    (e o que o script anti-FOUC escreve)
- *   `.dark` / `.light`             -> @nuxtjs/color-mode e Nuxt UI
- *   `[data-mantine-color-scheme]`  -> Mantine
- *
- * O atributo deve ficar no <html>.
- *
- * O unico valor que este arquivo emite e `color-scheme`, que faz o trabalho de
- * verdade: `light-dark()` (usado em semantic.css) e o Skeleton resolvem o par
- * light/dark a partir dele, sem precisar de uma segunda copia da paleta.
- */
-
-/*
- * O seletor precisa cubrir o elemento E os descendentes (`[attr] *`), porque o
- * atributo vive no <html> e as utilities sao aplicadas la embaixo.
- */
 @custom-variant dark (&:where(
     [data-mode='dark'],
     [data-mode='dark'] *,
@@ -40,19 +8,16 @@
   )
 );
 
-/* 1. Light por padrao. */
 :root {
   color-scheme: light;
 }
 
-/* 2. Dark automatico, apenas quando nenhum app fixou a preferencia. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-mode='light']):not(.light):not([data-mantine-color-scheme='light']) {
     color-scheme: dark;
   }
 }
 
-/* 3. Dark explicito — vence a media query acima. */
 :root:is([data-mode='dark'], .dark, [data-mantine-color-scheme='dark']) {
   color-scheme: dark;
 }

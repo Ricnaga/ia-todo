@@ -21,12 +21,6 @@ const toTodoUpdateRequest = (draft: TodoUpdateDraft): TodoUpdateRequest => {
   return toTodoCreateRequest(draft)
 }
 
-/**
- * A invalidacao e por dependencia exata, entao a mutation nao consegue saber
- * quais tags a rota declarou em `depends()` — quem chama passa o que a rota
- * pediu. `invalidateAll()` nao e usado: ele re-executa tudo e so funciona no
- * browser.
- */
 async function invalidateTodoWrites(
   keys: readonly string[] = todoQueryKeys.writeTargets(),
 ): Promise<void> {
