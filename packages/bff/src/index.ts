@@ -1,2 +1,2 @@
-export { createGraphQLHandler } from './graphql'
+export { createGraphQLHandler } from './handler'
 export type { GraphQLContext } from './context'
