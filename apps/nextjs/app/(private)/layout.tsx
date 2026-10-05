@@ -5,7 +5,6 @@ import { verifySession } from '@/lib/auth/session'
 import { NavShell } from '@/components/nav-shell'
 import { authQueryKeys } from '@/services/auth/auth.keys'
 import { fetchMe } from '@/services/auth/auth.request'
-import { SessionGuard } from './_components/session-guard/session-guard'
 
 type AppLayoutProps = {
   children: ReactNode
@@ -25,7 +24,6 @@ export default async function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <SessionGuard />
       <NavShell>{children}</NavShell>
     </HydrationBoundary>
   )

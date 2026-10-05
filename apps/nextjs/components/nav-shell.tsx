@@ -13,6 +13,7 @@ import {
   IconSparkles,
 } from '@tabler/icons-react'
 import { paths } from '@/lib/constants/router-paths'
+import { useSessionGuard } from '@/lib/auth/use-session-guard'
 import { authClient, useMeQuery } from '@/services/auth'
 import { ThemeSwitcher } from './theme-switcher/theme-switcher'
 
@@ -28,6 +29,11 @@ type NavShellProps = {
 }
 
 export function NavShell({ children }: NavShellProps) {
+  // Reage a sessao morrendo depois que o SSR ja aprovou. Fica aqui porque este
+  // e o unico componente client da arvore privada, e porque o `handleSignOut`
+  // abaixo ja aplica a mesma politica a mao.
+  useSessionGuard()
+
   const pathname = usePathname()
   const router = useRouter()
   const queryClient = useQueryClient()
