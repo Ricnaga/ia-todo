@@ -1,0 +1,169 @@
+type Assistant {
+  criteria: Criteria!
+  todos: [Todo!]!
+}
+
+type AuthAccount {
+  accountId: String!
+  createdAt: DateTime!
+  id: String!
+  providerId: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type AuthSession {
+  createdAt: DateTime!
+  expiresAt: DateTime!
+  id: String!
+  ipAddress: String
+  isCurrent: Boolean!
+  updatedAt: DateTime!
+  userAgent: String
+}
+
+type AuthUser {
+  createdAt: DateTime!
+  email: String!
+  emailVerified: Boolean!
+  id: String!
+  image: String
+  name: String!
+  updatedAt: DateTime!
+}
+
+input ChangeEmailInput {
+  callbackURL: String
+  newEmail: String!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input CreateTodoInput {
+  description: String
+  dueDate: DateTime
+  priority: Priority
+  title: String!
+}
+
+type Criteria {
+  due: SearchDue!
+  keywords: [String!]!
+  priority: SearchPriority!
+  query: String!
+  status: SearchStatus!
+}
+
+scalar DateTime
+
+type DaySummary {
+  focus: String!
+  suggestedOrder: [String!]!
+  summary: String!
+}
+
+input DraftInput {
+  description: String
+  title: String
+}
+
+type Mutation {
+  changeEmail(input: ChangeEmailInput!): Boolean!
+  changePassword(input: ChangePasswordInput!): Boolean!
+  createTodo(input: CreateTodoInput!): Todo!
+  deleteTodo(id: String!): Boolean!
+  nlSearch(query: String!): Assistant!
+  revokeOtherSessions: Boolean!
+  revokeSession(input: RevokeSessionInput!): Boolean!
+  suggestTodo(draft: DraftInput!): TodoSuggestion!
+  summarizeDay: DaySummary!
+  unlinkAccount(input: UnlinkAccountInput!): Boolean!
+  updateProfile(input: UpdateProfileInput!): AuthUser!
+  updateTodo(id: String!, input: UpdateTodoInput!): Todo!
+}
+
+enum Priority {
+  high
+  low
+  medium
+  urgent
+}
+
+type Query {
+  me: AuthUser
+  myAccounts: [AuthAccount!]!
+  mySessions: [AuthSession!]!
+  todo(id: String!): Todo!
+  todos: [Todo!]!
+}
+
+input RevokeSessionInput {
+  sessionId: String!
+}
+
+enum SearchDue {
+  any
+  none
+  overdue
+  thisWeek
+  today
+}
+
+enum SearchPriority {
+  any
+  high
+  low
+  medium
+  urgent
+}
+
+enum SearchStatus {
+  any
+  completed
+  pending
+}
+
+type Subtask {
+  done: Boolean!
+  id: String!
+  title: String!
+}
+
+type Todo {
+  completed: Boolean!
+  createdAt: DateTime!
+  description: String
+  dueDate: DateTime
+  id: String!
+  priority: Priority!
+  subtasks: [Subtask!]
+  title: String!
+  updatedAt: DateTime!
+}
+
+type TodoSuggestion {
+  description: String!
+  priority: Priority!
+  subtasks: [String!]!
+  title: String!
+}
+
+input UnlinkAccountInput {
+  accountId: String!
+}
+
+input UpdateProfileInput {
+  image: String
+  name: String
+}
+
+input UpdateTodoInput {
+  completed: Boolean
+  description: String
+  dueDate: DateTime
+  priority: Priority
+  title: String
+}

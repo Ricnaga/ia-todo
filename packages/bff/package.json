@@ -6,11 +6,14 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./graphql": "./src/graphql/index.ts"
   },
   "sideEffects": true,
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "codegen": "tsx scripts/build-schema.ts && graphql-codegen --config codegen.ts",
+    "codegen:check": "git diff --exit-code -- src/graphql/generated schema.graphql"
   },
   "dependencies": {
     "@ia-task-manager/schemas": "workspace:*",
@@ -23,8 +26,13 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^7.4.3",
+    "@graphql-codegen/client-preset": "^6.2.0",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@ia-task-manager/tsconfig": "workspace:*",
+    "@parcel/watcher-wasm": "^2.6.0",
     "@types/node": "^20",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
