@@ -36,6 +36,7 @@
     "@ia-task-manager/bff": "workspace:*",
     "@ia-task-manager/design-tokens": "workspace:*",
     "@ia-task-manager/schemas": "workspace:*",
-    "@ia-task-manager/server": "workspace:*"
+    "@ia-task-manager/server": "workspace:*",
+    "graphql": "^17.0.2"
   }
 }
