@@ -9,9 +9,14 @@
 @import '@ia-task-manager/design-tokens/adapters/mantine.css';
 
 :root {
-  /* Override de app: a fonte do projeto entra na frente do fallback do token. */
-  --ds-font-sans: var(--font-geist-sans), var(--ds-font-fallback-sans);
-  --ds-font-mono: var(--font-geist-mono), var(--ds-font-fallback-mono);
+  /*
+   * Override de app: a fonte do projeto entra na frente do fallback do token.
+   * Este `:root` e propositalmente NAO/@theme e nao esta dentro de `@layer` --
+   * declacoes sem camada vencem o `@layer theme` onde `--ds-font-sans` tem seu
+   * valor padrao. Sem `--ds-font-mono` aqui porque Hanken Grotesk nao tem
+   * companheira mono e o fallback de sistema ja e o default do token.
+   */
+  --ds-font-sans: var(--font-hanken-grotesk), var(--ds-font-fallback-sans);
 }
 
 body {

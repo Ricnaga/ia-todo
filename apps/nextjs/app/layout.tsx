@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Hanken_Grotesk } from 'next/font/google'
 import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
@@ -8,15 +8,15 @@ import { Providers } from '@/providers'
 import { env } from '@/lib/config/environment'
 import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const hankenGrotesk = Hanken_Grotesk({
+  variable: '--font-hanken-grotesk',
   subsets: ['latin'],
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
+// Hanken Grotesk e uma fonte de texto, sem companheira mono. Sem `--ds-font-mono`
+// o token cai no fallback de sistema (ver packages/design-tokens/src/typography.css),
+// que e o mesmo nos tres apps -- manter uma webfont mono so aqui faria os blocos
+// de codigo ficarem com fonte diferente em cada front.
 
 export const metadata: Metadata = {
   // Sem isto, qualquer URL relativa de metadata vira warning e o
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html
       lang="pt-BR"
       {...mantineHtmlProps}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${hankenGrotesk.variable} h-full antialiased`}
     >
       <head>
         <ColorSchemeScript />
