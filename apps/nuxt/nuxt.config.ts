@@ -3,7 +3,30 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   devServer: { port: 3001 },
-  modules: ['@nuxt/ui', '@nuxtjs/color-mode'],
+  // `@nuxt/fonts` baixa a Hanken Grotesk no build, gera o `@font-face` com
+  // fallback de metricas ajustadas (fontaine, evita salto de layout) e serve da
+  // propria origem, sem request a terceiros em producao. O `@nuxt/ui` ja o
+  // registra por padrao (`fonts: true`), mas entrar so por transitiva seria
+  // depender de um detalhe do modulo -- por isso a declaracao explicita.
+  modules: ['@nuxt/ui', '@nuxt/fonts', '@nuxtjs/color-mode'],
+  fonts: {
+    // A familia entra no CSS por custom property (`--ds-font-sans` em
+    // app/assets/css/main.css), e nao por um `font-family:` direto. O plugin
+    // descarta arquivos CSS sem a string `font-family:` -- entao sem esta opcao
+    // a Hanken nunca seria resolvida. Ver o override em main.css.
+    processCSSVariables: true,
+    families: [
+      {
+        name: 'Hanken Grotesk',
+        provider: 'google',
+        // Range, e nao a lista de pesos: numere 400, 500, 600 e 700 o provider
+        // baixa uma instancia estatica por peso (e por cada estilo italico),
+        // replicando o que o `next/font` e o Fontsource ja entregam em um
+        // arquivo so com o eixo `wght`. Ver os arquivos em `_fonts/` no build.
+        weights: ['400 700'],
+      },
+    ],
+  },
   css: ['~/assets/css/main.css'],
   build: {
     // Os packages do monorepo sao source-only (`main` -> `src/index.ts`, sem

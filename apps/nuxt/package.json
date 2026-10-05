@@ -18,6 +18,7 @@
     "@ia-task-manager/design-tokens": "workspace:*",
     "@ia-task-manager/schemas": "workspace:*",
     "@ia-task-manager/server": "workspace:*",
+    "@nuxt/fonts": "^0.14.0",
     "@nuxt/ui": "^4.11.2",
     "@nuxtjs/color-mode": "^4.0.1",
     "nuxt": "^4.5.2",
