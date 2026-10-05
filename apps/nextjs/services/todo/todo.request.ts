@@ -37,8 +37,9 @@ export async function updateTodo(id: string, input: TodoUpdateRequest): Promise<
   return todoSchema.parse(data.updateTodo)
 }
 
-export async function deleteTodo(id: string): Promise<void> {
-  await request({ document: DeleteTodoDocument, variables: { id } })
+export async function deleteTodo(id: string): Promise<boolean> {
+  const data = await request({ document: DeleteTodoDocument, variables: { id } })
+  return data.deleteTodo
 }
 
 export async function suggestTodo(draft: DraftInput): Promise<TodoSuggestion> {

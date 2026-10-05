@@ -60,7 +60,7 @@ export function useSuggestTodoMutation() {
 export function useDeleteTodoMutation() {
   const invalidateTodos = useInvalidateTodos()
   return useMutation({
-    mutationFn: (id: string): Promise<void> => deleteTodoRequest(id),
+    mutationFn: (id: string): Promise<boolean> => deleteTodoRequest(id),
     onSuccess: invalidateTodos,
   })
 }
