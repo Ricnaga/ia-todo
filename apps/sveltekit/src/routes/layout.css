@@ -19,6 +19,25 @@
 @import '@ia-task-manager/design-tokens/index.css';
 @import '@ia-task-manager/design-tokens/adapters/skeleton.css';
 
+@import '@fontsource-variable/hanken-grotesk';
+
+:root {
+  /*
+   * Override de app: a fonte do projeto entra na frente do fallback do token.
+   * Este `:root` e propositalmente NAO/@theme e nao esta dentro de `@layer` --
+   * declaracoes sem camada vencem o `@layer theme` onde `--ds-font-sans` tem seu
+   * valor padrao. Sem `--ds-font-mono` porque Hanken Grotesk nao tem
+   * companheira mono e o fallback de sistema ja e o default do token.
+   *
+   * `--font-hanken-grotesk` existe para o nome da variavel ser o mesmo nos
+   * tres apps: aqui ela aponta para a familia que o Fontsource declara, no Next
+   * ela e gerada pelo `next/font`. Assim a linha do `--ds-font-sans` fica
+   * identica no monorepo, que e o que o design-tokens precisa garantir.
+   */
+  --font-hanken-grotesk: 'Hanken Grotesk Variable';
+  --ds-font-sans: var(--font-hanken-grotesk), var(--ds-font-fallback-sans);
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-fg);
