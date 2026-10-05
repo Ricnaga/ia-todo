@@ -3,23 +3,13 @@ import { useMutation } from '~/composables/useMutation'
 import { insightsQueryKeys } from '~/services/insights/insights.keys'
 import { todoQueryKeys } from './todo.keys'
 import { createTodo, deleteTodo, suggestTodo, updateTodo } from './todo.request'
-import type { TodoCreateRequest, TodoUpdateRequest } from './todo.types'
-import type { CreateTodoFormInput, DraftInput, TodoSuggestion } from '@ia-task-manager/schemas/todo'
-
-export type TodoDraft = CreateTodoFormInput | TodoSuggestion
-export type TodoUpdateDraft = CreateTodoFormInput | { completed: boolean }
-
-const toTodoCreateRequest = (draft: TodoDraft): TodoCreateRequest => ({
-  title: draft.title,
-  description: draft.description,
-  priority: draft.priority,
-  dueDate: 'dueDate' in draft && typeof draft.dueDate === 'string' ? draft.dueDate : null,
-})
-
-const toTodoUpdateRequest = (draft: TodoUpdateDraft): TodoUpdateRequest => {
-  if ('completed' in draft) return { completed: draft.completed }
-  return toTodoCreateRequest(draft)
-}
+import {
+  toTodoCreateRequest,
+  toTodoUpdateRequest,
+  type TodoDraft,
+  type TodoUpdateDraft,
+} from '@ia-task-manager/bff/graphql'
+import type { DraftInput } from '@ia-task-manager/schemas/todo'
 
 function invalidateTodoWrites(): Promise<void> {
   return refreshNuxtData([...todoQueryKeys.writeTargets(), insightsQueryKeys.daySummary])
