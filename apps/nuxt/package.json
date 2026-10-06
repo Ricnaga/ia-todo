@@ -18,15 +18,18 @@
     "@ia-task-manager/design-tokens": "workspace:*",
     "@ia-task-manager/schemas": "workspace:*",
     "@ia-task-manager/server": "workspace:*",
+    "@iconify-json/tabler": "^1.2.3",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/icon": "^2.5.1",
     "@nuxt/ui": "^4.11.2",
     "@nuxtjs/color-mode": "^4.0.1",
+    "better-auth": "^1.7.5",
     "graphql": "^17.0.2",
     "nuxt": "^4.5.2",
     "tailwindcss": "^4.3.3",
     "vue": "^3.5.43",
-    "vue-router": "^5.3.1"
+    "vue-router": "^5.3.1",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@nuxt/eslint-config": "~1.16.0",
