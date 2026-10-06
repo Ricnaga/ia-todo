@@ -37,6 +37,9 @@
     "@ia-task-manager/design-tokens": "workspace:*",
     "@ia-task-manager/schemas": "workspace:*",
     "@ia-task-manager/server": "workspace:*",
-    "graphql": "^17.0.2"
+    "@tabler/icons-svelte": "^3.48.0",
+    "better-auth": "^1.7.5",
+    "graphql": "^17.0.2",
+    "zod": "^4.5.4"
   }
 }
