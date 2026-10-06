@@ -16,7 +16,7 @@ alwaysApply: true
 >
 > `packages/design-tokens` é a fonte única de cor, espaçamento, tipografia, shadow e motion (CSS puro para Tailwind 4), com um adapter por UI kit (`adapters/mantine.css`, `adapters/nuxt-ui.css`, `adapters/skeleton.css`). **Nunca usar cor/espaço literal no app** — sempre o token.
 >
-> **Daqui para baixo, este documento descreve o app Next** (`apps/nextjs/`), o mais maduro: `app/`, `components/`, `lib/`, `providers/`, `services/`. Os apps Nuxt e SvelteKit têm só o playground do GraphQL montado (ver [Playground](#playground-do-graphql-os-3-fronts-montam-o-yoga-in-process)); **a camada de `services/` e o data fetching deles ainda não existem** — a definição foi fechada mas não implementada. O núcleo e a API ficam em `packages/server` e `packages/bff`; os contratos zod em `packages/schemas`.
+> **Daqui para baixo, o app Next** (`apps/nextjs/`) é a referência, o mais maduro (`app/`, `components/`, `lib/`, `providers/`, `services/`). Os apps Nuxt e SvelteKit **já têm a mesma camada de `services/`** (GraphQL + auth) **e as páginas públicas** (`/`, `/login`, `register`, `/dashboard` placeholder) — ver [Data layer](#data-layer-services) e [Páginas públicas nos 3 apps](#páginas-públicas-nos-3-apps). O que ainda é só do Next são as páginas privadas (`/tarefas`, `/resumo`, `/busca`, `/settings`) e o `NavShell`. O núcleo e a API ficam em `packages/server` e `packages/bff`; os contratos zod em `packages/schemas`.
 >
 > O app consome os packages por nome via `transpilePackages` — eles publicam TS puro, sem build. O alias `@/*` do Next é exclusive do app. Lint e format passam pelo Turborepo, com uma config flat por app e Prettier único na raiz (ver [Tooling](#tooling-e-gates)).
 
@@ -58,6 +58,19 @@ Route groups: `(public)` = não autenticado; `(private)` = autenticado (verifica
 - `/(private)/busca` — nlSearch
 - `/(private)/settings` — Perfil (nome/imagem + email), Segurança (trocar senha), Contas vinculadas (link/unlink Google/GitHub), Sessões ativas (revogar sessão / outras sessões)
 
+## Páginas públicas nos 3 apps
+
+Portadas dos Next para `apps/nuxt` e `apps/sveltekit` com paridade de comportamento (mesmos textos, placeholders, mensagens de toast e regras zod). Cada app tem `paths`/`TPath` próprio: o Next (`lib/constants/router-paths.ts`) já tem as 8 rotas; Nuxt (`app/lib/constants/paths.ts`) e SvelteKit (`src/lib/constants/paths.ts`) só as 4 que existem.
+
+- **Guard**: só a regra **"logado → redireciona"** (cookie `better-auth.session_token`, checado no SSR; não há validação de sessão nem a regra inversa `protegida → /login`). Nuxt: `app/middleware/auth.global.ts` (`import.meta.server` + `navigateTo`); SvelteKit: `src/hooks.server.ts` (303 em `resolve`/`redirect`). O `proxy.ts` do Next continua com **as duas direções** e é a referência quando as rotas privadas chegarem nos outros apps.
+- **Handler REST do better-auth** montado nos 3 (`auth` de `@ia-task-manager/server/auth`): Next `app/api/auth/[...all]/route.ts`, Nuxt `server/api/auth/[...all].ts` (`toWebRequest`/`sendWebResponse`, mesmo padrão do `server/api/graphql.ts`), SvelteKit `src/routes/api/auth/[...all]/+server.ts` (`GET`/`POST` como o `toNextJsHandler`). Smoke test: `POST /api/auth/sign-in/email` com credencial errada devolve `401 INVALID_EMAIL_OR_PASSWORD` (se vier 500, o DB não subiu).
+- **Ícones: Tabler nos 3, sempre lib — nunca SVG à mão.** Next `@tabler/icons-react`; Nuxt Nuxt Icon + `@iconify-json/tabler` (strings `i-tabler:sparkles`, via `UIcon`/prop `icon` dos componentes Nuxt UI); SvelteKit `@tabler/icons-svelte` (`<IconSparkles size={18} />`, mesmo nome do React).
+- **Toast**: contrato único `notifyError(title)(error)` + `notifySuccess(title, message)` com `toErrorMessage`, em `lib/utils/notifications.ts` de cada app — só a implementação muda (Mantine `notifications.show`; Nuxt `useToast()` dentro de `useNotifications()` porque `useToast` é composable; SvelteKit `createToaster()` de skeleton-svelte em `lib/toast.ts` + `<Toaster />` montado no `+layout.svelte`).
+- **Sem header nas páginas públicas** (paridade com o Next): só o card. `ColorModeToggle` (Nuxt e SvelteKit) fica órfão de propósito, reservado ao layout privado futuro.
+- **Landing**: CTAs só no hero. Os cards de feature **não têm botão/rota** nos 2 apps (as rotas privadas não existem, então virariam 404); badge e diagrama da arquitetura são por app ("Nuxt 4 · Vue 3 · …" / "SvelteKit 5 · Svelte 5 · …", `UI ──(useAsyncData|fetch)──▶ GraphQL`).
+- **Formulários**: Nuxt usa `UForm` + schema zod (Standard Schema, os erros saem do `UFormField`, `validateOn` default input/blur/change); SvelteKit fica em HTML semântico + `safeParse` + `z.flattenError` — o Skeleton **não** tem componentes de form, só classes (`input`, `label-text`, `btn`, `preset-*`, `hr`). Links e `goto` precisam de `resolve()` do `$app/paths` (regra `svelte/no-navigation-without-resolve`) e `callbackURL` é tipado como `TPath` para `resolve()` aceitar (ele só aceita pathnames conhecidos; o valor em runtime passa direto).
+- **`/dashboard` é placeholder** nos 2 apps (saudação + "em construção"): Nuxt lê `useMeQuery()` no `setup`; SvelteKit tem `+page.server.ts` chamando `fetchMe(fetch)` e devolvendo `{ user }`.
+
 ## Estrutura
 
 ```
@@ -73,11 +86,13 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 
 ## Data layer (`services/`)
 
-> **Pausado por decisão do usuário**: a evolução da auth e das tarefas fica para depois. Para o app Next, começar por aqui. Para Nuxt e SvelteKit, o desenho está fechado e fica no item "Pendências do data layer Nuxt/SvelteKit" do fim da seção de Tooling.
+> **Escopo**: a camada `services/` existe nos **3 apps** (GraphQL + auth, com as decisões
+> abaixo). As páginas privadas e as features de IA na UI são **só do Next** — a evolução
+> delas no Nuxt/SvelteKit fica para depois.
 
-### Pendências do data layer Nuxt/SvelteKit (decidido, não implementado)
+### Contrato comum aos 3 apps (decidido e implementado)
 
-Contrato comum aos dois (paridade com o Next, `services/<contexto>/` com
+Contrato comum aos três (paridade com o Next, `services/<contexto>/` com
 imports explícitos — sem auto-import):
 
 - **Nuxt**: `useAsyncData`/`useFetch` **nativo** (sem @tanstack/vue-query),
