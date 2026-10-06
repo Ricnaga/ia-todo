@@ -6,17 +6,20 @@
     <meta name="text-scale" content="scale" />
     <script>
       // Define o modo antes da pintura para nao piscar a paleta errada.
-      // e a unica copia desta regra no projeto (ver src/lib/color-mode.svelte.ts);
-      // ela precisa rodar aqui porque app.html nao consegue importar modulos.
+      // As regras de preferencia/resolucao sao espelhadas em
+      // src/lib/color-mode.svelte.ts; precisa rodar aqui porque app.html
+      // nao consegue importar modulos.
       {
         const stored = localStorage.getItem('color-mode')
-        const mode =
-          stored === 'light' || stored === 'dark'
-            ? stored
-            : matchMedia('(prefers-color-scheme: dark)').matches
+        const preference =
+          stored === 'light' || stored === 'dark' || stored === 'auto' ? stored : 'auto'
+        const resolve = () =>
+          preference === 'auto'
+            ? matchMedia('(prefers-color-scheme: dark)').matches
               ? 'dark'
               : 'light'
-        document.documentElement.setAttribute('data-mode', mode)
+            : preference
+        document.documentElement.setAttribute('data-mode', resolve())
       }
     </script>
     %sveltekit.head%
