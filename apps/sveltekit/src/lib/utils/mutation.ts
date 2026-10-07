@@ -50,7 +50,7 @@ export function createMutation<TInput, TResult>(
 
   return {
     mutate(input, mutateOptions) {
-      void mutateAsync(input, mutateOptions)
+      void mutateAsync(input, mutateOptions).catch(() => {})
     },
     mutateAsync,
     get isPending() {
