@@ -23,6 +23,7 @@
     "@nuxt/icon": "^2.5.1",
     "@nuxt/ui": "^4.11.2",
     "@nuxtjs/color-mode": "^4.0.1",
+    "@tanstack/vue-table": "^8.21.3",
     "better-auth": "^1.7.5",
     "graphql": "^17.0.2",
     "nuxt": "^4.5.2",

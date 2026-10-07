@@ -13,3 +13,7 @@ export const priorityColors = {
   high: 'warning',
   urgent: 'error',
 } as const satisfies Record<TodoPriority, string>
+
+export const priorityOptions: { value: TodoPriority; label: string }[] = (
+  Object.keys(priorityLabels) as TodoPriority[]
+).map((value) => ({ value, label: priorityLabels[value] }))
