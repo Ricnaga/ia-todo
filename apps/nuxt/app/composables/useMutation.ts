@@ -51,7 +51,7 @@ export function useMutation<TInput, TResult>(
   }
 
   function mutate(input: TInput, mutateOptions?: MutateOptions<TResult>): void {
-    void mutateAsync(input, mutateOptions)
+    void mutateAsync(input, mutateOptions).catch(() => {})
   }
 
   return { mutate, mutateAsync, isPending, error, data }
