@@ -1,6 +1,6 @@
 <script lang="ts">
   import { IconCircleCheck } from '@tabler/icons-svelte'
-  import SkeletonStack from '$lib/components/SkeletonStack.svelte'
+  import SkeletonStack from '$lib/components/skeleton-stack/skeleton-stack.svelte'
   import type { DaySummary } from '@ia-task-manager/schemas/insights'
 
   interface Props {

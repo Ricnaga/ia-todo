@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SkeletonStack from '$lib/components/SkeletonStack.svelte'
+  import SkeletonStack from '$lib/components/skeleton-stack/skeleton-stack.svelte'
 </script>
 
 <div class="flex flex-col gap-4">

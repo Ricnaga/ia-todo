@@ -1,10 +1,10 @@
 <script lang="ts">
   import { IconFingerprint, IconLink, IconUserCircle, IconWorld } from '@tabler/icons-svelte'
   import type { AuthAccount, AuthSession, AuthUser } from '@ia-task-manager/schemas/auth'
-  import SectionAccounts from '$lib/components/SectionAccounts.svelte'
-  import SectionProfile from '$lib/components/SectionProfile.svelte'
-  import SectionSecurity from '$lib/components/SectionSecurity.svelte'
-  import SectionSessions from '$lib/components/SectionSessions.svelte'
+  import SectionAccounts from '../section-accounts/section-accounts.svelte'
+  import SectionProfile from '../section-profile/section-profile.svelte'
+  import SectionSecurity from '../section-security/section-security.svelte'
+  import SectionSessions from '../section-sessions/section-sessions.svelte'
 
   const tabs = [
     { id: 'profile', label: 'Perfil', icon: IconUserCircle },

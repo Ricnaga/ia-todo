@@ -1,5 +1,5 @@
 <script lang="ts">
-  import NavShell from '$lib/components/NavShell.svelte'
+  import NavShell from '$lib/components/nav-shell/nav-shell.svelte'
   import type { LayoutProps } from './$types'
 
   let { data, children }: LayoutProps = $props()

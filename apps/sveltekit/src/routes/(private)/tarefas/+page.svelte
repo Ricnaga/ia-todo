@@ -1,8 +1,8 @@
 <script lang="ts">
   import { invalidate } from '$app/navigation'
-  import ContentTodoManager from '$lib/components/ContentTodoManager.svelte'
-  import ErrorState from '$lib/components/ErrorState.svelte'
-  import SkeletonTodoManager from '$lib/components/SkeletonTodoManager.svelte'
+  import ContentTodoManager from './_components/content-todo-manager/content-todo-manager.svelte'
+  import ErrorState from '$lib/components/error-state/error-state.svelte'
+  import SkeletonTodoManager from './_components/skeleton-todo-manager/skeleton-todo-manager.svelte'
   import { todoQueryKeys } from '$lib/services/todo/todo.keys'
   import type { PageProps } from './$types'
 

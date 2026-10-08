@@ -1,9 +1,9 @@
 <script lang="ts">
   import { invalidate } from '$app/navigation'
-  import ErrorState from '$lib/components/ErrorState.svelte'
-  import SettingsPanel from '$lib/components/SettingsPanel.svelte'
-  import SkeletonAccounts from '$lib/components/SkeletonAccounts.svelte'
-  import SkeletonSessions from '$lib/components/SkeletonSessions.svelte'
+  import ErrorState from '$lib/components/error-state/error-state.svelte'
+  import SettingsPanel from './_components/settings-panel/settings-panel.svelte'
+  import SkeletonAccounts from './_components/skeleton-accounts/skeleton-accounts.svelte'
+  import SkeletonSessions from './_components/skeleton-sessions/skeleton-sessions.svelte'
   import { authQueryKeys } from '$lib/services/auth/auth.keys'
   import type { PageProps } from './$types'
 

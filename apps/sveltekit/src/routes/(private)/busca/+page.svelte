@@ -1,5 +1,5 @@
 <script lang="ts">
-  import FormNlSearch from '$lib/components/FormNlSearch.svelte'
+  import FormNlSearch from './_components/form-nl-search.svelte'
 </script>
 
 <svelte:head>

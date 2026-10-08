@@ -5,7 +5,7 @@
   import { authClient } from '$lib/services/auth/auth.client'
   import { useUnlinkAccountMutation } from '$lib/services/auth/auth.mutation'
   import { notifyError, notifySuccess } from '$lib/utils/notifications'
-  import ProviderAccountItem from '$lib/components/ProviderAccountItem.svelte'
+  import ProviderAccountItem from '../provider-account-item/provider-account-item.svelte'
 
   const providers = [
     { id: 'google', label: 'Google', icon: IconBrandGoogle },

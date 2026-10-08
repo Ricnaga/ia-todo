@@ -1,7 +1,7 @@
 <script lang="ts">
   import { IconDeviceDesktop, IconLogout, IconShieldX } from '@tabler/icons-svelte'
   import type { AuthSession } from '@ia-task-manager/schemas/auth'
-  import EmptyState from '$lib/components/EmptyState.svelte'
+  import EmptyState from '$lib/components/empty-state/empty-state.svelte'
   import {
     useRevokeOtherSessionsMutation,
     useRevokeSessionMutation,

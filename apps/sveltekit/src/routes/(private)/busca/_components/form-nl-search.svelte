@@ -1,6 +1,6 @@
 <script lang="ts">
   import { IconSearch } from '@tabler/icons-svelte'
-  import CardSearchResultList from '$lib/components/CardSearchResultList.svelte'
+  import CardSearchResultList from './card-search-result-list/card-search-result-list.svelte'
   import { useNlSearchMutation } from '$lib/services/assistant/assistant.mutation'
   import { notifyError } from '$lib/utils/notifications'
 

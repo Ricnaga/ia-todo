@@ -1,10 +1,10 @@
 <script lang="ts">
   import { IconPlus, IconSparkles } from '@tabler/icons-svelte'
   import type { CreateTodoFormInput, Todo, TodoSuggestion } from '@ia-task-manager/schemas/todo'
-  import FilterTodoList from '$lib/components/FilterTodoList.svelte'
-  import ModalAiSuggest from '$lib/components/ModalAiSuggest.svelte'
-  import ModalTodoForm from '$lib/components/ModalTodoForm.svelte'
-  import TableTodoList from '$lib/components/TableTodoList.svelte'
+  import FilterTodoList from '../filter-todo-list/filter-todo-list.svelte'
+  import ModalAiSuggest from '../modal-ai-suggest/modal-ai-suggest.svelte'
+  import ModalTodoForm from '../modal-todo-form/modal-todo-form.svelte'
+  import TableTodoList from '../table-todo-list/table-todo-list.svelte'
   import { useCreateTodoMutation, useUpdateTodoMutation } from '$lib/services/todo/todo.mutation'
   import { notifyError, notifySuccess } from '$lib/utils/notifications'
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { IconSparkles } from '@tabler/icons-svelte'
-  import CardDaySummaryContent from '$lib/components/CardDaySummaryContent.svelte'
-  import EmptyState from '$lib/components/EmptyState.svelte'
+  import CardDaySummaryContent from './card-day-summary-content/card-day-summary-content.svelte'
+  import EmptyState from '$lib/components/empty-state/empty-state.svelte'
   import { useSummarizeDayMutation } from '$lib/services/insights/insights.mutation'
   import { notifyError } from '$lib/utils/notifications'
 

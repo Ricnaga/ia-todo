@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CardDaySummary from '$lib/components/CardDaySummary.svelte'
+  import CardDaySummary from './_components/card-day-summary.svelte'
 </script>
 
 <svelte:head>

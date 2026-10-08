@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from '$app/paths'
-  import EmptyState from '$lib/components/EmptyState.svelte'
-  import SkeletonStack from '$lib/components/SkeletonStack.svelte'
+  import EmptyState from '$lib/components/empty-state/empty-state.svelte'
+  import SkeletonStack from '$lib/components/skeleton-stack/skeleton-stack.svelte'
   import { paths } from '$lib/constants/paths'
   import { priorityColors, priorityLabels } from '$lib/constants/todo.constants'
   import type { Assistant, Criteria } from '@ia-task-manager/schemas/assistant'

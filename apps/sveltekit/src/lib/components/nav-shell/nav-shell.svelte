@@ -13,7 +13,7 @@
     IconSparkles,
     type Icon,
   } from '@tabler/icons-svelte'
-  import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte'
+  import ThemeSwitcher from '$lib/components/theme-switcher/theme-switcher.svelte'
   import { paths, type TPath } from '$lib/constants/paths'
   import { authClient } from '$lib/services/auth/auth.client'
   import type { AuthUser } from '@ia-task-manager/schemas/auth'

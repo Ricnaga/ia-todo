@@ -1,7 +1,7 @@
 <script lang="ts">
   import { navigating } from '$app/state'
   import favicon from '$lib/assets/favicon.svg'
-  import Toaster from '$lib/components/Toaster.svelte'
+  import Toaster from '$lib/components/toaster/toaster.svelte'
   import './layout.css'
 
   let { children } = $props()
