@@ -4,6 +4,11 @@ import type { CreateTodoFormInput, Todo, TodoSuggestion } from '@ia-task-manager
 import { useNotifications } from '~/lib/utils/notifications'
 import { useCreateTodoMutation, useUpdateTodoMutation } from '~/services/todo/todo.mutation'
 import { useTodosQuery } from '~/services/todo/todo.query'
+import FilterTodoList from '../filter-todo-list/filter-todo-list.vue'
+import ModalAiSuggest from '../modal-ai-suggest/modal-ai-suggest.vue'
+import ModalTodoForm from '../modal-todo-form/modal-todo-form.vue'
+import SkeletonTodoManager from '../skeleton-todo-manager/skeleton-todo-manager.vue'
+import TableTodoList from '../table-todo-list/table-todo-list.vue'
 
 type FormModalState = {
   mode: 'create' | 'edit'

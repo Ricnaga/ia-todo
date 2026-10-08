@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useNotifications } from '~/lib/utils/notifications'
 import { useNlSearchMutation } from '~/services/assistant/assistant.mutation'
+import CardSearchResultList from './card-search-result-list/card-search-result-list.vue'
 
 const { notifyError } = useNotifications()
 const { mutate, isPending, data: result } = useNlSearchMutation()

@@ -7,6 +7,7 @@ import {
   useRevokeSessionMutation,
 } from '~/services/auth/auth.mutation'
 import { useMySessionsQuery } from '~/services/auth/auth.query'
+import SkeletonSessions from '../skeleton-sessions/skeleton-sessions.vue'
 
 const sessionDateOptions: Intl.DateTimeFormatOptions = {
   day: '2-digit',

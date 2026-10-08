@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
+import SectionAccounts from '../section-accounts/section-accounts.vue'
+import SectionProfile from '../section-profile/section-profile.vue'
+import SectionSecurity from '../section-security/section-security.vue'
+import SectionSessions from '../section-sessions/section-sessions.vue'
 
 const items = [
   { value: 'profile', label: 'Perfil', icon: 'i-tabler:user-circle', slot: 'profile' },

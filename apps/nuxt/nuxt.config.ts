@@ -4,6 +4,8 @@ export default defineNuxtConfig({
   devServer: { port: 3001 },
 
   modules: ['@nuxt/ui', '@nuxt/fonts', '@nuxtjs/color-mode'],
+
+  components: [{ path: '~/app/components', pathPrefix: false }],
   fonts: {
     processCSSVariables: true,
     families: [

@@ -6,6 +6,8 @@ import { useNotifications } from '~/lib/utils/notifications'
 import { authClient } from '~/services/auth/auth.client'
 import { useUnlinkAccountMutation } from '~/services/auth/auth.mutation'
 import { useMyAccountsQuery } from '~/services/auth/auth.query'
+import SkeletonAccounts from '../skeleton-accounts/skeleton-accounts.vue'
+import ProviderAccountItem from '../provider-account-item/provider-account-item.vue'
 
 const providers = [
   { id: 'google', label: 'Google', icon: 'i-tabler:brand-google' },

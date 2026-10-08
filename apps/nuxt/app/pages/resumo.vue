@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSeoMeta } from '#imports'
+import CardDaySummary from './resumo/_components/card-day-summary.vue'
 
 definePageMeta({ layout: 'private' })
 

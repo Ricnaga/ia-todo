@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useNotifications } from '~/lib/utils/notifications'
 import { useDaySummaryQuery } from '~/services/insights/insights.query'
+import CardDaySummaryContent from './card-day-summary-content/card-day-summary-content.vue'
 
 const { notifyError } = useNotifications()
 const { data: summary, status, error, execute } = useDaySummaryQuery()

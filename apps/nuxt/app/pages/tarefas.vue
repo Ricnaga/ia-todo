@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSeoMeta } from '#imports'
+import ContentTodoManager from './tarefas/_components/content-todo-manager/content-todo-manager.vue'
 
 definePageMeta({ layout: 'private' })
 
