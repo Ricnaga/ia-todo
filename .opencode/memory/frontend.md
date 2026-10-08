@@ -16,7 +16,7 @@ alwaysApply: true
 >
 > `packages/design-tokens` é a fonte única de cor, espaçamento, tipografia, shadow e motion (CSS puro para Tailwind 4), com um adapter por UI kit (`adapters/mantine.css`, `adapters/nuxt-ui.css`, `adapters/skeleton.css`). **Nunca usar cor/espaço literal no app** — sempre o token.
 >
-> **Daqui para baixo, o app Next** (`apps/nextjs/`) é a referência, o mais maduro (`app/`, `components/`, `lib/`, `providers/`, `services/`). Os apps Nuxt e SvelteKit **já têm a mesma camada de `services/`** (GraphQL + auth) **e as páginas públicas** (`/`, `/login`, `register`, `/dashboard` placeholder) — ver [Data layer](#data-layer-services) e [Páginas públicas nos 3 apps](#páginas-públicas-nos-3-apps). O que ainda é só do Next são as páginas privadas (`/tarefas`, `/resumo`, `/busca`, `/settings`) e o `NavShell`. O núcleo e a API ficam em `packages/server` e `packages/bff`; os contratos zod em `packages/schemas`.
+> **Daqui para baixo, o app Next** (`apps/nextjs/`) é a referência, o mais maduro (`app/`, `components/`, `lib/`, `providers/`, `services/`). Os apps Nuxt e SvelteKit têm a mesma camada de `services/` (GraphQL + auth), as páginas públicas (`/`, `/login`, `register`) **e as 5 rotas privadas portadas** (`/dashboard` na fase 1, `/resumo` e `/busca` na fase 2, `/tarefas` e `/settings` na fase 3) — ver [Fase 1](#fase-1-privada-nuxt-e-sveltekit), [Fase 2](#fase-2-nuxt-e-sveltekit) e [Fase 3](#fase-3-nuxt-e-sveltekit). O núcleo e a API ficam em `packages/server` e `packages/bff`; os contratos zod em `packages/schemas`.
 >
 > O app consome os packages por nome via `transpilePackages` — eles publicam TS puro, sem build. O alias `@/*` do Next é exclusive do app. Lint e format passam pelo Turborepo, com uma config flat por app e Prettier único na raiz (ver [Tooling](#tooling-e-gates)).
 
@@ -81,8 +81,92 @@ Shell + guard + dashboard portados com paridade do Next; `tarefas`, `resumo`, `b
 - **Menu da conta (SvelteKit)**: `Menu` do Skeleton com `onSelect` no **root** — `invokeOnSelect` lê `context.get("highlightedValue")`, então `.click()` sintético **não** dispara `onSelect`; no smoke usar mouse real (CDP). `sign-out` → `authClient.signOut()` + `goto(resolve(LOGIN), { invalidateAll: true })` (o item não tem href; `goto` manual).
 - **Tema com 3 opções** (Sistema/Claro/Escuro) nos 2 apps: `ThemeSwitcher` (Nuxt `colorMode.preference`; SvelteKit `Menu.OptionItem type="radio"` com `colorMode.preference` + `setPreference`). SvelteKit: `lib/color-mode.svelte.ts` guarda `preference` (`auto|light|dark`), listener de `matchMedia` só quando `auto`, e o `app.html` espelha a mesma lógica no script inline para não piscar no load. `ColorModeToggle` foi removido.
 - **Skeleton (SvelteKit)**: componentes headless — estilizar com as nossas classes `btn`, `btn-icon` (+ `-sm/base/lg`), `preset-tonal`, `preset-tonal-error`, `card` (só radius/hover; padding e border são nossos). `Menu.ItemGroupLabel` **exige** `Menu.ItemGroup` pai (sem contexto dá `TypeError` no SSR); `Menu.Content` precisa de `z-50` (o `--z-index` é copiado do computed do próprio content) com header em `z-40`; `ItemIndicator` `hidden data-[state=checked]:block` sobre `Menu.Item` (que já sai com `hidden` quando unchecked). Ícones tipados com `import type { Icon } from '@tabler/icons-svelte'` (legado `SvelteComponentTyped`, **não** `Component` do svelte) — e nunca redeclarar `Icon` no mesmo escopo de um `let icon` (dá "Identifier 'Icon' has already been declared").
-- **Tokens**: cor só por classe semântica vinda do `@theme static` de `packages/design-tokens/src/semantic.css` (`text-error`, `bg-error-soft`, `text-accent`, `bg-accent-soft`, `text-fg/muted/dimmed/highlighted`, `bg-surface/sunken/elevated/hover`, `border-line`) — nunca cor literal.
+- **Tokens**: cor só por classe semântica vinda do `@theme static` de `packages/design-tokens/src/semantic.css` (`text-error`, `bg-error-soft`, `text-accent`, `bg-accent-soft`, `text-fg/muted`, `bg-surface/sunken/elevated/hover`, `border-line`) — nunca cor literal. `text-dimmed`/`text-highlighted` **não** existem no SvelteKit (vêm do Nuxt UI) — usar `text-muted`/`text-fg` (ver Fase 3).
 - **Smoke de referência (5 cenários)**: rotas privadas sem cookie → `303 /login?next=%2F…`; com cookie → 200 com shell; `/login` logado → `303 /dashboard`; cookie inválido → `303 /login?next=%2Fdashboard`; 404 → status 404 + "Página não encontrada". Rodar com Chrome headless via CDP (`/tmp/opencode/cdp-smoke.js` + `cdp-interact.js`, `ws@8.21.3` já em `node_modules`); no SvelteKit o sign-out via curl exige `-H 'Origin: http://localhost:5173'` (senão 403 `MISSING_OR_NULL_ORIGIN`) e a sessão é revogada a cada sign-out (relogar entre execuções).
+
+## Fase 2 (Nuxt e SvelteKit)
+
+`/resumo` e `/busca` portados com paridade de textos/placeholders/toasts/zod.
+Commits: Nuxt `3cca8b8` ("fase 2 resumo+busca"), SvelteKit `4def400`.
+
+- **Nuxt**: `pages/resumo.vue` e `pages/busca.vue` (fina, só título + componente);
+  componentes `CardDaySummary`, `CardDaySummaryContent`, `FormNlSearch`,
+  `CardSearchResultList`, `SkeletonStack`, `EmptyState`. O resumo é
+  **query** `useDaySummaryQuery()` (`services/insights/insights.query.ts`,
+  `execute()` no clique do botão) e a busca é **mutation**
+  `useNlSearchMutation()` (`services/assistant/`).
+- **SvelteKit**: mesmos componentes em `src/lib/components/` (singulative, sem
+  `index.ts`). Título em `<svelte:head>` (`Resumo do dia | ia-task-manager` /
+  `Busca por IA | ia-task-manager`). A IA (busca/sugestão/resumo) é sempre
+  **mutação** (`createMutation`); `FormNlSearch` é `<input>` + `onkeydown`
+  (Enter) e botão `Buscar` `disabled` sem `canSearch`, disparando
+  `useNlSearchMutation`; o resumo lê `listTodos` do SSR (`+page.server.ts` +
+  `depends(todoQueryKeys.all)`).
+- Resumo sem resumo gerado → `CardDaySummary` mostra `EmptyState`
+  ("Gere um resumo para ver o plano de execução do dia.") — texto idêntico
+  nos 3 apps.
+- `useSeoMeta` (Nuxt) equivale ao `<svelte:head>` (SvelteKit).
+
+## Fase 3 (Nuxt e SvelteKit)
+
+`/tarefas` e `/settings` portados. Commits: Nuxt `7bc0f02`; SvelteKit `248175e`
+(tarefas) e `0c1c955` (settings + `depends(authQueryKeys.me)` no layout).
+
+**`/tarefas`**
+
+- **Tabela**: Next usa `@tanstack/react-table` v9; Nuxt fica no **v8** (compat do
+  `UTable`); SvelteKit usa **`@tanstack/svelte-table` v9.2.6** (a v8 é exclusiva
+  do Svelte 4 — peer `svelte ^4`, importa de `svelte/internal`; a v9 exige
+  `^5.0.0` e usa `createTable({ features, get data() {...} })` + `FlexRender` +
+  `renderComponent(Comp, { ...on* })` — callbacks de componente viram props).
+  Colunas: `todoColumnHelper.columns([...])`; headers ordenáveis em componente
+  `TableSortHeader`. Ordenação, filtros e query string vivem em
+  `lib/todo/{todo-filters,use-todo-filters}.ts` (Nuxt) / `lib/constants/` +
+  `lib/todo/*` (SvelteKit); `priorityColors`/`priorityLabels` em
+  `lib/constants/todo.constants.*`.
+- **Modais** (`ModalTodoForm`, `ModalAiSuggest`): Nuxt `UModal`;
+  SvelteKit `<dialog>` nativo + `onMount(showModal)` / `$effect` reativo ao
+  `open`, com `onclick` no backdrop (`event.target === dialogEl`) e
+  `oncancel` liberado quando "buscando sugestão". `--dialog-max-width`/`42rem`.
+- **Form (SvelteKit)** (criar/editar): HTML semântico (`input`, `textarea`,
+  `select` + classes `input`/`textarea`/`select`), validação `zod.safeParse` +
+  `z.flattenError(...).fieldErrors` mostrada em `<span class="text-error text-xs">`.
+  Mutações: `useCreateTodoMutation`/`useUpdateTodoMutation`/`useDeleteTodoMutation`
+  (invalidam `todoQueryKeys.all`); toasts `notifyError('Erro ao criar')` etc.
+
+**`/settings`**
+
+- Abas verticais com ARIA completa (`tablist`/`tab`/`tabpanel`, `aria-selected`,
+  roving `tabindex`, setas/Home/End):
+  Nuxt `UTabs orientation="vertical" :unmount-on-hide="false"`; SvelteKit
+  painéis montados e inativos ocultos com classe `hidden` (keepMounted). No
+  Svelte: `{@const Icon = tab.icon}` com `bind:this` em array
+  `$state<HTMLButtonElement[]>`.
+- **Dados**: accounts/sessions vêm do SSR (useAsyncData no Nuxt, load
+  function no SvelteKit) — sem query client. SvelteKit:
+  `settings/+page.server.ts` com `fetchMyAccounts(fetch)` +
+  `fetchMySessions(fetch)` em `Promise.all`, `depends(authQueryKeys.accounts)` +
+  `depends(authQueryKeys.sessions)`, retorno `{ accounts, sessions, loadError }`;
+  retry na page com `invalidate` por key. `+layout.server.ts` ganhou
+  `depends(authQueryKeys.me)` para o `navShell` refletir `updateProfile`
+  (`invalidate(authQueryKeys.me)` no sucesso).
+- Nuxt: leitura via `useMyAccountsQuery()`/`useMySessionsQuery()` +
+  `useMeQuery()` (Query data é `AuthUser | null`).
+- **Token acessível** — o `text-dimmed`/`text-highlighted` do Nuxt vem do
+  **Nuxt UI** (`--ui-text-dimmed`), NÃO de `design-tokens` (só define
+  `--color-fg`/`--color-muted`). Next não usa essas classes. **No SvelteKit elas
+  são no-op (não geram CSS) — usar `text-muted`/`text-fg`** (comprovado por
+  `grep` no CSS buildado). Por isso os ports do SvelteKit usam `text-fg` nos
+  títulos e `text-muted` nos secundários, e o `+page.svelte` de settings foi
+  reescrito do placeholder que usava `text-highlighted`.
+- **Skeleton presets usados**: `preset-tonal`, `preset-tonal-error`,
+  `preset-tonal-success` (Verificado/Vinculada), `preset-tonal-warning`
+  (Não verificado), `preset-tonal-primary` (aba ativa / Esta sessão) — todos
+  em `adapter skeleton.css` + gerados sob demanda no build.
+- **Bug pré-existente (3 apps)**: `createTodoSchema.dueDate` (`z.coerce.date()
+.nullable().optional()`) rejeita `''` → criar/editar tarefa sem data falha;
+  `description === ''` rejeitado por `min(1)`; `packages/bff/src/graphql/
+todo-draft.ts` envia `dueDate: null`. Não corrigir sem pedido.
 
 ## Estrutura
 
@@ -100,9 +184,10 @@ services/graphql/      → cliente GraphQL da UI (graphql-request) + base reques
 ## Data layer (`services/`)
 
 > **Escopo**: a camada `services/` existe nos **3 apps** (GraphQL + auth, com as decisões
-> abaixo). As páginas privadas estão sendo portadas aos poucos (fase 1: shell, guard e
-> dashboard no Nuxt e no SvelteKit) — as features de IA na UI e as fases 2 e 3 ficam
-> para depois.
+> abaixo). As páginas privadas já estão portadas nos 3 apps (fases 1–3) — as convenções
+> ficam em [Fase 1 privada (Nuxt e SvelteKit)](#fase-1-privada-nuxt-e-sveltekit),
+> [Fase 2 (Nuxt e SvelteKit)](#fase-2-nuxt-e-sveltekit) e
+> [Fase 3 (Nuxt e SvelteKit)](#fase-3-nuxt-e-sveltekit).
 
 ### Contrato comum aos 3 apps (decidido e implementado)
 
