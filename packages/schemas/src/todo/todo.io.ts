@@ -1,21 +1,33 @@
 import { z } from 'zod'
-import { prioritySchema, titleSchema, descriptionSchema } from './todo.model'
+import { prioritySchema, titleSchema } from './todo.model'
+
+export const descriptionInputSchema = z
+  .union([z.string().trim().max(2000), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value === undefined || value === null) return value
+    const trimmed = value.trim()
+    return trimmed ? trimmed : null
+  })
+
+export const dueDateInputSchema = z
+  .union([z.literal(''), z.coerce.date<string | Date>(), z.null(), z.undefined()])
+  .transform((value) => (value === '' ? null : value))
 
 export const createTodoSchema = z.object({
   title: titleSchema,
-  description: descriptionSchema.nullish(),
+  description: descriptionInputSchema.optional(),
   priority: prioritySchema
     .nullish()
     .default('medium')
     .transform((v) => v ?? 'medium'),
-  dueDate: z.coerce.date().nullable().optional(),
+  dueDate: dueDateInputSchema.optional(),
 })
 
 export const updateTodoSchema = z.object({
   title: titleSchema.nullish().transform((v) => v ?? undefined),
-  description: descriptionSchema.nullish(),
+  description: descriptionInputSchema.optional(),
   priority: prioritySchema.nullish().transform((v) => v ?? undefined),
-  dueDate: z.coerce.date().nullable().optional(),
+  dueDate: dueDateInputSchema.optional(),
   completed: z
     .boolean()
     .nullish()
@@ -25,7 +37,7 @@ export const updateTodoSchema = z.object({
 export const draftInputSchema = z
   .object({
     title: titleSchema.nullish().transform((v) => v ?? undefined),
-    description: descriptionSchema.nullish().transform((v) => v ?? undefined),
+    description: descriptionInputSchema.optional().transform((v) => v ?? undefined),
   })
   .refine((draft) => Boolean(draft.title || draft.description), {
     message: 'Informe um título ou uma descrição para a IA sugerir.',

@@ -26,7 +26,7 @@
   </span>
   <p class="text-fg text-lg font-semibold">{title}</p>
   {#if message}
-    <p class="text-dimmed max-w-sm text-sm">{message}</p>
+    <p class="text-muted max-w-sm text-sm">{message}</p>
   {/if}
   {#if retry}
     <button type="button" class="btn preset-tonal-error mt-2" onclick={() => onretry?.()}>
