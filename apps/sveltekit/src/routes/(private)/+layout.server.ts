@@ -1,10 +1,13 @@
 import { error, redirect } from '@sveltejs/kit'
 import { GraphQLRequestError, UNAUTHENTICATED_CODE } from '@ia-task-manager/bff/graphql'
 import { paths } from '$lib/constants/paths'
+import { authQueryKeys } from '$lib/services/auth/auth.keys'
 import { fetchMe } from '$lib/services/auth/auth.request'
 import type { LayoutServerLoad } from './$types'
 
-export const load: LayoutServerLoad = async ({ fetch, url }) => {
+export const load: LayoutServerLoad = async ({ fetch, url, depends }) => {
+  depends(authQueryKeys.me)
+
   let user
   try {
     user = await fetchMe(fetch)
