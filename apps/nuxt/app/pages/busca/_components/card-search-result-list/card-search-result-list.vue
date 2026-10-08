@@ -42,7 +42,7 @@ function formatCriteria(criteria: Criteria): string {
 
   <EmptyState v-else-if="result.todos.length === 0" message="Nenhuma tarefa corresponde à busca." />
 
-  <UCard v-else>
+  <UCard v-else class="animate-in fade-in slide-in-from-bottom-2 duration-base ease-entrance">
     <div class="flex flex-col gap-4">
       <div class="flex items-center gap-1.5">
         <span class="text-dimmed text-xs font-semibold">Filtros entendidos:</span>

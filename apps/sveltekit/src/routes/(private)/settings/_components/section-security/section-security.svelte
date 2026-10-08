@@ -35,7 +35,9 @@
   }
 </script>
 
-<div class="card border-line bg-surface border max-w-md p-6">
+<div
+  class="animate-in fade-in duration-base ease-entrance card border-line bg-surface border max-w-md p-6"
+>
   <div class="flex flex-col gap-4">
     <h2 class="text-fg font-semibold">Alterar senha</h2>
 

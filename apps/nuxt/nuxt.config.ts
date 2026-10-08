@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   devServer: { port: 3001 },
 
+  app: {
+    pageTransition: { name: 'page', mode: 'out-in' },
+  },
+
   modules: ['@nuxt/ui', '@nuxt/fonts', '@nuxtjs/color-mode'],
 
   components: [{ path: '~/app/components', pathPrefix: false }],

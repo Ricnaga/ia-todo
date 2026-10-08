@@ -16,7 +16,9 @@
     <SkeletonStack rowHeight={14} />
   </div>
 {:else if summary}
-  <div class="card border-line bg-surface flex flex-col gap-4 border p-6">
+  <div
+    class="animate-in fade-in duration-base ease-entrance card border-line bg-surface flex flex-col gap-4 border p-6"
+  >
     <p>{summary.summary}</p>
 
     <div>

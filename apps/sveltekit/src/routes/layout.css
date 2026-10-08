@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton-svelte';
@@ -16,4 +17,31 @@
 body {
   background-color: var(--color-bg);
   color: var(--color-fg);
+}
+
+dialog.animate-dialog {
+  --anim-duration: var(--duration-slow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.animate-dialog {
+    --anim-duration: 0.01ms;
+  }
+}
+
+::view-transition-group(root) {
+  animation-duration: var(--duration-slow);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-timing-function: var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
 }

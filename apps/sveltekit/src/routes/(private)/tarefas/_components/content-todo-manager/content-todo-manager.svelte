@@ -96,7 +96,9 @@
 
   <FilterTodoList />
 
-  <div class="card border-line bg-surface border p-4">
+  <div
+    class="animate-in fade-in duration-base ease-entrance card border-line bg-surface border p-4"
+  >
     <TableTodoList {todos} onedit={handleEdit} />
   </div>
 

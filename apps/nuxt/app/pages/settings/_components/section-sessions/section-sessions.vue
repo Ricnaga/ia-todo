@@ -56,7 +56,7 @@ function handleRevoke(sessionId: string) {
 </script>
 
 <template>
-  <UCard class="max-w-md">
+  <UCard class="animate-in fade-in duration-base ease-entrance max-w-md">
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="text-highlighted font-semibold">Sessões ativas</h2>

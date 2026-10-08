@@ -52,7 +52,7 @@ function handleUnlink(account: AuthAccount | undefined) {
 </script>
 
 <template>
-  <UCard class="max-w-md">
+  <UCard class="animate-in fade-in duration-base ease-entrance max-w-md">
     <div class="flex flex-col gap-4">
       <h2 class="text-highlighted font-semibold">Contas vinculadas</h2>
 

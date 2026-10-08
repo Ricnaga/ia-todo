@@ -3,7 +3,9 @@ defineProps<{ title: string }>()
 </script>
 
 <template>
-  <div class="flex min-h-svh items-center justify-center px-4 py-10">
+  <div
+    class="animate-in fade-in duration-slow ease-entrance flex min-h-svh items-center justify-center px-4 py-10"
+  >
     <UCard class="w-full max-w-md">
       <h2 class="text-highlighted mb-6 text-2xl font-semibold">
         {{ title }}

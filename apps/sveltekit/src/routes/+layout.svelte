@@ -1,10 +1,24 @@
 <script lang="ts">
+  import { onNavigate } from '$app/navigation'
   import { navigating } from '$app/state'
   import favicon from '$lib/assets/favicon.svg'
   import Toaster from '$lib/components/toaster/toaster.svelte'
   import './layout.css'
 
   let { children } = $props()
+
+  onNavigate((navigation) => {
+    if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return
+    }
+
+    return new Promise<void>((resolve) => {
+      document.startViewTransition(async () => {
+        resolve()
+        await navigation.complete
+      })
+    })
+  })
 </script>
 
 <svelte:head>

@@ -50,7 +50,9 @@
 {:else if result.todos.length === 0}
   <EmptyState message="Nenhuma tarefa corresponde à busca." />
 {:else}
-  <div class="card border-line bg-surface flex flex-col gap-4 border p-6">
+  <div
+    class="animate-in fade-in slide-in-from-bottom-2 duration-base ease-entrance card border-line bg-surface flex flex-col gap-4 border p-6"
+  >
     <div class="flex items-center gap-1.5">
       <span class="text-muted text-xs font-semibold">Filtros entendidos:</span>
       <span class="badge preset-tonal">{formatCriteria(result.criteria)}</span>

@@ -100,7 +100,7 @@ function onAdd(suggestion: TodoSuggestion) {
 
       <FilterTodoList />
 
-      <UCard>
+      <UCard class="animate-in fade-in duration-base ease-entrance">
         <TableTodoList :todos="items" @edit="handleEdit" />
       </UCard>
 

@@ -9,7 +9,7 @@ defineProps<{ summary?: DaySummary; isPending: boolean }>()
     <SkeletonStack :row-height="14" />
   </UCard>
 
-  <UCard v-else-if="summary">
+  <UCard v-else-if="summary" class="animate-in fade-in duration-base ease-entrance">
     <div class="flex flex-col gap-4">
       <p>{{ summary.summary }}</p>
 

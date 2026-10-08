@@ -74,7 +74,7 @@ function onSubmitEmail() {
     <SkeletonStack v-else-if="isPending || !user" :lines="4" :row-height="44" />
 
     <template v-else>
-      <UCard>
+      <UCard class="animate-in fade-in duration-base ease-entrance">
         <div class="flex flex-col gap-4">
           <h2 class="text-highlighted font-semibold">Informações básicas</h2>
 
@@ -109,7 +109,7 @@ function onSubmitEmail() {
         </div>
       </UCard>
 
-      <UCard>
+      <UCard class="animate-in fade-in duration-base ease-entrance">
         <div class="flex flex-col gap-4">
           <h2 class="text-highlighted font-semibold">E-mail</h2>
 
