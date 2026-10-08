@@ -1,5 +1,5 @@
 import { invalidate } from '$app/navigation'
-import { createMutation } from '$lib/utils/mutation'
+import { createMutation } from '$lib/utils/mutation.svelte'
 import { insightsQueryKeys } from '$lib/services/insights/insights.keys'
 import { todoQueryKeys } from './todo.keys'
 import { createTodo, deleteTodo, suggestTodo, updateTodo } from './todo.request'

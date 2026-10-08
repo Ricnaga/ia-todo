@@ -1,5 +1,5 @@
 import { invalidate } from '$app/navigation'
-import { createMutation } from '$lib/utils/mutation'
+import { createMutation } from '$lib/utils/mutation.svelte'
 import { authQueryKeys } from './auth.keys'
 import {
   changeEmail,
