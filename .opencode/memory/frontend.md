@@ -77,7 +77,7 @@ Shell + guard + dashboard portados com paridade do Next; `tarefas`, `resumo`, `b
 
 - **Sessão real no layout privado, em 2 camadas** (igual ao Next): sem cookie → redirect do guard com `next`; com cookie → `me` no load do layout, e `null`/`UNAUTHENTICATED` → redirect de novo. Nuxt: `app/layouts/private.vue` com `useMeQuery()` + `definePageMeta({ layout: 'private' })` nas 5 páginas; SvelteKit: `src/routes/(private)/+layout.server.ts` com `fetchMe(fetch)` (`me` tem `skipTypeScopes` → sem sessão devolve `null`, sem erro de GraphQL). Erros de infra viram a página de erro, **não** redirect.
 - **Erro global nos 2 apps, paridade de texto**: 404 → "Página não encontrada" + "Voltar ao início"; demais → "Erro ao carregar" + tentar novamente (Nuxt `clearNuxtData` + `clearError`; SvelteKit `invalidateAll()`). No SvelteKit o `+error.svelte` fica na **raiz** (não no grupo `(private)`) e troca o shell inteiro — é o comportamento esperado, igual ao Next. `message` do erro só em dev; componente compartilhado `ErrorState` (`role="alert"`, `btn preset-tonal-error`).
-- **Shell**: Nuxt `app/layouts/private.vue` (`UHeader`/`USidebar`/`UNavigationMenu`/`UDropdownMenu` + `<NuxtPage />` + `NuxtLoadingIndicator` no `app.vue`); SvelteKit `src/lib/components/NavShell.svelte` montado no `+layout.svelte` do grupo — header `sticky z-40 h-14`, sidebar `hidden md:flex`, **barra horizontal rolável no mobile sem drawer** (decisão do usuário), menu de conta, e o indicador de navegação (`bg-accent`) no `+layout.svelte` raiz.
+- **Shell**: Nuxt `app/layouts/private.vue` (`UHeader`/`USidebar`/`UNavigationMenu`/`UDropdownMenu` + `<NuxtPage />` + `NuxtLoadingIndicator` no `app.vue`); SvelteKit `src/lib/components/nav-shell/nav-shell.svelte` (folder-per-component desde a Fase 4) montado no `+layout.svelte` do grupo — header `sticky z-40 h-14`, sidebar `hidden md:flex`, **barra horizontal rolável no mobile sem drawer** (decisão do usuário), menu de conta, e o indicador de navegação (`bg-accent`) no `+layout.svelte` raiz.
 - **Menu da conta (SvelteKit)**: `Menu` do Skeleton com `onSelect` no **root** — `invokeOnSelect` lê `context.get("highlightedValue")`, então `.click()` sintético **não** dispara `onSelect`; no smoke usar mouse real (CDP). `sign-out` → `authClient.signOut()` + `goto(resolve(LOGIN), { invalidateAll: true })` (o item não tem href; `goto` manual).
 - **Tema com 3 opções** (Sistema/Claro/Escuro) nos 2 apps: `ThemeSwitcher` (Nuxt `colorMode.preference`; SvelteKit `Menu.OptionItem type="radio"` com `colorMode.preference` + `setPreference`). SvelteKit: `lib/color-mode.svelte.ts` guarda `preference` (`auto|light|dark`), listener de `matchMedia` só quando `auto`, e o `app.html` espelha a mesma lógica no script inline para não piscar no load. `ColorModeToggle` foi removido.
 - **Skeleton (SvelteKit)**: componentes headless — estilizar com as nossas classes `btn`, `btn-icon` (+ `-sm/base/lg`), `preset-tonal`, `preset-tonal-error`, `card` (só radius/hover; padding e border são nossos). `Menu.ItemGroupLabel` **exige** `Menu.ItemGroup` pai (sem contexto dá `TypeError` no SSR); `Menu.Content` precisa de `z-50` (o `--z-index` é copiado do computed do próprio content) com header em `z-40`; `ItemIndicator` `hidden data-[state=checked]:block` sobre `Menu.Item` (que já sai com `hidden` quando unchecked). Ícones tipados com `import type { Icon } from '@tabler/icons-svelte'` (legado `SvelteComponentTyped`, **não** `Component` do svelte) — e nunca redeclarar `Icon` no mesmo escopo de um `let icon` (dá "Identifier 'Icon' has already been declared").
@@ -95,8 +95,11 @@ Commits: Nuxt `3cca8b8` ("fase 2 resumo+busca"), SvelteKit `4def400`.
   **query** `useDaySummaryQuery()` (`services/insights/insights.query.ts`,
   `execute()` no clique do botão) e a busca é **mutation**
   `useNlSearchMutation()` (`services/assistant/`).
-- **SvelteKit**: mesmos componentes em `src/lib/components/` (singulative, sem
-  `index.ts`). Título em `<svelte:head>` (`Resumo do dia | ia-task-manager` /
+- **SvelteKit**: mesmos componentes inicialmente em `src/lib/components/`
+  (singulative, sem `index.ts`) — **desde a Fase 4 movidos** para
+  folder-per-component + `_components` por rota (ver
+  [Fase 4](#fase-4-arquitetura-espelhada--motion)). Título em `<svelte:head>`
+  (`Resumo do dia | ia-task-manager` /
   `Busca por IA | ia-task-manager`). A IA (busca/sugestão/resumo) é sempre
   **mutação** (`createMutation`); `FormNlSearch` é `<input>` + `onkeydown`
   (Enter) e botão `Buscar` `disabled` sem `canSearch`, disparando
@@ -163,10 +166,68 @@ Commits: Nuxt `3cca8b8` ("fase 2 resumo+busca"), SvelteKit `4def400`.
   `preset-tonal-success` (Verificado/Vinculada), `preset-tonal-warning`
   (Não verificado), `preset-tonal-primary` (aba ativa / Esta sessão) — todos
   em `adapter skeleton.css` + gerados sob demanda no build.
-- **Bug pré-existente (3 apps)**: `createTodoSchema.dueDate` (`z.coerce.date()
-.nullable().optional()`) rejeita `''` → criar/editar tarefa sem data falha;
-  `description === ''` rejeitado por `min(1)`; `packages/bff/src/graphql/
-todo-draft.ts` envia `dueDate: null`. Não corrigir sem pedido.
+- **Bug de `''` corrigido (commit `d2b701a`, 3 apps)**: `createTodoSchema`/`updateTodoSchema` passaram a aceitar **`description: ''`/só-espaço → `null`** (trim + max 2000) e **`dueDate: ''` → `null`** (string-data/Date/null/undefined ok; string inválida continua erro `Invalid input`). Em zod v4: `z.preprocess` vaza `unknown` no `z.input` (quebra o RHF do Next) → usar `z.union([...])` + `.transform` e `z.coerce.date<string | Date>()`; campos com transform que recebem `undefined` exigem **`.optional()`** (senão viram obrigatórios). `descriptionSchema` original (min 1, do `todoSchema`/`todoSuggestionSchema`) ficou intacto. No BFF, `todo-draft.toTodoCreateRequest` normaliza com `toDateInput` (''→null) e `toDescriptionInput` (''→null) — cobre o draft da IA (`''` → undefined/omitido). Runtime validado por smokes `tsx`.
+
+## Fase 4 (arquitetura espelhada + motion)
+
+Commits: SvelteKit `b7b4599`, Nuxt `6c6711f`, motion `c81afe3` (ambos + `d2b701a`
+dos bugs, Fase 1).
+
+**Arquitetura de componentes = espelho do Next nos 2 apps:**
+
+- **Globais** (usados em várias pages) ficam em `components/<nome>/<nome>.<ext>`
+  em `src/lib/components/` (SvelteKit) e `app/components/` (Nuxt): `empty-state`,
+  `error-state`, `skeleton-stack`, `theme-switcher`, `render-boundary` (+
+  `render-query-boundary` novo), e no SvelteKit também `nav-shell` e `toaster`.
+  O Nuxt **não tem** NavShell/Toaster (usa `layouts/private.vue` + `UApp` toasts).
+- **Colação por rota** `_components/` dentro de cada page: tarefas (8, incluindo
+  os `table-todo-*`), settings (6), resumo (`card-day-summary.vue` flat +
+  `card-day-summary-content/`), busca (`form-nl-search.vue` flat +
+  `card-search-result-list/`), auth (`(public)/_components/card-auth` +
+  `oauth-buttons`; `login|register/_components/form-login|form-register`). A regra
+  flat-vs-folder espelha o que o Next já faz (flat para o container forte,
+  folder para os filhos).
+- **Nuxt**: `nuxt.config.ts` ganhou `components: [{ path: '~/app/components',
+pathPrefix: false }]` — sem isso o auto-import de `components/<x>/<x>.vue`
+  viraria `Xxx<Xxx>`. Componentes movidos para `pages/**/_components/` deixam de
+  ser auto-importados: quem usa precisa de **`import X from './<rota>/_components/...'`**
+  e irmãos usam **caminho relativo** (`../table-sort-header/...`);
+  globais continuam auto-import (sem `import`).
+- **SvelteKit**: imports sempre explícitos (não há auto-import); ganhou
+  `(private)/+error.svelte` (espelho do `error.tsx` do grupo Next) com
+  `invalidateAll()` no retry e 404 via `goto(resolve(paths.HOME))`.
+- FormLogin/FormRegister extraídos nos 2 apps (estado/handlers/schema + `OAuthButtons`
+  - divisor + link; prop `callbackURL` default `paths.DASHBOARD`; página = `CardAuth`
+  - form + `useSeoMeta`/`<svelte:head>`).
+- `RenderBoundary`/`RenderQueryBoundary` (novos, paridade com o Next): props
+  `status: 'pending'|'error'|'ready'`, slot/snippet `children` + `fallback` +
+  `errorSnippet`, emit/event `retry`; fallback default = `SkeletonStack`, erro
+  default = `ErrorState`.
+
+**Motion (tw-animate-css v1.4 nos 2 apps):**
+
+- `@import 'tw-animate-css';` logo após o `@import 'tailwindcss';` em
+  `routes/layout.css` (SvelteKit) e `app/assets/css/main.css` (Nuxt).
+- O `@theme static` de `packages/design-tokens/src/motion.css` gera utilities
+  Tailwind 4 nativas: `--duration-*` → `duration-fast|base|slow` e `--ease-*` →
+  `ease-standard|entrance|exit` (confirmado no CSS buildado; nunca usar
+  `--duration-*`/`--ease-*` literais).
+- Micro-entradas nos cartões de conteúdo (paridade nos 2 apps):
+  `animate-in fade-in duration-base ease-entrance` (tabela de tarefas, resumo,
+  sections de settings) e `animate-in fade-in slide-in-from-bottom-2 duration-base
+ease-entrance` (resultado da busca); `CardAuth` com `duration-slow`.
+- **Transição de rota**: SvelteKit = **View Transitions** via `onNavigate` no
+  `+layout.svelte` raiz (`document.startViewTransition`, ignorado em
+  `prefers-reduced-motion`) + `::view-transition-group/old/new(root)` com
+  `--duration-slow`/`--ease-standard` no `layout.css`; Nuxt = `app.pageTransition`
+  `{ name: 'page', mode: 'out-in' }` no `nuxt.config.ts` + classes
+  `.page-enter-active/leave-active` em `main.css` (opacity+translateY, `--duration-slow`/
+  `--ease-standard`). Ambos respeitam `prefers-reduced-motion: reduce` (animations
+  off da camada nativa) e o `tw-animate-css` já desativa os próprios utilities.
+- **Skeleton dialog**: `.animate-dialog` (usado em `modal-todo-form` e
+  `modal-ai-suggest` do SvelteKit) usa `--anim-duration:.25s` fixo — o
+  `layout.css` faz `dialog.animate-dialog { --anim-duration: var(--duration-slow) }`
+  (não mexer no source do Skeleton). Nuxt `UModal` é nativa, sem override.
 
 ## Estrutura
 
