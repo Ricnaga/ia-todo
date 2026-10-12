@@ -7,7 +7,7 @@ Realize uma auditoria completa deste projeto.
 
 Siga o workflow do skill `codebase-audit` no modo completo:
 
-1. Mapeie todos os arquivos fonte com glob (`**/*.{tsx,ts,jsx}`)
+1. Mapeie todos os arquivos fonte com glob (`**/*.{ts,tsx,js,jsx,vue,svelte}`) — cubra os 3 apps (Next, Nuxt, SvelteKit) e os packages
 2. Catalogue exports de cada arquivo (componentes, hooks, utils, services, types)
 3. Identifique duplicações (mesmo nome, assinatura similar, lógica copiada)
 4. Ao analisar duplicações, consulte também o skill `design-principles` (DRY, KISS, YAGNI, SOC) para embasar as recomendações

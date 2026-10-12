@@ -1,88 +1,45 @@
 ---
-description: Gera scaffold de uma página/feature completa no Next.js.
+description: Gera scaffold de uma página/feature completa nos 3 apps do monorepo (Next, Nuxt, SvelteKit).
 agent: frontend-engineer
 ---
 
-Gere a estrutura completa de uma feature ou página no projeto.
+Gere a estrutura completa de uma feature ou página no projeto, nos **três apps** (paridade de arquitetura e comportamento).
 
 ## Argumentos
 
-`$ARGUMENTS` deve conter o caminho da feature (ex: `dashboard/settings`, `auth/login`).
+`$ARGUMENTS` deve conter o caminho da feature (ex: `tarefas`, `login`).
 
 ## Passos
 
-1. Analisar a estrutura existente do projeto (App Router, pastas, convenções)
-2. Criar a estrutura da feature
+1. Analisar a estrutura existente do projeto (convenções espelhadas nos 3 apps; ver `README.md` — seção "UI nos três apps" — e `.opencode/memory/frontend.md` "Fase 4")
+2. Render boundary (estados async) com `render-boundary`/`render-query-boundary` no lugar de loading/error parciais
+3. Criar a estrutura da feature nos três apps
 
-### Estrutura padrão (App Router)
+### Estrutura padrão (espelhada nos 3 apps)
 
-Para `app/(feature)/slug/`:
+Globais vão em `components/<nome>/<nome>.<ext>`; irmãos da rota ficam em `<rota>/_components/`.
 
 ```
-app/(feature)/slug/
-├── page.tsx              # Página principal (Server Component)
-├── layout.tsx            # Layout da feature (se necessário)
-├── loading.tsx           # Loading state
-├── error.tsx             # Error boundary
-├── not-found.tsx         # 404 da feature
-├── components/
-│   └── FeatureComponent.tsx
-├── actions.ts            # Server Actions (se aplicável)
-├── types.ts              # Types da feature
-└── utils.ts              # Helpers específicos
+Next       app/<rota>/                Nuxt     app/pages/<rota>/            SvelteKit src/routes/<rota>/
+├── page.tsx                           ├── index.vue (ou <rota>.vue)         ├── +page.svelte
+├── layout.tsx (se privada, em        ├── layouts/private.vue (app-wide)    └── _components/...  (mais +page.server.ts
+│   (private)/ chama verifySession)   └── _components/...                   │    se houver load; (private)/+page
+├── _components/                                                             │    é protegido por (private)/+layout.svelte)
+│   └── <Feature>.tsx
+└── loading.tsx / error.tsx (uso
+    pontual; preferir render-boundary)
 ```
 
-### Padrão da página
-
-```tsx
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Feature Name',
-  description: 'Descrição da feature',
-}
-
-export default async function FeaturePage() {
-  // data fetching no servidor
-  return <div>{/* conteúdo */}</div>
-}
-```
-
-### Padrão do Server Action
-
-```tsx
-'use server'
-
-import { z } from 'zod'
-
-const schema = z.object({
-  // campos validados
-})
-
-export async function actionName(formData: FormData) {
-  const parsed = schema.safeParse(Object.fromEntries(formData))
-  if (!parsed.success) {
-    return { error: parsed.error.flatten() }
-  }
-  // lógica
-  return { success: true }
-}
-```
-
-## Notas
-
-- Adaptar conforme convenções existentes no projeto
-- Incluir testes se houver testes no projeto
-- Considerar se a feature precisa de API routes ou Server Actions
-- Usar types existentes do projeto quando possível
+- Imports: `_components/` irmãos por **caminho relativo** (nos 3 apps); globais por alias/auto-import (Nuxt auto-importa com `pathPrefix: false`; SvelteKit `$lib/components/...`).
+- Data fetching canônico por app: React Query (Next), `useAsyncData`/`useFetch` (Nuxt), load em `+page.server.ts` (SvelteKit). Nunca fetch solto em `onMount`/`onMounted`.
+- Motion: tokens de `packages/design-tokens/src/motion.css` (utilities `duration-slow`/`ease-entrance`) + `tw-animate-css` para micro-entradas; transição de rota já existe — não recriar.
 
 ## Convenções deste projeto
 
-- **Gerenciador de pacotes**: `pnpm` (nunca npm/yarn)
-- **UI**: Mantine (`@mantine/core`, `@mantine/form`, `@mantine/hooks`, `@mantine/notifications`) + Tabler Icons (`@tabler/icons-react`) + Tailwind
-- **Dados no servidor**: GraphQL via `graphql-yoga` + `@pothos/core`; queries consumidas no client com `@tanstack/react-query` e `@tanstack/react-table`
-- **State**: `zustand`
-- **Validação**: `zod` + `react-hook-form` (`@hookform/resolvers`)
-- **Banco**: Prisma (`prisma/schema.prisma`, SQLite via better-sqlite3), cliente em `server/db/prisma.ts`, casos de uso em `server/modules/*/use-cases/`, DI pelo composition root em `server/shared/container.ts`
+- **Gerenciador de pacotes**: `pnpm` (nunca npm/yarn); gates: `pnpm typecheck`, `pnpm lint`, `pnpm format:check` (`prettier --check .`)
+- **Stack por app (mesma arquitetura)**: Next 16 + React 19 + Mantine v9 + Tabler Icons / Nuxt 4 + Vue 3 + `@nuxt/ui` v4 / SvelteKit 2 + Svelte 5 (runes) + skeleton-svelte v5 — todos com Tailwind CSS v4 + `design-tokens` (vai ficar em `packages/design-tokens`)
+- **Dados**: GraphQL via `graphql-yoga` + Pothos no BFF (`packages/bff`); cliente tipado na camada `services/` de cada app
+- **Validação**: contratos zod canônicos em `packages/schemas` (importar de lá; ver semanticas de `''` → null); forms: react-hook-form (Next), Nuxt/SvelteKit nativo/form lib do kit
+- **Banco**: Prisma (`packages/db/...`? não — `server/db/prisma.ts` via `pnpm --filter @ia-task-manager/nextjs db:*`), use-cases em `server/modules/*/use-cases/`, DI pelo composition root `server/shared/container.ts`
 - **Estilo de código**: single quotes, sem semicolon, trailing comma all (prettier)
-- Verificar como arquivos similares existentes resolvem (ex: `components/`, `lib/schemas/`, `bff/pothos/`, `server/modules/`) antes de criar novo padrão
+- Verificar como arquivos similares existentes resolvem (ex.: `components/form-login/form-login.<ext>`, `bff/pothos/modules/todo/`, `server/modules/todos/use-cases/`) antes de criar novo padrão

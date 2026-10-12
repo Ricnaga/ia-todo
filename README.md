@@ -14,33 +14,44 @@ IA aplicada ao ciclo de vida da tarefa — 3 features:
 
 ## Páginas
 
-| Rota       | Página                             |
-| ---------- | ---------------------------------- |
-| `/`        | Landing/README do app + navegação  |
-| `/tarefas` | CRUD de tarefas + botão sugerir IA |
-| `/resumo`  | summarizeDay (IA)                  |
-| `/busca`   | nlSearch (IA)                      |
+As mesmas telas, nos três apps (`apps/nextjs`, `apps/nuxt`, `apps/sveltekit`):
+
+| Rota         | Página                                                |
+| ------------ | ----------------------------------------------------- |
+| `/`          | Landing/README do app + navegação                     |
+| `/login`     | Entrar (email+senha + OAuth)                          |
+| `/register`  | Criar conta (nome + email + senha + OAuth)            |
+| `/dashboard` | Visão geral (saudação com primeiro nome + atalhos)    |
+| `/tarefas`   | CRUD de tarefas + botão sugerir IA                    |
+| `/resumo`    | summarizeDay (IA)                                     |
+| `/busca`     | nlSearch (IA)                                         |
+| `/settings`  | Perfil, segurança, contas vinculadas e sessões ativas |
 
 ## Arquitetura — monorepo pnpm, núcleo único, porta GraphQL, DDD por bounded contexts
 
 ```
-apps/nextjs/      → app Next.js (único front com telas por enquanto)
+apps/nextjs/      → app Next.js 16 (referência de UI; mesma arquitetura de componentes nos 3 apps)
 ├── app/           → App Router: (private)/, (public)/, api/
 │   ├── api/graphql/route.ts   → GET/POST delega a createGraphQLHandler() do @ia-task-manager/bff
 │   └── api/auth/[...all]/route.ts → handler do better-auth
-├── components/    → componentes UI compartilhados
-├── lib/           → auth/ (session) + constants/ (UI tokens, router paths) + utils/
+├── components/    → componentes globais (components/<nome>/<nome>.tsx)
 └── services/      → cliente GraphQL da UI (graphql-request) + operações tipadas
 
-apps/nuxt/        → app Nuxt 4 (só o playground do GraphQL por enquanto)
+apps/nuxt/        → app Nuxt 4 (paridade de telas/comportamento com o Next)
+├── app/
+│   ├── components/ → componentes globais (components/<nome>/<nome>.vue + render-boundary)
+│   ├── pages/      → páginas + _components por rota + layouts/private.vue
+│   └── assets/css/main.css → Tailwind 4 + design-tokens + tw-animate-css (page transition)
 └── server/
     ├── utils/graphql.ts  → singleton yoga = createGraphQLHandler()
     └── api/graphql.ts    → defineEventHandler + toWebRequest/sendWebResponse
 
-apps/sveltekit/   → app SvelteKit 2 (só o playground do GraphQL por enquanto)
+apps/sveltekit/   → app SvelteKit 2 (paridade de telas/comportamento com o Next)
 └── src/
-    ├── lib/server/graphql.ts              → singleton yoga = createGraphQLHandler()
-    └── routes/api/graphql/+server.ts      → RequestHandler que desempacota event.request (GET/POST)
+    ├── lib/components/ → componentes globais (components/<nome>/<nome>.svelte + render-boundary)
+    ├── lib/server/graphql.ts → singleton yoga = createGraphQLHandler()
+    └── routes/          → páginas + _components por rota; (private)/+error.svelte
+        └── api/graphql/+server.ts → RequestHandler (GET/POST)
 
 packages/
 ├── tsconfig/      → base de TypeScript compartilhada (source-only, sem build)
@@ -86,14 +97,23 @@ packages/
 
 - **Source-only**: os packages publicam TypeScript puro (`main` → `src/index.ts`), sem etapa de build. Cada app os compila no seu bundler — `transpilePackages` (Next), `build.transpile` (Nuxt) e `ssr.noExternal` + `optimizeDeps.exclude` (SvelteKit) — e por isso os imports internos dos packages são **relativos**: o alias `@/*` do Next não existe fora dele.
 - **Turborepo** orquestra `build`, `typecheck` e `db:*` pelo grafo de dependências, com cache. `lint` e `format` passam uma única vez pela raiz (o ESLint tem uma config só, em `eslint.config.mjs`).
-- A UI consome **GraphQL** via React Query, com operações tipadas no wrapper `services/graphql/base.ts`.
+- A UI consome **GraphQL** pela camada `services/` de cada app, com operações tipadas no wrapper `services/graphql/base.ts` — data fetching próprio por app (React Query no Next; `useAsyncData`/load functions no Nuxt/SvelteKit), mesma superfície e mesmo contrato.
 - Consumidores externos usam o mesmo endpoint GraphQL — uma porta, zero duplicação.
 - Hexagonal no BFF + clean architecture/DDD no back: o BFF define as ports (`adapters/`, uma por bounded context); o server entra como adapter no único composition root (`bff/context.ts`), sem connectors/domain/factories intermediários — retomados só se surgir divergência real de shape (relay, multi-consumidores, subscriptions, 3º domínio).
 - A IA é infra genérica em `packages/server/src/shared/ai`: os use-cases injetam o port `AiService`; trocar de provider (Gemini → outro) = novo adapter, sem tocar nos contexts.
 
+## UI nos três apps (paridade de estrutura e comportamento)
+
+- **Globais** em `components/<nome>/<nome>.<ext>` (Next `components/`, Nuxt `app/components/` com auto-import e `pathPrefix: false`, SvelteKit `src/lib/components/`): `empty-state`, `error-state`, `skeleton-stack`, `theme-switcher`, `render-boundary`/`render-query-boundary` (estados async: fallback = `SkeletonStack`, erro = `ErrorState`).
+- **Colação por rota** em `<rota>/_components/`: `_components/form-login` e `form-register`, `card-auth`, `oauth-buttons` (públicas) e os componentes de `tarefas`, `resumo`, `busca`, `settings` (privadas). Nuxt/SvelteKit importam esses irmãos com caminho relativo; globais continuam auto-import (Nuxt).
+- **Formulários de auth** extraídos (`FormLogin`/`FormRegister`): página = `CardAuth` + form (schema/estado/handlers + `OAuthButtons` + link), prop `callbackURL`.
+- **Motion**: tokens em `packages/design-tokens/src/motion.css` (`--duration-*`/`--ease-*`) viram utilities Tailwind nativas (`duration-slow`, `ease-entrance`); micro-entradas com `tw-animate-css` (`animate-in fade-in ...`) nos cartões de conteúdo e `CardAuth`, e **transição de rota** — View Transitions no SvelteKit (`onNavigate` + `::view-transition-*`) e `app.pageTransition` (out-in, classes `.page-*`) no Nuxt. Tudo respeita `prefers-reduced-motion`.
+
 ## Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript strict · Prisma 7 (SQLite via better-sqlite3) · GraphQL Yoga + Pothos · Google Gemini · Mantine · React Query · react-hook-form + zod · TanStack Table
+**Frontend (3 apps, mesma arquitetura)**: Next.js 16 (App Router) + React 19 · Nuxt 4 + Vue 3 · SvelteKit 2 + Svelte 5 (runes) · TypeScript strict · Tailwind CSS v4 · design-tokens · Mantine v9 / @nuxt/ui v4 / skeleton-svelte v5 · tw-animate-css
+
+**Back/Data**: Prisma 7 (SQLite via better-sqlite3) · GraphQL Yoga + Pothos · Google Gemini · TanStack Table · React Query (Next) / `useAsyncData` (Nuxt) / load functions (SvelteKit) · zod
 
 ## Começando
 
@@ -129,7 +149,7 @@ Para rodar os outros dois, copie o `.env.example` do app e ajuste `BETTER_AUTH_U
 | `BETTER_AUTH_SECRET` | não (dev)   | Assina o cookie de sessão; em prod é obrigatório |
 | `BETTER_AUTH_URL`    | não (dev)   | URL do app; padrão `http://localhost:3000`       |
 | `GEMINI_API_KEY`     | não (IA)    | Chave do Google AI Studio                        |
-| `GEMINI_MODEL`       | não         | Modelo padrão `gemini-2.5-flash`                 |
+| `GEMINI_MODEL`       | não         | Modelo padrão `gemini-3.8-flash`                 |
 
 `GEMINI_API_KEY` é opcional: o app roda com CRUD; os recursos de IA precisam da chave.
 

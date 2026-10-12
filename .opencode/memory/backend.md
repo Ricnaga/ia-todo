@@ -27,7 +27,7 @@ alwaysApply: true
   → `session.cookieCache` ligado (`maxAge: 60`, `strategy: 'compact'`): valida a sessão pelo cookie `session_data` assinado (HMAC) sem ir ao banco, cortando as ~4-5 leituras da tabela `Session` por page load; ao expirar o `maxAge` volta ao banco (1 leitura/min/usuário) e renova o cache. **Não usar `refreshCache`** — é só para setup sem `database` e o Better Auth o desliga com warning. **Trade-off**: sessão revogada no banco continua válida no cookie até `maxAge` (~60s)
 - **API**: GraphQL (graphql-yoga + @pothos/core) + REST do Better Auth (`app/api/auth/[...all]/route.ts`, só fluxos de sessão/cookies)
 - **Cache**: Redis (cache-aside por `userId`), fallback silencioso se Redis indisponível — `server/shared/cache/` + `docker-compose.yml` (redis:7-alpine)
-- **IA**: @google/generative-ai (Gemini), acessado via `server/shared/ai` (port `AiService` na raiz + adapters por provider em `ai/<provider>/`; os use-cases injetam só a abstração)
+- **IA**: @google/genai (Gemini, Interactions API — `interactions.create` + `response_format` JSON Schema), acessado via `server/shared/ai` (port `AiService` na raiz + adapters por provider em `ai/<provider>/`; os use-cases injetam só a abstração)
 - **Validação**: zod (schemas compartilhados com o frontend)
 
 ## Arquitetura — núcleo único, porta GraphQL, DDD por bounded contexts
@@ -37,7 +37,12 @@ lib/
 ├── constants/       → constantes FRONTEND-only (tokens de UI: `todo.constants.ts` priorityLabels/Colors/Options; `router-paths.ts`) — server/bff não importam daqui
 ├── schemas/         → zod compartilhado entre fronteiras — published language, 1 pasta por contexto com barrel index.ts (path público `@/lib/schemas/{context}`)
 │   todos/todo.model.ts → canônico (models): todoSchema é a BASE (type Todo); todoSuggestionSchema (type TodoSuggestion); subtaskSchema; prioritySchema
-│   todos/todo.io.ts → IO da fronteira: createTodoSchema/updateTodoSchema/draftInputSchema + tipos z.input/z.output (ex.: CreateTodoInput=z.input, CreateTodoOutput=z.infer). z.input tolera null vindo do GraphQL; update trata null como "não alterar"/"limpar" por campo
+│   todos/todo.io.ts → IO da fronteira: createTodoSchema/updateTodoSchema/draftInputSchema + tipos z.input/z.output (ex.: CreateTodoInput=z.input, CreateTodoOutput=z.infer). z.input tolera null vindo do GraphQL; update trata null como "não alterar"/"limpar" por campo.
+│                    → Além do null, aceita '' vindo de formulário: descrição ''/só-espaço → null (trim + max 2000) e dueDate '' → null
+│                    → (string-data/Date/null/undefined ok; string inválida → erro `Invalid input`). Em zod v4 NÃO usar z.preprocess
+│                    → (vaza unknown no z.input) → z.union([...]) + .transform; campos com transform que recebem undefined exigem `.optional()`.
+│                    → Normalização p/ GraphQL: packages/bff/src/graphql/todo-draft.ts, toTodoCreateRequest + toDateInput/toDescriptionInput
+│                    → (rascunho da IA com '' vira campo omitido) — detalhes e validação por smoke tsx em frontend.md "Fase 4" |
 │   assistant/assistant.model.ts → models (criteriaSchema, assistantSchema: Criteria, Assistant)
 │   insights/insights.model.ts → models (daySummarySchema: DaySummary)
 │   auth/auth.model.ts, auth/auth.io.ts → models de user/conta/sessão + schemas de input (updateProfile, changeEmail, changePassword, unlinkAccount, revokeSession)
@@ -71,7 +76,7 @@ server/              → núcleo de negócio (zero dependência de Next), DDD po
 │   ├── ai/          → INFRA genérica: ai.service.interface.ts (port AiService, acessível em @/server/shared/ai/ai.service.interface,
 │   │                → use-cases dependem SÓ do port) — adapter por provider em pasta própria com barrel (path público @/server/shared/ai/gemini)
 │   │                → gemini/: gemini-ai.service.ts (GeminiAiService implements AiService) + gemini-schema.mapper.ts
-│   │                → (converte zod → Schema Gemini; caso sem suporte → throws) + index.ts (exporta GeminiAiService)
+│   │                → (converte zod → JSON Schema puro; caso sem suporte → throws) + index.ts (exporta GeminiAiService)
 │   ├── cache/       → cache.interface.ts (ICache get/set/delete com TTL) + redis/ (RedisCache, lazy connect, connectTimeout 2s,
 │   │                → reconnectStrategy: false, JSON serialization, fallback silencioso) + index.ts singletons (RedisCache via env.REDIS_URL)
 │   ├── oauth/       → INFRA genérica: oauth.interface.ts (AuthProvider = 'google'|'github' + port IOAuthService.getProviders)

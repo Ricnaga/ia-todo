@@ -64,9 +64,12 @@ Carregue a skill correspondente **antes** de escrever ou revisar código no path
 - Usar Expo Router para navigation (React Native)
 - Prefirir Server Components quando possível (web)
 - Usar TypeScript com tipos explícitos
-- Seguir o padrão de pastas do projeto
+- Seguir o padrão de pastas do projeto — **espelho nos 3 apps**: globais em `components/<nome>/<nome>.<ext>` (Next `components/`, Nuxt `app/components/` com `pathPrefix: false` no auto-import, SvelteKit `src/lib/components/`); colação por rota em `<rota>/_components/` (Next `app/<rota>/`, Nuxt `app/pages/<rota>/`, SvelteKit `src/routes/<rota>/`); os irmãos de `_components/` importam por **caminho relativo**, globais por auto-import (Nuxt) ou `$lib/components/...` (SvelteKit)
+- Confirmar no `README.md` da raiz e em `.opencode/memory/frontend.md` (seção "Fase 4") antes de criar/reorganizar pastas de componentes
+- Hooks/composables/loads canônicos por app: React Query (Next), `useFetch`/`useAsyncData` (Nuxt), load em `+page.server.ts`/`+layout.server.ts` (SvelteKit) — nunca `onMount` + fetch solto
+- Motion: consumir os tokens de `packages/design-tokens/src/motion.css` (geram utilities `duration-fast/base/slow` e `ease-standard/entrance/exit`) + `tw-animate-css` (`animate-in fade-in ...`); não criar keyframes próprios para micro-entradas; transições de rota já existem (View Transitions no SvelteKit, `pageTransition` no Nuxt) — não duplicar
 - Componentes em `components/`, hooks em `hooks/`, utils em `lib/`
-- Nomear arquivos em kebab-case
+- Nomear arquivos em kebab-case (pasta do componente = nome dele, ex.: `form-login/form-login.svelte`)
 
 ## Padrões
 
