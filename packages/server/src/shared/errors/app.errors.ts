@@ -28,3 +28,13 @@ export class AuthActionFailedError extends AppError {
     this.name = 'AuthActionFailedError'
   }
 }
+
+export class AiUnavailableError extends AppError {
+  constructor() {
+    super(
+      'AI_UNAVAILABLE',
+      'A IA está temporariamente indisponível. Tente novamente em alguns instantes.',
+    )
+    this.name = 'AiUnavailableError'
+  }
+}

@@ -13,6 +13,8 @@ allowBuilds:
   msgpackr-extract: false
   better-sqlite3: true
   vue-demi: true
+  '@google/genai': false
+  protobufjs: false
 
 # `graphql-request@7.4.0` declara `graphql: 14 - 16` como peer. O repo roda
 # `graphql@17`, que e o que o `graphql-yoga@5` e o Pothos do BFF pedem, entao o
