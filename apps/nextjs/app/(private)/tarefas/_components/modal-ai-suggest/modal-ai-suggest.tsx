@@ -18,6 +18,7 @@ type ModalAiSuggestProps = {
 
 export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSuggestProps) {
   const [draft, setDraft] = useState<DraftInput>({})
+  const [draftError, setDraftError] = useState<string | null>(null)
   const [suggestion, setSuggestion] = useState<TodoSuggestion | null>(null)
 
   const suggestMutation = useSuggestTodoMutation()
@@ -27,11 +28,29 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
     onClose()
     setSuggestion(null)
     setDraft({})
+    setDraftError(null)
   }
 
   const resetSuggestion = () => {
     setSuggestion(null)
     suggestMutation.reset()
+  }
+
+  const handleDraftChange = (next: DraftInput) => {
+    setDraft(next)
+    setDraftError(null)
+  }
+
+  const handleSuggest = () => {
+    const hasContent = Boolean((draft.title ?? '').trim() || (draft.description ?? '').trim())
+    if (!hasContent) {
+      setDraftError('Informe um título ou uma descrição para a IA sugerir.')
+      return
+    }
+    suggestMutation.mutate(draft, {
+      onSuccess: setSuggestion,
+      onError: notifyError('Não consegui sugerir'),
+    })
   }
 
   return (
@@ -46,7 +65,7 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
             label="Tema / título (opcional)"
             placeholder="Montar plano de estudos"
             value={draft.title ?? ''}
-            onChange={(event) => setDraft({ ...draft, title: event.currentTarget.value })}
+            onChange={(event) => handleDraftChange({ ...draft, title: event.currentTarget.value })}
           />
           <Textarea
             label="Descrição / contexto (opcional)"
@@ -55,8 +74,15 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
             minRows={2}
             maxRows={4}
             value={draft.description ?? ''}
-            onChange={(event) => setDraft({ ...draft, description: event.currentTarget.value })}
+            onChange={(event) =>
+              handleDraftChange({ ...draft, description: event.currentTarget.value })
+            }
           />
+          {draftError && (
+            <Text size="xs" c="red">
+              {draftError}
+            </Text>
+          )}
           <Group justify="flex-end">
             <Button variant="subtle" onClick={handleClose}>
               Cancelar
@@ -64,12 +90,7 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
             <Button
               leftSection={<IconSparkles size={16} />}
               loading={suggestMutation.isPending}
-              onClick={() =>
-                suggestMutation.mutate(draft, {
-                  onSuccess: setSuggestion,
-                  onError: notifyError('Não consegui sugerir'),
-                })
-              }
+              onClick={handleSuggest}
             >
               Sugerir
             </Button>

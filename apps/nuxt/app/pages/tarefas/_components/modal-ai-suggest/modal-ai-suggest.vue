@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { priorityColors, priorityLabels } from '~/lib/constants/todo.constants'
 import { useNotifications } from '~/lib/utils/notifications'
 import { useSuggestTodoMutation } from '~/services/todo/todo.mutation'
@@ -16,12 +16,17 @@ type DraftState = {
 }
 
 const draft = ref<DraftState>({ title: '', description: '' })
+const draftError = ref<string | null>(null)
 const suggestion = ref<TodoSuggestion | null>(null)
 
 const suggestMutation = useSuggestTodoMutation()
 const { notifyError } = useNotifications()
 
 const isSuggesting = suggestMutation.isPending
+
+watch([() => draft.value.title, () => draft.value.description], () => {
+  draftError.value = null
+})
 
 function onUpdateOpen(value: boolean) {
   if (!value) {
@@ -45,6 +50,10 @@ function resetSuggestion() {
 }
 
 function onSuggest() {
+  if (draft.value.title.trim() === '' && draft.value.description.trim() === '') {
+    draftError.value = 'Informe um título ou uma descrição para a IA sugerir.'
+    return
+  }
   suggestMutation.mutate(draft.value, {
     onSuccess: (data) => {
       suggestion.value = data
@@ -87,6 +96,8 @@ function onAdd() {
           placeholder="Preciso revisar cálculo e física até sexta-feira…"
         />
       </UFormField>
+
+      <p v-if="draftError" class="text-error text-xs">{{ draftError }}</p>
 
       <div class="flex justify-end gap-2">
         <UButton variant="subtle" @click="handleClose">Cancelar</UButton>

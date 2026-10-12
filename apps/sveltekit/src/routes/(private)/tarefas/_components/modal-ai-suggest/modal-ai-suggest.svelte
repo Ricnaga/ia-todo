@@ -22,6 +22,7 @@
 
   let dialogEl: HTMLDialogElement | undefined = $state()
   let draft = $state<DraftState>({ title: '', description: '' })
+  let draftError = $state<string | null>(null)
   let suggestion = $state<TodoSuggestion | null>(null)
 
   const suggestMutation = useSuggestTodoMutation()
@@ -32,9 +33,16 @@
       dialogEl?.showModal()
       resetSuggestion()
       draft = { title: '', description: '' }
+      draftError = null
     } else {
       dialogEl?.close()
     }
+  })
+
+  $effect(() => {
+    void draft.title
+    void draft.description
+    draftError = null
   })
 
   onMount(() => {
@@ -70,6 +78,11 @@
   }
 
   function onSuggest(): void {
+    if (draft.title.trim() === '' && draft.description.trim() === '') {
+      draftError = 'Informe um título ou uma descrição para a IA sugerir.'
+      return
+    }
+    draftError = null
     suggestMutation.mutate(draft, {
       onSuccess: (data) => {
         suggestion = data
@@ -132,6 +145,10 @@
             placeholder="Preciso revisar cálculo e física até sexta-feira…"
             bind:value={draft.description}></textarea>
         </div>
+
+        {#if draftError}
+          <p class="text-error text-xs">{draftError}</p>
+        {/if}
 
         <div class="flex justify-end gap-2">
           <button type="button" class="btn preset-tonal" onclick={handleClose}>Cancelar</button>
