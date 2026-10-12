@@ -58,6 +58,16 @@ export function TableTodoList({ todos, onEdit }: TableTodoListProps) {
             />
           ),
         }),
+        todoColumnHelper.display({
+          id: 'status',
+          enableSorting: false,
+          header: 'Status',
+          cell: ({ row }) => (
+            <Badge color={row.original.completed ? 'teal' : 'gray'} variant="light">
+              {row.original.completed ? 'Concluída' : 'Pendente'}
+            </Badge>
+          ),
+        }),
         todoColumnHelper.accessor('title', {
           sortFn: 'alphanumeric',
           header: ({ column }) => <TableSortHeader column={column} label="Título" />,

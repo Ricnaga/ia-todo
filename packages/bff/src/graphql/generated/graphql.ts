@@ -15,6 +15,7 @@ export type ChangePasswordInput = {
 };
 
 export type CreateTodoInput = {
+  completed?: boolean | null | undefined;
   description?: string | null | undefined;
   dueDate?: string | null | undefined;
   priority?: Priority | null | undefined;

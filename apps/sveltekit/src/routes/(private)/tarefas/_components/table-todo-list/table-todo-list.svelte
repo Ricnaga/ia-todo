@@ -7,6 +7,7 @@
   import TableTodoActionsCell from '../table-todo-actions-cell/table-todo-actions-cell.svelte'
   import TableTodoCompletedCell from '../table-todo-completed-cell/table-todo-completed-cell.svelte'
   import TableTodoPriorityCell from '../table-todo-priority-cell/table-todo-priority-cell.svelte'
+  import TableTodoStatusCell from '../table-todo-status-cell/table-todo-status-cell.svelte'
   import TableTodoTitleCell from '../table-todo-title-cell/table-todo-title-cell.svelte'
   import { useDeleteTodoMutation, useUpdateTodoMutation } from '$lib/services/todo/todo.mutation'
   import { DEFAULT_TODO_SORT, TODO_SORT_FIELDS, filterTodos } from '$lib/todo/todo-filters'
@@ -65,6 +66,11 @@
           todo: row.original,
           ontoggle: (completed: boolean) => onToggleCompleted(row.original, completed),
         }),
+    }),
+    todoColumnHelper.display({
+      id: 'status',
+      header: 'Status',
+      cell: ({ row }) => renderComponent(TableTodoStatusCell, { todo: row.original }),
     }),
     todoColumnHelper.accessor('title', {
       sortFn: 'alphanumeric',

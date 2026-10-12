@@ -43,6 +43,7 @@ export class PrismaTodoRepository implements ITodoRepository {
         description: input.description ?? null,
         priority: input.priority,
         dueDate: input.dueDate ?? null,
+        completed: input.completed,
         userId,
       },
     })

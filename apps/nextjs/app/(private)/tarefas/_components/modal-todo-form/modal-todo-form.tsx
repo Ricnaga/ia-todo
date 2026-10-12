@@ -2,7 +2,7 @@
 
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Group, Modal, Select, Stack, TextInput, Textarea } from '@mantine/core'
+import { Button, Checkbox, Group, Modal, Select, Stack, TextInput, Textarea } from '@mantine/core'
 import { IconX } from '@tabler/icons-react'
 import type { Todo } from '@ia-task-manager/schemas/todo'
 import { priorityOptions } from '@/lib/constants/todo.constants'
@@ -31,6 +31,7 @@ export function ModalTodoForm({ mode, todo, onSubmit, onClose }: ModalTodoFormPr
       description: todo?.description ?? '',
       priority: todo?.priority ?? 'medium',
       dueDate: todo?.dueDate ? toDateInputValue(todo.dueDate) : '',
+      completed: todo?.completed ?? false,
     },
   })
 
@@ -69,6 +70,17 @@ export function ModalTodoForm({ mode, todo, onSubmit, onClose }: ModalTodoFormPr
                 {...field}
                 value={String(field.value ?? '')}
                 error={errors.dueDate?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="completed"
+            render={({ field }) => (
+              <Checkbox
+                label="Concluída"
+                checked={field.value ?? false}
+                onChange={(event) => field.onChange(event.currentTarget.checked)}
               />
             )}
           />

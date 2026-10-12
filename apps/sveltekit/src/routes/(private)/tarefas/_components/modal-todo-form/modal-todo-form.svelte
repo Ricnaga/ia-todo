@@ -19,6 +19,7 @@
     description: string
     priority: TodoPriority
     dueDate: string
+    completed: boolean
   }
 
   type TodoFormErrors = {
@@ -37,6 +38,7 @@
     description: '',
     priority: 'medium',
     dueDate: '',
+    completed: false,
   })
 
   let errors = $state<TodoFormErrors>({})
@@ -46,6 +48,7 @@
     formState.description = todo?.description ?? ''
     formState.priority = todo?.priority ?? 'medium'
     formState.dueDate = todo?.dueDate ? toDateInputValue(todo.dueDate) : ''
+    formState.completed = todo?.completed ?? false
   })
 
   onMount(() => {
@@ -155,6 +158,11 @@
           <span class="text-error text-xs">{errors.dueDate[0]}</span>
         {/if}
       </div>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" class="checkbox" bind:checked={formState.completed} />
+        <span class="label-text">Concluída</span>
+      </label>
 
       <div class="flex justify-end gap-2">
         <button type="button" class="btn preset-tonal" onclick={closeDialog}>

@@ -10,6 +10,7 @@ type TodoFormState = {
   description: string
   priority: TodoPriority
   dueDate: string
+  completed: boolean
 }
 
 const props = defineProps<{ mode: 'create' | 'edit'; todo?: Todo }>()
@@ -22,6 +23,7 @@ const state = reactive<TodoFormState>({
   description: props.todo?.description ?? '',
   priority: props.todo?.priority ?? 'medium',
   dueDate: props.todo?.dueDate ? toDateInputValue(props.todo.dueDate) : '',
+  completed: props.todo?.completed ?? false,
 })
 
 function onUpdateOpen(value: boolean) {
@@ -64,6 +66,8 @@ function onSubmit() {
         <UFormField label="Vencimento" name="dueDate">
           <UInput v-model="state.dueDate" class="w-full" type="date" />
         </UFormField>
+
+        <UCheckbox v-model="state.completed" label="Concluída" />
 
         <div class="flex justify-end gap-2">
           <UButton icon="i-tabler:x" variant="subtle" @click="emit('close')">Cancelar</UButton>

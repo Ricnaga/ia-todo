@@ -43,6 +43,7 @@ input ChangePasswordInput {
 }
 
 input CreateTodoInput {
+  completed: Boolean
   description: String
   dueDate: DateTime
   priority: Priority

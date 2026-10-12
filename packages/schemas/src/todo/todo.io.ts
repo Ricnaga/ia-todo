@@ -21,6 +21,11 @@ export const createTodoSchema = z.object({
     .default('medium')
     .transform((v) => v ?? 'medium'),
   dueDate: dueDateInputSchema.optional(),
+  completed: z
+    .boolean()
+    .nullish()
+    .default(false)
+    .transform((v) => v ?? false),
 })
 
 export const updateTodoSchema = z.object({

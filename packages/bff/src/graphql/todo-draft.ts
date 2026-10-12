@@ -23,10 +23,11 @@ export function toTodoCreateRequest(draft: TodoDraft): TodoCreateRequest {
     description: toDescriptionInput(draft.description),
     priority: draft.priority,
     dueDate: 'dueDate' in draft ? toDateInput(draft.dueDate) : null,
+    completed: 'completed' in draft ? draft.completed === true : false,
   }
 }
 
 export function toTodoUpdateRequest(draft: TodoUpdateDraft): TodoUpdateRequest {
-  if ('completed' in draft) return { completed: draft.completed }
+  if ('completed' in draft && !('title' in draft)) return { completed: draft.completed }
   return toTodoCreateRequest(draft)
 }

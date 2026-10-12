@@ -37,6 +37,7 @@ const sortByDueDate: SortingFn<Todo> = (a, b) => {
 
 const columns: ColumnDef<Todo>[] = [
   { accessorKey: 'completed', header: 'Concluída', enableSorting: true, sortingFn: 'basic' },
+  { id: 'status', header: 'Status', enableSorting: false },
   { accessorKey: 'title', header: 'Título', enableSorting: true, sortingFn: 'alphanumeric' },
   { accessorKey: 'priority', header: 'Prioridade', enableSorting: true, sortingFn: sortByPriority },
   { accessorKey: 'dueDate', header: 'Vencimento', enableSorting: true, sortingFn: sortByDueDate },
@@ -105,6 +106,12 @@ function onDelete(todo: Todo) {
           :aria-label="`Marcar ${row.original.title} como concluída`"
           @update:model-value="onToggleCompleted(row.original, $event)"
         />
+      </template>
+
+      <template #status-cell="{ row }">
+        <UBadge :color="row.original.completed ? 'success' : 'neutral'" variant="soft">
+          {{ row.original.completed ? 'Concluída' : 'Pendente' }}
+        </UBadge>
       </template>
 
       <template #title-header="{ header }">

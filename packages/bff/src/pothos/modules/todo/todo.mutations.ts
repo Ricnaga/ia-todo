@@ -12,6 +12,7 @@ builder.mutationFields((t) => ({
       description: t.input.string(),
       priority: t.input.field({ type: PriorityEnum }),
       dueDate: t.input.field({ type: DateTimeScalar }),
+      completed: t.input.boolean(),
     },
     resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.create(args.input, ctx.user.id)),
   }),
