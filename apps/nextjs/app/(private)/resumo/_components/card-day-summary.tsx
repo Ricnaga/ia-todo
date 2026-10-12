@@ -8,14 +8,14 @@ import { EmptyState } from '@/components/empty-state/empty-state'
 import { CardDaySummaryContent } from './card-day-summary-content/card-day-summary-content'
 
 export function CardDaySummary() {
-  const { data: summary, isPending, isError, refetch } = useDaySummaryQuery()
+  const { data: summary, isFetching, isError, refetch } = useDaySummaryQuery()
 
   return (
     <div className="flex flex-col gap-4">
       <Group justify="flex-end">
         <Button
           leftSection={<IconSparkles size={18} />}
-          loading={isPending}
+          loading={isFetching}
           onClick={() => refetch().catch(notifyError('Não consegui gerar o resumo'))}
         >
           {summary ? 'Gerar novo resumo' : 'Gerar resumo'}
@@ -28,8 +28,8 @@ export function CardDaySummary() {
         </Text>
       )}
 
-      <CardDaySummaryContent summary={summary} isPending={isPending} />
-      {!summary && !isPending && (
+      <CardDaySummaryContent summary={summary} isPending={isFetching} />
+      {!summary && !isFetching && (
         <EmptyState message="Gere um resumo para ver o plano de execução do dia." />
       )}
     </div>
