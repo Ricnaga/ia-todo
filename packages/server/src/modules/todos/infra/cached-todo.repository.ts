@@ -9,6 +9,15 @@ function todosKey(userId: string): string {
   return `todos:${userId}`
 }
 
+export function toDomainTodo(todo: Todo): Todo {
+  return {
+    ...todo,
+    dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
+    createdAt: new Date(todo.createdAt),
+    updatedAt: new Date(todo.updatedAt),
+  }
+}
+
 export class CachedTodoRepository implements ITodoRepository {
   constructor(
     private readonly repository: ITodoRepository,
@@ -17,7 +26,7 @@ export class CachedTodoRepository implements ITodoRepository {
 
   async list(userId: string): Promise<Todo[]> {
     const cached = await this.cache.get<Todo[]>(todosKey(userId))
-    if (cached) return cached
+    if (cached) return cached.map(toDomainTodo)
     const todos = await this.repository.list(userId)
     await this.cache.set(todosKey(userId), todos, DEFAULT_TTL_SECONDS)
     return todos
