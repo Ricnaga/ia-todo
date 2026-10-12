@@ -27,7 +27,7 @@ type Documents = {
     "\n  fragment TodoFields on Todo {\n    id\n    title\n    description\n    priority\n    dueDate\n    completed\n    createdAt\n    updatedAt\n    subtasks {\n      id\n      title\n      done\n    }\n  }\n": typeof types.TodoFieldsFragmentDoc,
     "\n  fragment TodoSuggestionFields on TodoSuggestion {\n    title\n    description\n    priority\n    subtasks\n  }\n": typeof types.TodoSuggestionFieldsFragmentDoc,
     "\n  fragment CriteriaFields on Criteria {\n    query\n    keywords\n    status\n    priority\n    due\n  }\n": typeof types.CriteriaFieldsFragmentDoc,
-    "\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    suggestedOrder\n  }\n": typeof types.DaySummaryFieldsFragmentDoc,
+    "\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    tasks {\n      title\n      note\n    }\n  }\n": typeof types.DaySummaryFieldsFragmentDoc,
     "\n  fragment AuthUserFields on AuthUser {\n    id\n    name\n    email\n    emailVerified\n    image\n    createdAt\n    updatedAt\n  }\n": typeof types.AuthUserFieldsFragmentDoc,
     "\n  fragment AuthAccountFields on AuthAccount {\n    id\n    providerId\n    accountId\n    userId\n    createdAt\n    updatedAt\n  }\n": typeof types.AuthAccountFieldsFragmentDoc,
     "\n  fragment AuthSessionFields on AuthSession {\n    id\n    isCurrent\n    expiresAt\n    ipAddress\n    userAgent\n    createdAt\n    updatedAt\n  }\n": typeof types.AuthSessionFieldsFragmentDoc,
@@ -53,7 +53,7 @@ const documents: Documents = {
     "\n  fragment TodoFields on Todo {\n    id\n    title\n    description\n    priority\n    dueDate\n    completed\n    createdAt\n    updatedAt\n    subtasks {\n      id\n      title\n      done\n    }\n  }\n": types.TodoFieldsFragmentDoc,
     "\n  fragment TodoSuggestionFields on TodoSuggestion {\n    title\n    description\n    priority\n    subtasks\n  }\n": types.TodoSuggestionFieldsFragmentDoc,
     "\n  fragment CriteriaFields on Criteria {\n    query\n    keywords\n    status\n    priority\n    due\n  }\n": types.CriteriaFieldsFragmentDoc,
-    "\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    suggestedOrder\n  }\n": types.DaySummaryFieldsFragmentDoc,
+    "\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    tasks {\n      title\n      note\n    }\n  }\n": types.DaySummaryFieldsFragmentDoc,
     "\n  fragment AuthUserFields on AuthUser {\n    id\n    name\n    email\n    emailVerified\n    image\n    createdAt\n    updatedAt\n  }\n": types.AuthUserFieldsFragmentDoc,
     "\n  fragment AuthAccountFields on AuthAccount {\n    id\n    providerId\n    accountId\n    userId\n    createdAt\n    updatedAt\n  }\n": types.AuthAccountFieldsFragmentDoc,
     "\n  fragment AuthSessionFields on AuthSession {\n    id\n    isCurrent\n    expiresAt\n    ipAddress\n    userAgent\n    createdAt\n    updatedAt\n  }\n": types.AuthSessionFieldsFragmentDoc,
@@ -135,7 +135,7 @@ export function graphql(source: "\n  fragment CriteriaFields on Criteria {\n    
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    suggestedOrder\n  }\n"): (typeof documents)["\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    suggestedOrder\n  }\n"];
+export function graphql(source: "\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    tasks {\n      title\n      note\n    }\n  }\n"): (typeof documents)["\n  fragment DaySummaryFields on DaySummary {\n    summary\n    focus\n    tasks {\n      title\n      note\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

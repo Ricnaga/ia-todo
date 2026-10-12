@@ -38,14 +38,24 @@ export function CardDaySummaryContent({ summary, isPending }: CardDaySummaryCont
           </Text>
         </div>
 
-        {summary.suggestedOrder.length > 0 && (
+        {summary.tasks.length > 0 && (
           <div>
             <Text fw={600} size="sm" mb={6}>
-              Ordem sugerida
+              Tarefas
             </Text>
             <List spacing="xs" withPadding>
-              {summary.suggestedOrder.map((item) => (
-                <List.Item key={item}>{item}</List.Item>
+              {summary.tasks.map((task) => (
+                <List.Item key={task.title}>
+                  <Text component="span">
+                    {task.title}
+                    {task.note && (
+                      <Text component="span" c="dimmed" inherit>
+                        {' '}
+                        — &ldquo;{task.note}&rdquo;
+                      </Text>
+                    )}
+                  </Text>
+                </List.Item>
               ))}
             </List>
           </div>

@@ -33,12 +33,14 @@
       <p class="text-muted text-sm">{summary.focus}</p>
     </div>
 
-    {#if summary.suggestedOrder.length > 0}
+    {#if summary.tasks.length > 0}
       <div>
-        <p class="mb-1.5 text-sm font-semibold">Ordem sugerida</p>
+        <p class="mb-1.5 text-sm font-semibold">Tarefas</p>
         <ul class="flex list-disc flex-col gap-2 pl-5">
-          {#each summary.suggestedOrder as item (item)}
-            <li class="text-sm">{item}</li>
+          {#each summary.tasks as task (task.title)}
+            <li class="text-sm">
+              {task.title}{#if task.note}<span class="text-muted"> — "{task.note}"</span>{/if}
+            </li>
           {/each}
         </ul>
       </div>

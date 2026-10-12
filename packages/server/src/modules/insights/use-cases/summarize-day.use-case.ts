@@ -7,7 +7,7 @@ import type { AiService } from '../../../shared/ai/ai.service.interface'
 const EMPTY_DAY_SUMMARY: DaySummary = {
   summary: 'Você não tem tarefas pendentes.',
   focus: 'Crie uma nova tarefa para começar.',
-  suggestedOrder: [],
+  tasks: [],
 }
 
 export class SummarizeDayUseCase {

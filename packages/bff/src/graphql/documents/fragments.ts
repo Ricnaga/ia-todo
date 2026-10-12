@@ -41,7 +41,10 @@ export const DaySummaryFieldsSource = graphql(`
   fragment DaySummaryFields on DaySummary {
     summary
     focus
-    suggestedOrder
+    tasks {
+      title
+      note
+    }
   }
 `)
 

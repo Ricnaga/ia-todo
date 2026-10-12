@@ -25,11 +25,11 @@ defineProps<{ summary?: DaySummary; isPending: boolean }>()
         <p class="text-dimmed text-sm">{{ summary.focus }}</p>
       </div>
 
-      <div v-if="summary.suggestedOrder.length > 0">
-        <p class="mb-1.5 text-sm font-semibold">Ordem sugerida</p>
+      <div v-if="summary.tasks.length > 0">
+        <p class="mb-1.5 text-sm font-semibold">Tarefas</p>
         <ul class="list-disc ps-5">
-          <li v-for="item in summary.suggestedOrder" :key="item" class="text-sm">
-            {{ item }}
+          <li v-for="task in summary.tasks" :key="task.title" class="text-sm">
+            {{ task.title }}<span v-if="task.note" class="text-dimmed"> — "{{ task.note }}"</span>
           </li>
         </ul>
       </div>

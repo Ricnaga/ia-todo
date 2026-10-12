@@ -62,8 +62,13 @@ scalar DateTime
 
 type DaySummary {
   focus: String!
-  suggestedOrder: [String!]!
   summary: String!
+  tasks: [DaySummaryTask!]!
+}
+
+type DaySummaryTask {
+  note: String!
+  title: String!
 }
 
 input DraftInput {
