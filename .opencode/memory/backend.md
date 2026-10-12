@@ -41,6 +41,7 @@ lib/
 │                    → Além do null, aceita '' vindo de formulário: descrição ''/só-espaço → null (trim + max 2000) e dueDate '' → null
 │                    → (string-data/Date/null/undefined ok; string inválida → erro `Invalid input`). Em zod v4 NÃO usar z.preprocess
 │                    → (vaza unknown no z.input) → z.union([...]) + .transform; campos com transform que recebem undefined exigem `.optional()`.
+│                    → createTodoSchema também aceita completed (optional, default false) — o form de criar/editar envia o checkbox.
 │                    → Normalização p/ GraphQL: packages/bff/src/graphql/todo-draft.ts, toTodoCreateRequest + toDateInput/toDescriptionInput
 │                    → (rascunho da IA com '' vira campo omitido) — detalhes e validação por smoke tsx em frontend.md "Fase 4" |
 │   assistant/assistant.model.ts → models (criteriaSchema, assistantSchema: Criteria, Assistant)

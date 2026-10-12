@@ -229,6 +229,26 @@ ease-entrance` (resultado da busca); `CardAuth` com `duration-slow`.
   `layout.css` faz `dialog.animate-dialog { --anim-duration: var(--duration-slow) }`
   (não mexer no source do Skeleton). Nuxt `UModal` é nativa, sem override.
 
+## Fase 5 (status de tarefa visível no form e na tabela)
+
+Commit `42b5874` (+ docs) — o único ciclo de vida da tarefa continua o booleano
+`completed`; o que mudou é a presença dele no form e um badge:
+
+- **`createTodoSchema` agora aceita `completed`** (optional, default `false`):
+  o form de criar/editar envia o checkbox "Concluída" nos 3 apps
+  (`modal-todo-form.<tsx|svelte|vue>` — defaultValues/formState/state = `todo?.completed ?? false`).
+  `CreateTodoInput`/`CreateTodoFormInput` ganharam `completed?`.
+- **Coluna "Status"** nova na tabela (badge `Pendente`/`Concluída`, derivado de
+  `completed`): Next `table-todo-list.tsx` (display column, Badge teal/gray);
+  SvelteKit `table-todo-status-cell/` novo (`badge preset-tonal-success` /
+  `preset-tonal`); Nuxt `table-todo-list.vue` (slot `#status-cell`, UBadge success/neutral).
+- BFF: `createTodo` ganhou `completed: t.input.boolean()` (schema.graphql + codegen
+  regenerados); `toTodoCreateRequest` agora propaga `completed` (draft da IA → false);
+  `toTodoUpdateRequest` só responde `{ completed }` quando o draft **não tem title**
+  (toggle da tabela) — o form completo (com title) segue o caminho full update,
+  agora incluindo `completed`.
+- Prisma create grava `completed` (`prisma-todo.repository.ts`).
+
 ## Estrutura
 
 ```
