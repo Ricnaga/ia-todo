@@ -3,7 +3,7 @@ import { z } from 'zod'
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().min(1).default('gemini-2.5-flash'),
+  GEMINI_MODEL: z.string().min(1).default('gemini-3.8-flash'),
   BETTER_AUTH_URL: z.string().url().default('http://localhost:3000'),
   BETTER_AUTH_SECRET: z.string().min(1),
   GOOGLE_CLIENT_ID: z.string().optional(),
