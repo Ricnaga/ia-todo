@@ -6,6 +6,7 @@
   import { Avatar, Menu, Portal } from '@skeletonlabs/skeleton-svelte'
   import {
     IconClipboardList,
+    IconCreditCard,
     IconHome,
     IconLogout,
     IconSearch,
@@ -36,6 +37,7 @@
     { label: 'Tarefas', href: paths.TAREFAS, icon: IconClipboardList },
     { label: 'Resumo do dia', href: paths.RESUMO, icon: IconSparkles },
     { label: 'Busca por IA', href: paths.BUSCA, icon: IconSearch },
+    { label: 'Planos', href: paths.PLANOS, icon: IconCreditCard },
   ]
 
   const settingsItems: NavItem[] = [
@@ -67,6 +69,11 @@
   async function handleMenuSelect(details: { value: string }): Promise<void> {
     if (details.value === 'settings') {
       await goto(resolve(paths.SETTINGS))
+      return
+    }
+
+    if (details.value === paths.PLANOS) {
+      await goto(resolve(paths.PLANOS))
       return
     }
 
@@ -126,6 +133,14 @@
                     <Menu.ItemText>{label}</Menu.ItemText>
                   </Menu.Item>
                 {/each}
+
+                <Menu.Item
+                  value={paths.PLANOS}
+                  class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[highlighted]:bg-sunken"
+                >
+                  <IconCreditCard class="text-muted size-4" />
+                  <Menu.ItemText>Planos</Menu.ItemText>
+                </Menu.Item>
               </Menu.ItemGroup>
 
               <Menu.Item

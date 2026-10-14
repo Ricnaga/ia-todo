@@ -7,6 +7,7 @@ export const paths = {
   RESUMO: '/resumo',
   BUSCA: '/busca',
   SETTINGS: '/settings',
+  PLANOS: '/planos',
 } as const
 
 export type TPath = (typeof paths)[keyof typeof paths]
