@@ -9,7 +9,7 @@ export default defineNuxtConfig({
 
   modules: ['@nuxt/ui', '@nuxt/fonts', '@nuxtjs/color-mode'],
 
-  components: [{ path: '~/app/components', pathPrefix: false }],
+  components: [{ path: '~/components', pathPrefix: false }],
   fonts: {
     processCSSVariables: true,
     families: [
