@@ -4,14 +4,14 @@ import { useNotifications } from '~/lib/utils/notifications'
 import { useDaySummaryQuery } from '~/services/insights/insights.query'
 import CardDaySummaryContent from './card-day-summary-content/card-day-summary-content.vue'
 
-const { notifyError } = useNotifications()
+const { notifyAiError } = useNotifications()
 const { data: summary, status, error, execute } = useDaySummaryQuery()
 
 const isPending = computed(() => status.value === 'pending')
 
 async function handleGenerate() {
   await execute()
-  if (error.value) notifyError('Não consegui gerar o resumo')(error.value)
+  if (error.value) notifyAiError('Não consegui gerar o resumo')(error.value)
 }
 </script>
 

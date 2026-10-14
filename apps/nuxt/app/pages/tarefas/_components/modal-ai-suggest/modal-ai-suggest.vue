@@ -20,7 +20,7 @@ const draftError = ref<string | null>(null)
 const suggestion = ref<TodoSuggestion | null>(null)
 
 const suggestMutation = useSuggestTodoMutation()
-const { notifyError } = useNotifications()
+const { notifyAiError } = useNotifications()
 
 const isSuggesting = suggestMutation.isPending
 const pending = computed(() => isSuggesting.value || props.adding)
@@ -60,7 +60,7 @@ function onSuggest() {
     onSuccess: (data) => {
       suggestion.value = data
     },
-    onError: notifyError('Não consegui sugerir'),
+    onError: notifyAiError('Não consegui sugerir'),
   })
 }
 
