@@ -11,6 +11,10 @@ const envSchema = z.object({
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),
   REDIS_URL: z.url().default('redis://localhost:6379'),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_ID_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_ID_YEARLY: z.string().optional(),
 })
 
 const parsed = envSchema.safeParse(process.env)

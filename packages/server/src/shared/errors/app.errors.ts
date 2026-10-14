@@ -38,3 +38,27 @@ export class AiUnavailableError extends AppError {
     this.name = 'AiUnavailableError'
   }
 }
+
+export class ProRequiredError extends AppError {
+  constructor() {
+    super('PRO_REQUIRED', 'Este recurso de IA é exclusivo do plano Pro.')
+    this.name = 'ProRequiredError'
+  }
+}
+
+export class StripeNotConfiguredError extends AppError {
+  constructor() {
+    super(
+      'STRIPE_NOT_CONFIGURED',
+      'O pagamento está indisponível no momento. Tente novamente mais tarde.',
+    )
+    this.name = 'StripeNotConfiguredError'
+  }
+}
+
+export class SubscriptionNotFoundError extends AppError {
+  constructor() {
+    super('SUBSCRIPTION_NOT_FOUND', 'Nenhuma assinatura encontrada para gerenciar.')
+    this.name = 'SubscriptionNotFoundError'
+  }
+}
