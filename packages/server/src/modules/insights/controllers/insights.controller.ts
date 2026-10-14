@@ -5,7 +5,7 @@ import type { DaySummary } from '@ia-task-manager/schemas/insights'
 export class InsightsController {
   constructor(private readonly insightsUseCase: IInsightsUseCase) {}
 
-  summarizeDay(todos: Todo[]): Promise<DaySummary> {
-    return this.insightsUseCase.summarizeDay(todos)
+  summarizeDay(todos: Todo[], userId: string): Promise<DaySummary> {
+    return this.insightsUseCase.summarizeDay(todos, userId)
   }
 }

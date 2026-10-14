@@ -2,7 +2,9 @@ import { daySummarySchema, type DaySummary } from '@ia-task-manager/schemas/insi
 import type { Todo } from '@ia-task-manager/schemas/todo'
 import { buildSummarizeDaySystemInstruction } from '../constants/prompt.constants'
 import { toPromptTodo } from '../mappers/todo-prompt.mapper'
+import { ProRequiredError } from '../../../shared/errors/app.errors'
 import type { AiService } from '../../../shared/ai/ai.service.interface'
+import type { EntitlementsService } from '../../../shared/entitlements/entitlements.interface'
 
 const EMPTY_DAY_SUMMARY: DaySummary = {
   summary: 'Você não tem tarefas pendentes.',
@@ -11,9 +13,14 @@ const EMPTY_DAY_SUMMARY: DaySummary = {
 }
 
 export class SummarizeDayUseCase {
-  constructor(private readonly aiService: AiService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly entitlements: EntitlementsService,
+  ) {}
 
-  async execute(todos: Todo[]): Promise<DaySummary> {
+  async execute(todos: Todo[], userId: string): Promise<DaySummary> {
+    if (!(await this.entitlements.hasAiAccess(userId))) throw new ProRequiredError()
+
     const payload = todos.filter((todo) => !todo.completed).map(toPromptTodo)
 
     if (payload.length === 0) {

@@ -1,7 +1,9 @@
 import { criteriaSchema, type Assistant, type Criteria } from '@ia-task-manager/schemas/assistant'
 import type { Todo } from '@ia-task-manager/schemas/todo'
 import { NL_SEARCH_SYSTEM_INSTRUCTION } from '../constants/prompt.constants'
+import { ProRequiredError } from '../../../shared/errors/app.errors'
 import type { AiService } from '../../../shared/ai/ai.service.interface'
+import type { EntitlementsService } from '../../../shared/entitlements/entitlements.interface'
 
 function startOfDay(date: Date): Date {
   const d = new Date(date)
@@ -47,9 +49,14 @@ function matchesCriteria(todo: Todo, criteria: Criteria): boolean {
 }
 
 export class NlSearchUseCase {
-  constructor(private readonly aiService: AiService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly entitlements: EntitlementsService,
+  ) {}
 
-  async execute(query: string, todos: Todo[]): Promise<Assistant> {
+  async execute(query: string, todos: Todo[], userId: string): Promise<Assistant> {
+    if (!(await this.entitlements.hasAiAccess(userId))) throw new ProRequiredError()
+
     const criteria = await this.aiService.generateStructured({
       systemInstruction: NL_SEARCH_SYSTEM_INSTRUCTION,
       prompt: `Consulta: "${query}"`,

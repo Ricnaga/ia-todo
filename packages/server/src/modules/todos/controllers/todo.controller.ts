@@ -26,7 +26,7 @@ export class TodoController {
     return this.todoUseCase.delete(id, userId)
   }
 
-  suggestTodo(draft: DraftInput): Promise<TodoSuggestion> {
-    return this.todoUseCase.suggestTodo(draft)
+  suggestTodo(draft: DraftInput, userId: string): Promise<TodoSuggestion> {
+    return this.todoUseCase.suggestTodo(draft, userId)
   }
 }

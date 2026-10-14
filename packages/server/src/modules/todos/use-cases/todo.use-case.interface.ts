@@ -12,5 +12,5 @@ export interface ITodoUseCase {
   create(input: CreateTodoInput, userId: string): Promise<Todo>
   update(id: string, input: UpdateTodoInput, userId: string): Promise<Todo>
   delete(id: string, userId: string): Promise<void>
-  suggestTodo(draft: DraftInput): Promise<TodoSuggestion>
+  suggestTodo(draft: DraftInput, userId: string): Promise<TodoSuggestion>
 }

@@ -5,7 +5,7 @@ import type { Assistant } from '@ia-task-manager/schemas/assistant'
 export class AssistantController {
   constructor(private readonly assistantUseCase: IAssistantUseCase) {}
 
-  nlSearch(query: string, todos: Todo[]): Promise<Assistant> {
-    return this.assistantUseCase.nlSearch(query, todos)
+  nlSearch(query: string, todos: Todo[], userId: string): Promise<Assistant> {
+    return this.assistantUseCase.nlSearch(query, todos, userId)
   }
 }

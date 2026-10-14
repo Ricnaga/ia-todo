@@ -12,6 +12,7 @@ import { SuggestTodoUseCase } from '../../modules/todos/use-cases/suggest-todo.u
 import { TodoController } from '../../modules/todos/controllers/todo.controller'
 import type { ITodoUseCase } from '../../modules/todos/use-cases/todo.use-case.interface'
 import { aiService } from './infra'
+import { entitlementsService } from './billing'
 
 const todoRepository: ITodoRepository = new CachedTodoRepository(
   new PrismaTodoRepository(prisma),
@@ -23,7 +24,7 @@ const findTodoById = new FindTodoByIdUseCase(todoRepository)
 const createTodo = new CreateTodoUseCase(todoRepository)
 const updateTodo = new UpdateTodoUseCase(todoRepository)
 const deleteTodo = new DeleteTodoUseCase(todoRepository)
-const suggestTodo = new SuggestTodoUseCase(aiService)
+const suggestTodo = new SuggestTodoUseCase(aiService, entitlementsService)
 
 const todoUseCase: ITodoUseCase = {
   list: (userId) => listTodos.execute(userId),
@@ -31,7 +32,7 @@ const todoUseCase: ITodoUseCase = {
   create: (input, userId) => createTodo.execute(input, userId),
   update: (id, input, userId) => updateTodo.execute(id, input, userId),
   delete: (id, userId) => deleteTodo.execute(id, userId),
-  suggestTodo: (draft) => suggestTodo.execute(draft),
+  suggestTodo: (draft, userId) => suggestTodo.execute(draft, userId),
 }
 
 export const todoController = new TodoController(todoUseCase)
