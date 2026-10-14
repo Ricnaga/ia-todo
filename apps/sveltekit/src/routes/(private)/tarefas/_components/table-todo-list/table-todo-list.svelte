@@ -5,11 +5,10 @@
   import type { Todo } from '@ia-task-manager/schemas/todo'
   import TableSortHeader from '../table-sort-header/table-sort-header.svelte'
   import TableTodoActionsCell from '../table-todo-actions-cell/table-todo-actions-cell.svelte'
-  import TableTodoCompletedCell from '../table-todo-completed-cell/table-todo-completed-cell.svelte'
   import TableTodoPriorityCell from '../table-todo-priority-cell/table-todo-priority-cell.svelte'
   import TableTodoStatusCell from '../table-todo-status-cell/table-todo-status-cell.svelte'
   import TableTodoTitleCell from '../table-todo-title-cell/table-todo-title-cell.svelte'
-  import { useDeleteTodoMutation, useUpdateTodoMutation } from '$lib/services/todo/todo.mutation'
+  import { useDeleteTodoMutation } from '$lib/services/todo/todo.mutation'
   import { DEFAULT_TODO_SORT, TODO_SORT_FIELDS, filterTodos } from '$lib/todo/todo-filters'
   import type { TodoSort } from '$lib/todo/todo-filters'
   import { todoColumnHelper, todoTableFeatures } from '$lib/todo/todo-table-features'
@@ -24,7 +23,6 @@
 
   let { todos, onedit }: Props = $props()
 
-  const updateMutation = useUpdateTodoMutation()
   const deleteMutation = useDeleteTodoMutation()
   const todoFilters = useTodoFilters()
 
@@ -36,13 +34,6 @@
     const field = TODO_SORT_FIELDS.find((candidate) => candidate === entry.id)
     if (!field) return DEFAULT_TODO_SORT
     return { field, direction: entry.desc ? 'desc' : 'asc' }
-  }
-
-  function onToggleCompleted(todo: Todo, completed: boolean): void {
-    updateMutation.mutate(
-      { id: todo.id, input: { completed } },
-      { onError: notifyError('Erro ao atualizar') },
-    )
   }
 
   function onDelete(todo: Todo): void {
@@ -57,19 +48,10 @@
       sortFn: 'basic',
       header: ({ column }) =>
         renderComponent(TableSortHeader, {
-          label: 'Concluída',
+          label: 'Status',
           sorted: column.getIsSorted(),
           ontoggle: (event: MouseEvent) => column.getToggleSortingHandler()?.(event),
         }),
-      cell: ({ row }) =>
-        renderComponent(TableTodoCompletedCell, {
-          todo: row.original,
-          ontoggle: (completed: boolean) => onToggleCompleted(row.original, completed),
-        }),
-    }),
-    todoColumnHelper.display({
-      id: 'status',
-      header: 'Status',
       cell: ({ row }) => renderComponent(TableTodoStatusCell, { todo: row.original }),
     }),
     todoColumnHelper.accessor('title', {

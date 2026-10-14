@@ -1,15 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { IconX } from '@tabler/icons-svelte'
+  import { IconLoader2, IconX } from '@tabler/icons-svelte'
   import { z } from 'zod'
   import { createTodoSchema } from '@ia-task-manager/schemas/todo'
   import type { CreateTodoFormInput, Todo, TodoPriority } from '@ia-task-manager/schemas/todo'
-  import { priorityOptions } from '$lib/constants/todo.constants'
+  import { priorityOptions, statusOptions } from '$lib/constants/todo.constants'
   import { toDateInputValue } from '$lib/utils/date'
 
   interface Props {
     mode: 'create' | 'edit'
     todo?: Todo
+    pending: boolean
     onsubmit: (values: CreateTodoFormInput) => void
     onclose: () => void
   }
@@ -29,7 +30,7 @@
     dueDate?: string[]
   }
 
-  let { mode, todo, onsubmit, onclose }: Props = $props()
+  let { mode, todo, pending, onsubmit, onclose }: Props = $props()
 
   let dialogEl: HTMLDialogElement | undefined = $state()
 
@@ -67,6 +68,7 @@
   }
 
   function closeDialog(): void {
+    if (pending) return
     dialogEl?.close()
   }
 
@@ -74,8 +76,12 @@
     onclose()
   }
 
+  function onDialogCancel(event: Event): void {
+    if (pending) event.preventDefault()
+  }
+
   function onDialogClick(event: MouseEvent): void {
-    if (event.target !== dialogEl) return
+    if (pending || event.target !== dialogEl) return
     closeDialog()
   }
 </script>
@@ -85,6 +91,7 @@
   class="dialog animate-dialog card border-line bg-surface border"
   style="--dialog-max-width: 42rem"
   onclose={onDialogClose}
+  oncancel={onDialogCancel}
   onclick={onDialogClick}
 >
   <div class="flex flex-col gap-4">
@@ -96,6 +103,7 @@
         type="button"
         class="btn-icon btn-icon-xs preset-tonal"
         aria-label="Fechar"
+        disabled={pending}
         onclick={closeDialog}
       >
         <IconX class="size-4" />
@@ -159,17 +167,35 @@
         {/if}
       </div>
 
-      <label class="flex items-center gap-2">
-        <input type="checkbox" class="checkbox" bind:checked={formState.completed} />
-        <span class="label-text">Concluída</span>
-      </label>
+      <div class="flex flex-col gap-1">
+        <label class="label-text" for="todo-status">Status</label>
+        <select
+          id="todo-status"
+          name="status"
+          class="select"
+          value={formState.completed ? 'completed' : 'pending'}
+          onchange={(event) => (formState.completed = event.currentTarget.value === 'completed')}
+        >
+          {#each statusOptions as option (option.value)}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
+      </div>
 
       <div class="flex justify-end gap-2">
-        <button type="button" class="btn preset-tonal" onclick={closeDialog}>
+        <button type="button" class="btn preset-tonal" disabled={pending} onclick={closeDialog}>
           <IconX class="size-4" />
           Cancelar
         </button>
-        <button type="submit" class="btn preset-filled-primary-500">
+        <button
+          type="submit"
+          class="btn preset-filled-primary-500"
+          disabled={pending}
+          aria-busy={pending}
+        >
+          {#if pending}
+            <IconLoader2 class="size-[18px] animate-spin" />
+          {/if}
           {mode === 'edit' ? 'Salvar' : 'Criar tarefa'}
         </button>
       </div>

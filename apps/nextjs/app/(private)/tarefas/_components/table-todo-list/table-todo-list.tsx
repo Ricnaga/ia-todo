@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Badge, Button, Checkbox, Group, Stack, Table, Text } from '@mantine/core'
+import { Badge, Button, Group, Stack, Table, Text } from '@mantine/core'
 import { IconClipboardList, IconFilterOff, IconPencil, IconTrash } from '@tabler/icons-react'
 import { useTable } from '@tanstack/react-table'
 import type { SortingState, Updater } from '@tanstack/react-table'
@@ -12,7 +12,7 @@ import type { TodoFilters, TodoSort } from '@/lib/todo/todo-filters'
 import { useTodoFilters } from '@/lib/todo/use-todo-filters'
 import { formatDate } from '@/lib/utils/date'
 import { notifyError, notifySuccess } from '@/lib/utils/notifications'
-import { useDeleteTodoMutation, useUpdateTodoMutation } from '@/services/todo/todo.mutation'
+import { useDeleteTodoMutation } from '@/services/todo/todo.mutation'
 import { TableSortHeader } from '../table-sort-header/table-sort-header'
 import { todoColumnHelper, todoTableFeatures } from './todo-table-features'
 
@@ -33,7 +33,6 @@ type TableTodoListProps = {
 }
 
 export function TableTodoList({ todos, onEdit }: TableTodoListProps) {
-  const updateMutation = useUpdateTodoMutation()
   const deleteMutation = useDeleteTodoMutation()
   const { filters, setFilters, clearFilters, isFiltered } = useTodoFilters()
 
@@ -44,24 +43,7 @@ export function TableTodoList({ todos, onEdit }: TableTodoListProps) {
       todoColumnHelper.columns([
         todoColumnHelper.accessor('completed', {
           sortFn: 'basic',
-          header: ({ column }) => <TableSortHeader column={column} label="Concluída" />,
-          cell: ({ row }) => (
-            <Checkbox
-              checked={row.original.completed}
-              onChange={(event) =>
-                updateMutation.mutate(
-                  { id: row.original.id, input: { completed: event.currentTarget.checked } },
-                  { onError: notifyError('Erro ao atualizar') },
-                )
-              }
-              aria-label={`Marcar ${row.original.title} como concluída`}
-            />
-          ),
-        }),
-        todoColumnHelper.display({
-          id: 'status',
-          enableSorting: false,
-          header: 'Status',
+          header: ({ column }) => <TableSortHeader column={column} label="Status" />,
           cell: ({ row }) => (
             <Badge color={row.original.completed ? 'teal' : 'gray'} variant="light">
               {row.original.completed ? 'Concluída' : 'Pendente'}
@@ -130,7 +112,7 @@ export function TableTodoList({ todos, onEdit }: TableTodoListProps) {
           ),
         }),
       ]),
-    [deleteMutation, onEdit, updateMutation],
+    [deleteMutation, onEdit],
   )
 
   const sorting = useMemo<SortingState>(

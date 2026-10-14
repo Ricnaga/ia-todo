@@ -26,6 +26,8 @@ export function ContentTodoManager() {
   const createMutation = useCreateTodoMutation()
   const updateMutation = useUpdateTodoMutation()
 
+  const isFormPending = createMutation.isPending || updateMutation.isPending
+
   const handleSubmit = (mode: 'create' | 'edit', todo?: Todo) => (values: TodoFormInput) => {
     if (mode !== 'edit' || !todo) {
       createMutation.mutate(values, {
@@ -91,6 +93,7 @@ export function ContentTodoManager() {
         <ModalTodoForm
           mode={formModal.mode}
           todo={formModal.todo}
+          pending={isFormPending}
           onSubmit={handleSubmit(formModal.mode, formModal.todo)}
           onClose={() => setFormModal(null)}
         />

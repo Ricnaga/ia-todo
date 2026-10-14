@@ -17,3 +17,8 @@ export const priorityColors: Record<TodoPriority, string> = {
 export const priorityOptions: { value: TodoPriority; label: string }[] = (
   Object.keys(priorityLabels) as TodoPriority[]
 ).map((value) => ({ value, label: priorityLabels[value] }))
+
+export const statusOptions = [
+  { value: 'pending', label: 'Pendente' },
+  { value: 'completed', label: 'Concluída' },
+]

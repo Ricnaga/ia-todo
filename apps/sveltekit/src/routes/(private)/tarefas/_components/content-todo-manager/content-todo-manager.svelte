@@ -27,6 +27,7 @@
 
   const pendingCount = $derived(todos.filter((todo) => !todo.completed).length)
   const isCreating = $derived(createMutation.isPending)
+  const isFormPending = $derived(createMutation.isPending || updateMutation.isPending)
 
   function openCreate(): void {
     formModal = { mode: 'create' }
@@ -106,6 +107,7 @@
     <ModalTodoForm
       mode={formModal.mode}
       todo={formModal.todo}
+      pending={isFormPending}
       onsubmit={handleSubmit}
       onclose={() => (formModal = null)}
     />

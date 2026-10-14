@@ -9,12 +9,11 @@ import TableSortHeader from '../table-sort-header/table-sort-header.vue'
 import { useTodoFilters } from '~/lib/todo/use-todo-filters'
 import { formatDate } from '~/lib/utils/date'
 import { useNotifications } from '~/lib/utils/notifications'
-import { useDeleteTodoMutation, useUpdateTodoMutation } from '~/services/todo/todo.mutation'
+import { useDeleteTodoMutation } from '~/services/todo/todo.mutation'
 
 const props = defineProps<{ todos: Todo[] }>()
 const emit = defineEmits<{ edit: [todo: Todo] }>()
 
-const updateMutation = useUpdateTodoMutation()
 const deleteMutation = useDeleteTodoMutation()
 const { notifyError, notifySuccess } = useNotifications()
 const { filters, setFilters, clearFilters, isFiltered } = useTodoFilters()
@@ -36,8 +35,7 @@ const sortByDueDate: SortingFn<Todo> = (a, b) => {
 }
 
 const columns: ColumnDef<Todo>[] = [
-  { accessorKey: 'completed', header: 'Concluída', enableSorting: true, sortingFn: 'basic' },
-  { id: 'status', header: 'Status', enableSorting: false },
+  { accessorKey: 'completed', header: 'Status', enableSorting: true, sortingFn: 'basic' },
   { accessorKey: 'title', header: 'Título', enableSorting: true, sortingFn: 'alphanumeric' },
   { accessorKey: 'priority', header: 'Prioridade', enableSorting: true, sortingFn: sortByPriority },
   { accessorKey: 'dueDate', header: 'Vencimento', enableSorting: true, sortingFn: sortByDueDate },
@@ -57,13 +55,6 @@ const sorting = computed<SortingState>({
   get: () => [{ id: filters.value.sort.field, desc: filters.value.sort.direction === 'desc' }],
   set: (value) => setFilters({ sort: toTodoSort(value) }),
 })
-
-function onToggleCompleted(todo: Todo, value: unknown) {
-  updateMutation.mutate(
-    { id: todo.id, input: { completed: value === true } },
-    { onError: notifyError('Erro ao atualizar') },
-  )
-}
 
 function onDelete(todo: Todo) {
   deleteMutation.mutate(todo.id, {
@@ -98,17 +89,9 @@ function onDelete(todo: Todo) {
 
     <UTable v-model:sorting="sorting" :data="filteredTodos" :columns="columns" sticky>
       <template #completed-header="{ header }">
-        <TableSortHeader :header="header" label="Concluída" />
+        <TableSortHeader :header="header" label="Status" />
       </template>
       <template #completed-cell="{ row }">
-        <UCheckbox
-          :model-value="row.original.completed"
-          :aria-label="`Marcar ${row.original.title} como concluída`"
-          @update:model-value="onToggleCompleted(row.original, $event)"
-        />
-      </template>
-
-      <template #status-cell="{ row }">
         <UBadge :color="row.original.completed ? 'success' : 'neutral'" variant="soft">
           {{ row.original.completed ? 'Concluída' : 'Pendente' }}
         </UBadge>

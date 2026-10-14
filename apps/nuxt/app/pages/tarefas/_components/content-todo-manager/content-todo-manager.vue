@@ -22,7 +22,10 @@ const createMutation = useCreateTodoMutation()
 const updateMutation = useUpdateTodoMutation()
 
 const isCreating = createMutation.isPending
-const isPending = computed(() => status.value === 'pending')
+const isFormPending = computed(
+  () => createMutation.isPending.value || updateMutation.isPending.value,
+)
+const isInitialLoading = computed(() => status.value === 'pending' && todos.value === undefined)
 const items = computed(() => todos.value ?? [])
 const pendingCount = computed(() => items.value.filter((todo) => !todo.completed).length)
 
@@ -80,7 +83,7 @@ function onAdd(suggestion: TodoSuggestion) {
 <template>
   <div class="flex flex-col gap-4">
     <ErrorState v-if="error" retry @retry="execute()" />
-    <SkeletonTodoManager v-else-if="isPending" />
+    <SkeletonTodoManager v-else-if="isInitialLoading" />
 
     <template v-else>
       <div class="flex flex-wrap items-start justify-between gap-4">
@@ -108,6 +111,7 @@ function onAdd(suggestion: TodoSuggestion) {
         v-if="formModal"
         :mode="formModal.mode"
         :todo="formModal.todo"
+        :pending="isFormPending"
         @submit="onSubmit"
         @close="formModal = null"
       />
