@@ -1,6 +1,12 @@
 import Link from 'next/link'
-import { Button, Card, SimpleGrid, Text, ThemeIcon, Title } from '@mantine/core'
-import { IconClipboardList, IconSearch, IconSettings, IconSparkles } from '@tabler/icons-react'
+import { Button, Card, Group, SimpleGrid, Text, ThemeIcon, Title } from '@mantine/core'
+import {
+  IconClipboardList,
+  IconHandStop,
+  IconSearch,
+  IconSettings,
+  IconSparkles,
+} from '@tabler/icons-react'
 import { verifySession } from '@/lib/auth/session'
 import { paths } from '@/lib/constants/router-paths'
 
@@ -34,7 +40,10 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 py-6">
       <div className="flex flex-col gap-2">
-        <Title order={1}>Olá, {user.name.split(' ')[0]} 👋</Title>
+        <Group gap="xs" align="center" wrap="nowrap">
+          <Title order={1}>Olá, {user.name.split(' ')[0]}</Title>
+          <IconHandStop size={30} />
+        </Group>
         <Text size="lg" c="dimmed">
           Sua central de produtividade com IA. Escolha onde começar.
         </Text>

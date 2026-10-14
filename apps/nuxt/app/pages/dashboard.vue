@@ -40,8 +40,9 @@ const shortcuts = [
 <template>
   <div class="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-6">
     <div class="flex flex-col gap-2">
-      <h1 class="text-highlighted text-3xl/tight font-bold">
-        {{ firstName ? `Olá, ${firstName} 👋` : 'Dashboard' }}
+      <h1 class="text-highlighted flex items-center gap-2 text-3xl/tight font-bold">
+        {{ firstName ? `Olá, ${firstName}` : 'Dashboard' }}
+        <UIcon v-if="firstName" name="i-tabler:hand-stop" class="size-7 shrink-0" />
       </h1>
       <p class="text-dimmed text-lg">Sua central de produtividade com IA. Escolha onde começar.</p>
     </div>
