@@ -6,6 +6,13 @@
   --ds-font-sans: var(--font-hanken-grotesk), var(--ds-font-fallback-sans);
 }
 
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-fg);
