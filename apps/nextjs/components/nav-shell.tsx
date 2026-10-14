@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AppShell, Avatar, Group, Menu, NavLink, Title } from '@mantine/core'
 import {
   IconClipboardList,
+  IconCreditCard,
   IconHome,
   IconLogout,
   IconSearch,
@@ -22,6 +23,7 @@ const navItems = [
   { href: paths.TAREFAS, label: 'Tarefas', icon: IconClipboardList },
   { href: paths.RESUMO, label: 'Resumo do dia', icon: IconSparkles },
   { href: paths.BUSCA, label: 'Busca por IA', icon: IconSearch },
+  { href: paths.PLANOS, label: 'Planos', icon: IconCreditCard },
 ]
 
 type NavShellProps = {
@@ -78,6 +80,13 @@ export function NavShell({ children }: NavShellProps) {
                   leftSection={<IconSettings size={16} />}
                 >
                   Configurações
+                </Menu.Item>
+                <Menu.Item
+                  component={Link}
+                  href={paths.PLANOS}
+                  leftSection={<IconCreditCard size={16} />}
+                >
+                  Planos
                 </Menu.Item>
                 <Menu.Item
                   color="red"
