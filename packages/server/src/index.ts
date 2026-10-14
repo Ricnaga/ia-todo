@@ -4,3 +4,4 @@ export type { TodoController } from './modules/todos/controllers/todo.controller
 export type { AssistantController } from './modules/assistant/controllers/assistant.controller'
 export type { InsightsController } from './modules/insights/controllers/insights.controller'
 export type { AuthController } from './modules/auth/controllers/auth.controller'
+export type { BillingController } from './modules/billing/controllers/billing.controller'
