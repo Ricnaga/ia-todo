@@ -2,7 +2,7 @@
 
 import { Button, Group, Text } from '@mantine/core'
 import { IconSparkles } from '@tabler/icons-react'
-import { notifyError } from '@/lib/utils/notifications'
+import { notifyAiError } from '@/lib/billing/notifications'
 import { useDaySummaryQuery } from '@/services/insights/insights.query'
 import { EmptyState } from '@/components/empty-state/empty-state'
 import { CardDaySummaryContent } from './card-day-summary-content/card-day-summary-content'
@@ -16,7 +16,7 @@ export function CardDaySummary() {
         <Button
           leftSection={<IconSparkles size={18} />}
           loading={isFetching}
-          onClick={() => refetch().catch(notifyError('Não consegui gerar o resumo'))}
+          onClick={() => refetch().catch(notifyAiError('Não consegui gerar o resumo'))}
         >
           {summary ? 'Gerar novo resumo' : 'Gerar resumo'}
         </Button>

@@ -6,7 +6,7 @@ import { IconPlus, IconSparkles } from '@tabler/icons-react'
 import type { TodoSuggestion } from '@ia-task-manager/schemas/todo'
 import type { DraftInput } from '@ia-task-manager/schemas/todo'
 import { priorityColors, priorityLabels } from '@/lib/constants/todo.constants'
-import { notifyError } from '@/lib/utils/notifications'
+import { notifyAiError } from '@/lib/billing/notifications'
 import { useSuggestTodoMutation } from '@/services/todo/todo.mutation'
 
 type ModalAiSuggestProps = {
@@ -52,7 +52,7 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
     }
     suggestMutation.mutate(draft, {
       onSuccess: setSuggestion,
-      onError: notifyError('Não consegui sugerir'),
+      onError: notifyAiError('Não consegui sugerir'),
     })
   }
 

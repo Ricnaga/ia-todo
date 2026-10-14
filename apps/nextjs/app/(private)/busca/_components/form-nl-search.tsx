@@ -4,14 +4,14 @@ import { useState, type KeyboardEvent } from 'react'
 import { Button, Group, Kbd, Text, TextInput, Title } from '@mantine/core'
 import { IconSearch } from '@tabler/icons-react'
 import { useNlSearchMutation } from '@/services/assistant/assistant.mutation'
-import { notifyError } from '@/lib/utils/notifications'
+import { notifyAiError } from '@/lib/billing/notifications'
 import { CardSearchResultList } from './card-search-result-list/card-search-result-list'
 
 export function FormNlSearch() {
   const { data: result, isPending, mutate } = useNlSearchMutation()
   const [query, setQuery] = useState<string>('')
 
-  const handleSearch = () => mutate(query, { onError: notifyError('Não consegui buscar') })
+  const handleSearch = () => mutate(query, { onError: notifyAiError('Não consegui buscar') })
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && query.trim()) handleSearch()
