@@ -23,8 +23,10 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
 
   const suggestMutation = useSuggestTodoMutation()
 
+  const pending = suggestMutation.isPending || adding
+
   const handleClose = () => {
-    if (suggestMutation.isPending) return
+    if (pending) return
     onClose()
     setSuggestion(null)
     setDraft({})
@@ -32,6 +34,7 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
   }
 
   const resetSuggestion = () => {
+    if (pending) return
     setSuggestion(null)
     suggestMutation.reset()
   }
@@ -54,7 +57,15 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
   }
 
   return (
-    <Modal opened={opened} onClose={handleClose} title="Sugerir tarefa com IA" size="lg">
+    <Modal
+      opened={opened}
+      onClose={handleClose}
+      title="Sugerir tarefa com IA"
+      size="lg"
+      closeOnClickOutside={!pending}
+      closeOnEscape={!pending}
+      closeButtonProps={{ disabled: pending }}
+    >
       {!suggestion ? (
         <Stack gap="sm">
           <Text size="sm" c="dimmed">
@@ -84,12 +95,13 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
             </Text>
           )}
           <Group justify="flex-end">
-            <Button variant="subtle" onClick={handleClose}>
+            <Button variant="subtle" disabled={pending} onClick={handleClose}>
               Cancelar
             </Button>
             <Button
               leftSection={<IconSparkles size={16} />}
               loading={suggestMutation.isPending}
+              disabled={pending}
               onClick={handleSuggest}
             >
               Sugerir
@@ -118,7 +130,7 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
             shadow="sm"
             padding="lg"
             onClick={resetSuggestion}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: pending ? 'default' : 'pointer' }}
           >
             <Group justify="space-between">
               <Text fw={600}>{suggestion.title}</Text>
@@ -133,12 +145,13 @@ export function ModalAiSuggest({ opened, onClose, adding, onAdd }: ModalAiSugges
             )}
           </Card>
           <Group justify="flex-end">
-            <Button variant="subtle" onClick={resetSuggestion}>
+            <Button variant="subtle" disabled={pending} onClick={resetSuggestion}>
               Refazer sugestão
             </Button>
             <Button
               leftSection={<IconPlus size={16} />}
               loading={adding}
+              disabled={pending}
               onClick={() => onAdd(suggestion)}
             >
               Adicionar tarefa

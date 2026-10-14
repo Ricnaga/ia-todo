@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { IconPlus, IconSparkles, IconX } from '@tabler/icons-svelte'
+  import { IconLoader2, IconPlus, IconSparkles, IconX } from '@tabler/icons-svelte'
   import type { TodoSuggestion } from '@ia-task-manager/schemas/todo'
   import { priorityColors, priorityLabels } from '$lib/constants/todo.constants'
   import { useSuggestTodoMutation } from '$lib/services/todo/todo.mutation'
@@ -27,11 +27,12 @@
 
   const suggestMutation = useSuggestTodoMutation()
   const isSuggesting = $derived(suggestMutation.isPending)
+  const pending = $derived(isSuggesting || adding)
 
   $effect(() => {
     if (open) {
       dialogEl?.showModal()
-      resetSuggestion()
+      suggestion = null
       draft = { title: '', description: '' }
       draftError = null
     } else {
@@ -50,7 +51,7 @@
   })
 
   function handleClose(): void {
-    if (isSuggesting) return
+    if (pending) return
     onclose()
   }
 
@@ -59,15 +60,16 @@
   }
 
   function onDialogCancel(event: Event): void {
-    if (isSuggesting) event.preventDefault()
+    if (pending) event.preventDefault()
   }
 
   function onDialogClick(event: MouseEvent): void {
-    if (isSuggesting || event.target !== dialogEl) return
+    if (pending || event.target !== dialogEl) return
     onclose()
   }
 
   function resetSuggestion(): void {
+    if (pending) return
     suggestion = null
   }
 
@@ -112,6 +114,7 @@
         type="button"
         class="btn-icon btn-icon-xs preset-tonal"
         aria-label="Fechar"
+        disabled={pending}
         onclick={handleClose}
       >
         <IconX class="size-4" />
@@ -151,15 +154,21 @@
         {/if}
 
         <div class="flex justify-end gap-2">
-          <button type="button" class="btn preset-tonal" onclick={handleClose}>Cancelar</button>
+          <button type="button" class="btn preset-tonal" disabled={pending} onclick={handleClose}>
+            Cancelar
+          </button>
           <button
             type="button"
             class="btn preset-filled-primary-500"
-            disabled={isSuggesting}
+            disabled={pending}
             aria-busy={isSuggesting}
             onclick={onSuggest}
           >
-            <IconSparkles class="size-[18px]" />
+            {#if isSuggesting}
+              <IconLoader2 class="size-[18px] animate-spin" />
+            {:else}
+              <IconSparkles class="size-[18px]" />
+            {/if}
             Sugerir
           </button>
         </div>
@@ -182,7 +191,7 @@
         {/if}
 
         <div
-          class="card border-line bg-surface border cursor-pointer p-3"
+          class="card border-line bg-surface border p-3 {pending ? '' : 'cursor-pointer'}"
           role="button"
           tabindex="0"
           onclick={resetSuggestion}
@@ -200,17 +209,26 @@
         </div>
 
         <div class="flex justify-end gap-2">
-          <button type="button" class="btn preset-tonal" onclick={resetSuggestion}>
+          <button
+            type="button"
+            class="btn preset-tonal"
+            disabled={pending}
+            onclick={resetSuggestion}
+          >
             Refazer sugestão
           </button>
           <button
             type="button"
             class="btn preset-filled-primary-500"
-            disabled={adding}
+            disabled={pending}
             aria-busy={adding}
             onclick={onAdd}
           >
-            <IconPlus class="size-[18px]" />
+            {#if adding}
+              <IconLoader2 class="size-[18px] animate-spin" />
+            {:else}
+              <IconPlus class="size-[18px]" />
+            {/if}
             Adicionar tarefa
           </button>
         </div>
