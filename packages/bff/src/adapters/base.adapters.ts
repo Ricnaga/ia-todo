@@ -2,8 +2,10 @@ export type { TodoPort, TodoCreateInput, TodoUpdateInput, SuggestTodoInput } fro
 export type { AssistantPort } from './assistant/assistant.port'
 export type { InsightsPort } from './insights/insights.port'
 export type { AuthPort } from './auth/auth.port'
+export type { BillingPort, CheckoutSessionInput } from './billing/billing.port'
 
 export { todoAdapter } from './todo/todo.adapter'
 export { assistantAdapter } from './assistant/assistant.adapter'
 export { insightsAdapter } from './insights/insights.adapter'
 export { authAdapter } from './auth/auth.adapter'
+export { billingAdapter } from './billing/billing.adapter'

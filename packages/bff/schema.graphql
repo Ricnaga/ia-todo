@@ -32,6 +32,16 @@ type AuthUser {
   updatedAt: DateTime!
 }
 
+enum BillingInterval {
+  monthly
+  yearly
+}
+
+enum BillingPlan {
+  free
+  pro
+}
+
 input ChangeEmailInput {
   callbackURL: String
   newEmail: String!
@@ -40,6 +50,10 @@ input ChangeEmailInput {
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
+}
+
+input CreateCheckoutSessionInput {
+  interval: BillingInterval!
 }
 
 input CreateTodoInput {
@@ -79,6 +93,8 @@ input DraftInput {
 type Mutation {
   changeEmail(input: ChangeEmailInput!): Boolean!
   changePassword(input: ChangePasswordInput!): Boolean!
+  createCheckoutSession(input: CreateCheckoutSessionInput!): String!
+  createPortalSession: String!
   createTodo(input: CreateTodoInput!): Todo!
   deleteTodo(id: String!): Boolean!
   nlSearch(query: String!): Assistant!
@@ -102,6 +118,7 @@ type Query {
   me: AuthUser
   myAccounts: [AuthAccount!]!
   mySessions: [AuthSession!]!
+  mySubscription: Subscription!
   todo(id: String!): Todo!
   todos: [Todo!]!
 }
@@ -130,6 +147,13 @@ enum SearchStatus {
   any
   completed
   pending
+}
+
+type Subscription {
+  cancelAtPeriodEnd: Boolean!
+  currentPeriodEnd: DateTime
+  plan: BillingPlan!
+  status: String
 }
 
 type Subtask {

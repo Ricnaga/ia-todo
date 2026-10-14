@@ -24,6 +24,9 @@ type Documents = {
     "\n  mutation UnlinkAccount($input: UnlinkAccountInput!) {\n    unlinkAccount(input: $input)\n  }\n": typeof types.UnlinkAccountDocument,
     "\n  mutation RevokeSession($input: RevokeSessionInput!) {\n    revokeSession(input: $input)\n  }\n": typeof types.RevokeSessionDocument,
     "\n  mutation RevokeOtherSessions {\n    revokeOtherSessions\n  }\n": typeof types.RevokeOtherSessionsDocument,
+    "\n  query MySubscription {\n    mySubscription {\n      plan\n      status\n      currentPeriodEnd\n      cancelAtPeriodEnd\n    }\n  }\n": typeof types.MySubscriptionDocument,
+    "\n  mutation CreateCheckoutSession($input: CreateCheckoutSessionInput!) {\n    createCheckoutSession(input: $input)\n  }\n": typeof types.CreateCheckoutSessionDocument,
+    "\n  mutation CreatePortalSession {\n    createPortalSession\n  }\n": typeof types.CreatePortalSessionDocument,
     "\n  fragment TodoFields on Todo {\n    id\n    title\n    description\n    priority\n    dueDate\n    completed\n    createdAt\n    updatedAt\n    subtasks {\n      id\n      title\n      done\n    }\n  }\n": typeof types.TodoFieldsFragmentDoc,
     "\n  fragment TodoSuggestionFields on TodoSuggestion {\n    title\n    description\n    priority\n    subtasks\n  }\n": typeof types.TodoSuggestionFieldsFragmentDoc,
     "\n  fragment CriteriaFields on Criteria {\n    query\n    keywords\n    status\n    priority\n    due\n  }\n": typeof types.CriteriaFieldsFragmentDoc,
@@ -50,6 +53,9 @@ const documents: Documents = {
     "\n  mutation UnlinkAccount($input: UnlinkAccountInput!) {\n    unlinkAccount(input: $input)\n  }\n": types.UnlinkAccountDocument,
     "\n  mutation RevokeSession($input: RevokeSessionInput!) {\n    revokeSession(input: $input)\n  }\n": types.RevokeSessionDocument,
     "\n  mutation RevokeOtherSessions {\n    revokeOtherSessions\n  }\n": types.RevokeOtherSessionsDocument,
+    "\n  query MySubscription {\n    mySubscription {\n      plan\n      status\n      currentPeriodEnd\n      cancelAtPeriodEnd\n    }\n  }\n": types.MySubscriptionDocument,
+    "\n  mutation CreateCheckoutSession($input: CreateCheckoutSessionInput!) {\n    createCheckoutSession(input: $input)\n  }\n": types.CreateCheckoutSessionDocument,
+    "\n  mutation CreatePortalSession {\n    createPortalSession\n  }\n": types.CreatePortalSessionDocument,
     "\n  fragment TodoFields on Todo {\n    id\n    title\n    description\n    priority\n    dueDate\n    completed\n    createdAt\n    updatedAt\n    subtasks {\n      id\n      title\n      done\n    }\n  }\n": types.TodoFieldsFragmentDoc,
     "\n  fragment TodoSuggestionFields on TodoSuggestion {\n    title\n    description\n    priority\n    subtasks\n  }\n": types.TodoSuggestionFieldsFragmentDoc,
     "\n  fragment CriteriaFields on Criteria {\n    query\n    keywords\n    status\n    priority\n    due\n  }\n": types.CriteriaFieldsFragmentDoc,
@@ -120,6 +126,18 @@ export function graphql(source: "\n  mutation RevokeSession($input: RevokeSessio
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation RevokeOtherSessions {\n    revokeOtherSessions\n  }\n"): (typeof documents)["\n  mutation RevokeOtherSessions {\n    revokeOtherSessions\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MySubscription {\n    mySubscription {\n      plan\n      status\n      currentPeriodEnd\n      cancelAtPeriodEnd\n    }\n  }\n"): (typeof documents)["\n  query MySubscription {\n    mySubscription {\n      plan\n      status\n      currentPeriodEnd\n      cancelAtPeriodEnd\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateCheckoutSession($input: CreateCheckoutSessionInput!) {\n    createCheckoutSession(input: $input)\n  }\n"): (typeof documents)["\n  mutation CreateCheckoutSession($input: CreateCheckoutSessionInput!) {\n    createCheckoutSession(input: $input)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreatePortalSession {\n    createPortalSession\n  }\n"): (typeof documents)["\n  mutation CreatePortalSession {\n    createPortalSession\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

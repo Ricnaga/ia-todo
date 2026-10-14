@@ -1,6 +1,7 @@
 import type {
   ChangeEmailMutationVariables,
   ChangePasswordMutationVariables,
+  CreateCheckoutSessionMutationVariables,
   CreateTodoMutationVariables,
   RevokeSessionMutationVariables,
   UnlinkAccountMutationVariables,
@@ -10,6 +11,8 @@ import type {
 
 export type TodoCreateRequest = CreateTodoMutationVariables['input']
 export type TodoUpdateRequest = UpdateTodoMutationVariables['input']
+
+export type CheckoutSessionRequest = CreateCheckoutSessionMutationVariables['input']
 
 export type UpdateProfileRequest = UpdateProfileMutationVariables['input']
 export type ChangeEmailRequest = ChangeEmailMutationVariables['input']
