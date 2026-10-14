@@ -2,7 +2,7 @@
   import { IconSearch } from '@tabler/icons-svelte'
   import CardSearchResultList from './card-search-result-list/card-search-result-list.svelte'
   import { useNlSearchMutation } from '$lib/services/assistant/assistant.mutation'
-  import { notifyError } from '$lib/utils/notifications'
+  import { notifyAiError } from '$lib/utils/notifications'
 
   const searchMutation = useNlSearchMutation()
 
@@ -14,7 +14,7 @@
 
   function handleSearch(): void {
     if (!query.trim()) return
-    searchMutation.mutate(query, { onError: notifyError('Não consegui buscar') })
+    searchMutation.mutate(query, { onError: notifyAiError('Não consegui buscar') })
   }
 
   function handleKeydown(event: KeyboardEvent): void {

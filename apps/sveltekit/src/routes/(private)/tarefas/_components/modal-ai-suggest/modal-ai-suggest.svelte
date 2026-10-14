@@ -4,7 +4,7 @@
   import type { TodoSuggestion } from '@ia-task-manager/schemas/todo'
   import { priorityColors, priorityLabels } from '$lib/constants/todo.constants'
   import { useSuggestTodoMutation } from '$lib/services/todo/todo.mutation'
-  import { notifyError } from '$lib/utils/notifications'
+  import { notifyAiError } from '$lib/utils/notifications'
 
   interface Props {
     open: boolean
@@ -89,7 +89,7 @@
       onSuccess: (data) => {
         suggestion = data
       },
-      onError: notifyError('Não consegui sugerir'),
+      onError: notifyAiError('Não consegui sugerir'),
     })
   }
 
