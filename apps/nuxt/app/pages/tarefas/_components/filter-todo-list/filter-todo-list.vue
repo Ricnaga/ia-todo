@@ -56,7 +56,7 @@ function onPriorityChange(value: unknown) {
     <UFormField label="Status" class="w-40">
       <USelect
         :model-value="filters.status"
-        :options="statusOptions"
+        :items="statusOptions"
         class="w-full"
         @update:model-value="onStatusChange"
       />
@@ -65,7 +65,7 @@ function onPriorityChange(value: unknown) {
     <UFormField label="Prioridade" class="w-40">
       <USelect
         :model-value="filters.priority"
-        :options="priorityOptions"
+        :items="priorityOptions"
         class="w-full"
         @update:model-value="onPriorityChange"
       />
