@@ -36,6 +36,39 @@ dialog.animate-dialog {
   }
 }
 
+@utility animate-menu {
+  --anim-duration: var(--duration-fast);
+  --menu-from-y: -4px;
+  --menu-from-scale: 0.96;
+
+  transition:
+    display var(--anim-duration) allow-discrete,
+    opacity var(--anim-duration) var(--ease-entrance),
+    transform var(--anim-duration) var(--ease-entrance);
+
+  opacity: 0;
+  transform: translateY(var(--menu-from-y)) scale(var(--menu-from-scale));
+  transform-origin: top;
+
+  &[data-state='open'] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  @starting-style {
+    &[data-state='open'] {
+      opacity: 0;
+      transform: translateY(var(--menu-from-y)) scale(var(--menu-from-scale));
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-menu {
+    --anim-duration: 0.01ms;
+  }
+}
+
 ::view-transition-group(root) {
   animation-duration: var(--duration-slow);
 }

@@ -19,7 +19,7 @@
   <Portal>
     <Menu.Positioner>
       <Menu.Content
-        class="border-line bg-elevated text-fg z-50 flex min-w-44 flex-col rounded-md border p-1 shadow-lg"
+        class="animate-menu border-line bg-elevated text-fg z-50 flex min-w-44 flex-col rounded-md border p-1 shadow-lg"
       >
         <Menu.ItemGroup>
           <Menu.ItemGroupLabel class="text-muted px-2 py-1.5 text-xs font-semibold uppercase">
