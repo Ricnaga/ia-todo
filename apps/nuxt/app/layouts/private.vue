@@ -76,24 +76,23 @@ async function handleSignOut() {
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <UHeader toggle-side="left">
+    <UHeader toggle-side="left" :to="paths.DASHBOARD" :ui="{ title: 'flex items-center gap-1.5' }">
       <template #title>
-        <NuxtLink :to="paths.DASHBOARD" class="flex items-center gap-1.5">
-          <UIcon name="i-tabler:sparkles" class="size-5" />
-          <span class="text-highlighted">ia-task-manager</span>
-        </NuxtLink>
+        <UIcon name="i-tabler:sparkles" class="size-5" />
+        <span class="text-highlighted">ia-task-manager</span>
       </template>
 
       <template #right>
         <ThemeSwitcher />
 
         <UDropdownMenu :items="accountItems" :content="{ align: 'end', collisionPadding: 12 }">
-          <UAvatar
-            :src="user?.image ?? undefined"
-            :alt="user?.name ?? 'Usuário'"
-            size="sm"
-            class="cursor-pointer"
-          />
+          <button
+            type="button"
+            aria-label="Abrir menu da conta"
+            class="focus-visible:ring-ring flex size-7 items-center justify-center rounded-full outline-none focus-visible:ring-2"
+          >
+            <UAvatar :src="user?.image ?? undefined" :alt="user?.name ?? 'Usuário'" size="sm" />
+          </button>
         </UDropdownMenu>
       </template>
 
