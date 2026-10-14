@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./assistant": "./src/assistant/index.ts",
     "./auth": "./src/auth/index.ts",
+    "./billing": "./src/billing/index.ts",
     "./insights": "./src/insights/index.ts",
     "./todo": "./src/todo/index.ts"
   },
