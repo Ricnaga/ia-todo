@@ -44,6 +44,12 @@ const navItems = computed<NavigationMenuItem[]>(() => [
     to: paths.BUSCA,
     active: route.path === paths.BUSCA,
   },
+  {
+    label: 'Planos',
+    icon: 'i-tabler:credit-card',
+    to: paths.PLANOS,
+    active: route.path === paths.PLANOS,
+  },
 ])
 
 const settingsItems = computed<NavigationMenuItem[]>(() => [
@@ -58,6 +64,7 @@ const settingsItems = computed<NavigationMenuItem[]>(() => [
 const accountItems = computed<DropdownMenuItem[]>(() => [
   { label: user.value?.name ?? 'Minha conta', type: 'label' as const },
   { label: 'Configurações', icon: 'i-tabler:settings', to: paths.SETTINGS },
+  { label: 'Planos', icon: 'i-tabler:credit-card', to: paths.PLANOS },
   { label: 'Sair', icon: 'i-tabler:logout', color: 'error' as const, onSelect: handleSignOut },
 ])
 
