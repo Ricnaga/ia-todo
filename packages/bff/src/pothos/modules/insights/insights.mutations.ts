@@ -9,7 +9,7 @@ builder.mutationFields((t) => ({
     resolve: (_root, _args, ctx) =>
       execute(async () => {
         const todos = await ctx.adapters.todo.list(ctx.user.id)
-        return ctx.adapters.insights.summarizeDay(todos)
+        return ctx.adapters.insights.summarizeDay(todos, ctx.user.id)
       }),
   }),
 }))

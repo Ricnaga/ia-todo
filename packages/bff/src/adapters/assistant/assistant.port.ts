@@ -2,5 +2,5 @@ import type { Todo } from '@ia-task-manager/schemas/todo'
 import type { Assistant } from '@ia-task-manager/schemas/assistant'
 
 export interface AssistantPort {
-  nlSearch(query: string, todos: Todo[]): Promise<Assistant>
+  nlSearch(query: string, todos: Todo[], userId: string): Promise<Assistant>
 }

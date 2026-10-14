@@ -52,6 +52,7 @@ builder.mutationFields((t) => ({
       title: t.input.string(),
       description: t.input.string(),
     },
-    resolve: (_root, args, ctx) => execute(() => ctx.adapters.todo.suggestTodo(args.draft)),
+    resolve: (_root, args, ctx) =>
+      execute(() => ctx.adapters.todo.suggestTodo(args.draft, ctx.user.id)),
   }),
 }))

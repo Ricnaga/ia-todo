@@ -12,5 +12,5 @@ export interface TodoPort {
   create(input: TodoCreateInput, userId: string): Promise<Todo>
   update(id: string, input: TodoUpdateInput, userId: string): Promise<Todo>
   delete(id: string, userId: string): Promise<void>
-  suggestTodo(draft: SuggestTodoInput): Promise<TodoSuggestion>
+  suggestTodo(draft: SuggestTodoInput, userId: string): Promise<TodoSuggestion>
 }

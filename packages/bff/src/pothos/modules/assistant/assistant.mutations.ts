@@ -12,7 +12,7 @@ builder.mutationFields((t) => ({
     resolve: (_root, args, ctx) =>
       execute(async () => {
         const todos = await ctx.adapters.todo.list(ctx.user.id)
-        return ctx.adapters.assistant.nlSearch(args.query, todos)
+        return ctx.adapters.assistant.nlSearch(args.query, todos, ctx.user.id)
       }),
   }),
 }))

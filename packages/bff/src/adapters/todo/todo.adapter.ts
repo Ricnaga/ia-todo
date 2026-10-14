@@ -8,6 +8,6 @@ export function todoAdapter(controller: TodoController): TodoPort {
     create: (input, userId) => controller.create(input, userId),
     update: (id, input, userId) => controller.update(id, input, userId),
     delete: (id, userId) => controller.delete(id, userId),
-    suggestTodo: (draft) => controller.suggestTodo(draft),
+    suggestTodo: (draft, userId) => controller.suggestTodo(draft, userId),
   }
 }
