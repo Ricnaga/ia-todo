@@ -127,10 +127,22 @@ Commits: Nuxt `3cca8b8` ("fase 2 resumo+busca"), SvelteKit `4def400`.
   `lib/todo/{todo-filters,use-todo-filters}.ts` (Nuxt) / `lib/constants/` +
   `lib/todo/*` (SvelteKit); `priorityColors`/`priorityLabels` em
   `lib/constants/todo.constants.*`.
-- **Modais** (`ModalTodoForm`, `ModalAiSuggest`): Nuxt `UModal`;
+- **Modais** (`ModalTodoForm`, `ModalAiSuggest`): Nuxt `UModal` (+`:dismissible`);
   SvelteKit `<dialog>` nativo + `onMount(showModal)` / `$effect` reativo ao
-  `open`, com `onclick` no backdrop (`event.target === dialogEl`) e
-  `oncancel` liberado quando "buscando sugestão". `--dialog-max-width`/`42rem`.
+  `open`, com `onclick` no backdrop (`event.target === dialogEl`) e `oncancel`.
+  `--dialog-max-width`/`42rem`.
+- **Contrato de modal durante request** (paridade nos 3 apps): request em
+  andamento ⇒ botão primário com `loading`/spinner + `aria-busy`, **todos** os
+  botões `disabled` (inclusive Cancelar/X) e dismiss bloqueado (Next
+  `closeOnClickOutside={!pending}`/`closeOnEscape={!pending}`/`closeButtonProps`;
+  Nuxt `:dismissible="!pending"`; Svelte `pending` nos guards de
+  `onclick`/`oncancel`/`handleClose`). Os handlers de reset/fechamento fazem
+  early-return em `pending` (não confiar só na UI). O `pending` vem do pai como
+  prop: no manager é `isFormPending` = create||update; no `ModalAiSuggest` é
+  `suggestMutation.isPending || adding`. **Inputs NÃO são desabilitados** — só
+  botões e dismiss. Gotcha Svelte: o `$effect` que reage a `open` **não** deve
+  chamar o reset guardado (isso adiciona `pending` às deps e limpa a sugestão
+  ao terminar o request) — resetar inline.
 - **Form (SvelteKit)** (criar/editar): HTML semântico (`input`, `textarea`,
   `select` + classes `input`/`textarea`/`select`), validação `zod.safeParse` +
   `z.flattenError(...).fieldErrors` mostrada em `<span class="text-error text-xs">`.
@@ -249,6 +261,83 @@ Commit `42b5874` (+ docs) — o único ciclo de vida da tarefa continua o boolea
   agora incluindo `completed`.
 - Prisma create grava `completed` (`prisma-todo.repository.ts`).
 
+## Fase 6 (status como coluna única + select no modal; fix UModal e flash Nuxt)
+
+- **Status só como atributo** (decisão B): removido o toggle checkbox da tabela.
+  A coluna única **"Status"** (badge read-only `Pendente`/`Concluída`) passa a ser
+  **ordenável** por `completed` (`sortFn`/`sortingFn: 'basic'`, preservando
+  `TODO_SORT_FIELDS`/`TableSortHeader`). Nos 3 apps (`table-todo-list.<tsx|vue|svelte>`);
+  SvelteKit apagou `table-todo-completed-cell/`; removidos `useUpdateTodoMutation`/
+  `onToggleCompleted` da tabela (o update segue só no form do `content-todo-manager`).
+- **`Select "Status"` no modal** de criar/editar (`modal-todo-form.<tsx|vue|svelte>`):
+  default Pendente (create) / status atual (edit). `statusOptions` (`pending`/
+  `completed`) em `lib/constants/todo.constants.ts` dos 3 apps; mapeia para o
+  booleano `completed` (proxy `computed` no Nuxt, `onChange` no SvelteKit,
+  `Controller` no Next). Schema/BFF inalterados.
+- **Nuxt `UModal`**: o **slot default é o trigger** (`DialogTrigger v-if="!!slots.default"`,
+  `Modal.vue:145`) — conteúdo tem de ir em **`#body`**. Estava no default slot em
+  `modal-todo-form.vue` e `modal-ai-suggest.vue` → o conteúdo renderizava inline e
+  clicar nele abria a modal vazia. Corrigido com `<template #body>`. O X **não** é
+  barrado por `dismissible` (`Modal.vue:117`): usar `:close="{ disabled: pending }"`
+  e guardar `onUpdateOpen` (`if (!value && pending) return`).
+- **Flash Nuxt**: `useAsyncData` reinicia `status='pending'` a cada `execute()`
+  mantendo o `data` anterior (`nuxt .../app/composables/asyncData.js:330`/`:364`),
+  então o skeleton só pode aparecer no **load inicial**:
+  `isInitialLoading = status === 'pending' && data === undefined`
+  (`content-todo-manager.vue`). Next (`useSuspenseQuery` + `invalidateQueries`) e
+  SvelteKit (`invalidate` sem skeleton amarrado) não tinham o problema.
+- **Aut-import de componentes Nuxt**: o alias `~` aponta para `app/` (srcDir);
+  portanto o path correto no `nuxt.config` é `~/components` — **não** `~/app/components`
+  (que resolveria para `app/app/components` e deixaria os componentes globais
+  `ErrorState`/`EmptyState`/`RenderBoundary`/`SkeletonStack`/`ThemeSwitcher` fora do
+  auto-import, gerando `[Vue warn] Failed to resolve component`). Os componentes de
+  rota (`pages/**/_components`) são importados explicitamente, não auto-importados.
+- **`USelect` (Nuxt UI v4) usa `items`, não `options`** (`Select.vue`; doc:
+  ui.nuxt.com/docs/components/select). `:options` não é prop → vira attr perdido, o
+  select fica sem itens e o trigger exibe o **valor cru** (`getDisplayValue` cai em
+  `String(value)`: `pending`/`completed`, `medium`, `all`). Usar
+  `:items="[{ value, label }]"` (o `v-model` referencia o `value`). Atingia o modal
+  (Prioridade/Status) e os filtros (`filter-todo-list.vue`) — todos corrigidos.
+  Nos outros apps não se aplica (Next usa `data` do Mantine; SvelteKit usa `<option>` nativo).
+- **Hydration mismatch no `UHeader` do Nuxt**: o `UHeader` já embrulha o slot `#title`
+  num `ULink`/`<a>` (`Header.vue:85`, com `:to` default `"/"`). Colocar um `<NuxtLink>`
+  dentro do `#title` gera **`<a>` aninhado** — o parser do browser fecha o `<a>` externo
+  antes do interno e reestrutura o DOM → `[Vue warn] Hydration children mismatch` no
+  `<a data-slot="title">` (server com menos filhos) e no `<div data-slot="left">` (server
+  com mais filhos). Fix: passar `:to` no `UHeader` e pôr **só o conteúdo** (ícone + texto)
+  no `#title` (`private.vue`), ou mover o `<NuxtLink>` para o slot `#left` (que substitui
+  o `ULink`). O `aria-label` do título vem do texto do slot (`getSlotChildrenText`).
+- **Cursor pointer em botões**: o preflight do Tailwind v4 **não** aplica
+  `cursor: pointer` em `button` (default do browser é `default`) — `preflight.css` só
+  trata o cursor dos spinners do Safari. Regra base nos 3 `main`/`globals`/`layout.css`:
+  `@layer base { button:not(:disabled), [role='button']:not(:disabled) { cursor: pointer } }`.
+  Utilitários (`cursor-*`) continuam vencendo (camada utilities). Elementos clicáveis que
+  **não** são botão (UCard, avatar de dropdown, itens de menu) mantêm `cursor-pointer` manual.
+- **Nuxt UI v4 defaulta os ícones internos para Lucide** (`defaultIcons` com `i-lucide-*` no
+  `dist/shared/ui.*.mjs`), mas o projeto instala só `@iconify-json/tabler`. Aí `@nuxt/icon`
+  (server bundle `local`) loga "Collection `lucide` is not found locally … suggest to install it
+  via pnpm add @iconify-json/lucide" (`runtime/server/api.js:25-30`) quando um ícone padrão é
+  renderizado (ex.: `Select.vue:79` usa `chevronDown` nos filtros de `/tarefas`; `Slideover` e
+  `Drawer` usam `close`). **Solução escolhida: manter um único set (Tabler)** — sobrescrever
+  `ui.icons` em `apps/nuxt/app/app.config.ts` mapeando as 43 chaves `i-lucide-*` para os
+  equivalentes `i-tabler:*` (todos conferidos em `@iconify-json/tabler`). Funciona porque
+  `.nuxt/app.config.mjs` exporta `defuFn(cfg0, inlineConfig)`: `cfg0` (o `app.config.ts` do
+  projeto) **vence** os defaults do módulo (`inlineConfig` = lucide). Não adicionar
+  `@iconify-json/lucide` (contraria a convenção Tabler dos 3 apps). Os componentes do Nuxt UI
+  sempre leem `appConfig.ui.icons.<chave>`, então não há lucide hardcodado no runtime.
+- **Avatar de conta como trigger do `UDropdownMenu` (Nuxt)**: passar `<UAvatar>` direto como
+  filho do `UDropdownMenu` (trigger `as-child`) **não** dá toda a área clicável. O `UAvatar` tem
+  `defineOptions({ inheritAttrs: false })` e roteia `$attrs` (onde o reka-ui põe o `onClick`/
+  `aria-haspopup`/`data-state` do trigger) para o **`<img>`** (quando `src`) ou para o
+  `<span data-slot="fallback">` (sem imagem) — nunca para o `<span data-slot="root">`. Como o
+  `cursor: pointer` fica no root, sobra uma borda/anel visível que "parece" clicável mas não
+  abre (medido: root `28x28` vs fallback só `17x20`). Verificado com Chrome headless: clicar no
+  root → `NOT-OPENED`; clicar no img/fallback → `OPENED`. Fix (paridade com SvelteKit, que já
+  usa `<button>` de trigger): embrulhar o `<UAvatar>` num `<button type="button">` com
+  `class="flex size-7 ... rounded-full focus-visible:ring-ring focus-visible:ring-2"` e
+  `aria-label` — aí o trigger `as-child` cai no `<button>` e toda a área abre (Next já funciona
+  porque o `Menu.Target` do Mantine esparrama handlers no root do `Avatar`).
+
 ## Estrutura
 
 ```
@@ -365,6 +454,12 @@ loadEnv('development', import.meta.dirname, ''))`, senão o
   produção precisa do `@sveltejs/adapter-node`.
 - O HTML do GraphiQL vem de `unpkg.com` — o endpoint responde sem internet, a
   UI não.
+- **Abort do cliente (499)**: quando o navegador cancela a request em voo
+  (navegação/deixar a página), o Next lança `ResponseAborted`; o
+  `app/api/graphql/route.ts` detecta (`isClientAbort`) e devolve `499` em vez de
+  deixar virar 500. Só o SvelteKit replica (`AbortError`/`ResponseAborted` no
+  `+server.ts`); o Nitro/Nuxt (`toWebRequest`) **não** propaga o signal do
+  cliente, então não há o que tratar lá.
 - `DATABASE_URL` e `BETTER_AUTH_URL` são **por app**: o primeiro é relativo ao
   cwd de cada app, e o segundo tem que ser a porta do app que está rodando
   (`environment.ts` só usa `3000` como fallback). Cookie ignora porta, então com
